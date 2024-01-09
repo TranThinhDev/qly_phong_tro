@@ -15,6 +15,14 @@
   });
   $(".menu-content").hide();
 
+  var element = document.getElementById('truncatedText');
+  var maxLength = 18; // Số kí tự tối đa bạn muốn hiển thị
+
+  if (element.textContent.length > maxLength) {
+    var truncatedText = element.textContent.substring(0, maxLength) + '...';
+    element.textContent = truncatedText;
+  }
+
   // sidebar active
   // $(".main-sidebar").find("a").removeClass("active");
   // $(".main-sidebar").find("li").removeClass("active");

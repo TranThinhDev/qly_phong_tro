@@ -33,8 +33,8 @@
                 <div class="col-xl-5 xl-6">
                     <div class="card">
                         <div class="card-body">
-                            <div class="media contact-media">
-                                <img src="{{ asset('images/user_avatar/' . $user->profile_photo_path) }}" class="img-fluid img-80" alt="">
+                            <div class="media contact-media" style="align-items: flex-start">
+                                <img src="{{ asset('images/user_avatar/' . $user->profile_photo_path) }}" class="img-fluid" alt="">
                                 <div class="media-body">
                                     <h4>{{ $user->name }}</h4>
                                     <span class="light-font">{{json_decode($user->address)->address }}</span>

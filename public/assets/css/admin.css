@@ -16589,8 +16589,8 @@ label {
       -webkit-animation: tada 1.5s ease infinite;
               animation: tada 1.5s ease infinite; }
     .page-wrapper .page-main-header .header-menu .profile-avatar img {
-      width: 40px;
-      border-radius: 8px; }
+      width: 55px;
+      border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;}
     .page-wrapper .page-main-header .header-menu .onhover-dropdown .onhover-show-div {
       padding: 20px; }
     .page-wrapper .page-main-header .header-menu .notification-dropdown {
@@ -20612,7 +20612,10 @@ footer {
       -ms-flex-align: center;
           align-items: center; }
   .user-info .media > img {
-    border-radius: 8px; }
+    border-radius: 8px; 
+    width: 70px;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  }
   .user-info .media .media-body {
     margin-left: 20px; }
     .user-info .media .media-body h4, .user-info .media .media-body .h4 {

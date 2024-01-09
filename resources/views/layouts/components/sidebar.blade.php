@@ -2,6 +2,15 @@
     $currentRoute = \Route::currentRouteName();
 @endphp
 
+<style>
+    .truncate-text {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  </style>
+
 <div class="page-sidebar">
     <div class="logo-wrap">
         <a href="{{ route('home') }}">
@@ -14,16 +23,16 @@
     </div>
     <div class="main-sidebar">
         <div class="user-profile">
-            <div class="media">
+            <div class="d-flex align-items-center">
                 <div class="change-pic">
-                    <img src="{{ asset('images/user_avatar/' . Auth::user()->profile_photo_path) }}" class="img-fluid"
+                    <img src="{{ asset('images/user_avatar/' . Auth::user()->profile_photo_path) }}" class="img-fluid" width="500"
                         alt="">
                 </div>
-                <div class="media-body">
+                <div class="media-body w-25">
                     <a href="user-profile.html">
                         <h6>{{ Auth::user()->name }}</h6>
                     </a>
-                    <span class="font-roboto">{{ Auth::user()->email }}</span>
+                    <span class="font-roboto text-truncate" id="truncatedText">{{ Auth::user()->email }}</span>
                 </div>
             </div>
         </div>
