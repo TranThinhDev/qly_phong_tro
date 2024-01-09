@@ -88,12 +88,11 @@
                                                 <div class="d-flex flex-column py-3">
                                                     @if ($item->status != 0)
                                                         <a href="{{ route('hide_room', $item->id) }}"
-                                                            class="btn btn-warning mb-2">Ẩn</a>
+                                                            class="btn btn-warning mb-2"><i data-feather="eye"></i></a>
                                                     @endif
-                                                    <a 
-                                                        onclick="event.preventDefault();
+                                                    <a onclick="event.preventDefault();
                                                                  document.getElementById('delete-form-{{ $item->id }}').submit();"
-                                                        class="btn btn-danger">Xóa</a>
+                                                        class="btn btn-danger"><i data-feather="trash"></i></a>
                                                     <form id="delete-form-{{ $item->id }}"
                                                         action="{{ route('ManagerRoom.destroy', $item->id) }}"
                                                         method="POST" style="display: none;">

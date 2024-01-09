@@ -33,7 +33,7 @@
                 </div>
                 <div class="col-sm-6">
 
-                    <a href="{{ route('loai_phong') }}" class="btn btn-outline-warning btn-to-right">Quay lại</a>
+                    <a href="{{ route('categorynew.index') }}" class="btn btn-outline-warning btn-to-right">Quay lại</a>
 
                 </div>
             </div>

@@ -48,7 +48,7 @@
                 </li>
                 <li class="sidebar-item">
                     <a href="javascript:void(0)"
-                        class="sidebar-link  {{ $currentRoute == 'loai_phong' || $currentRoute == 'ManagerRoom.index' ? 'active' : '' }}">
+                        class="sidebar-link  ">
                         <i data-feather="home"></i>
                         <span>Quản Lý Phòng Trọ</span>
                     </a>
@@ -70,7 +70,7 @@
                 </li>
                 <li class="sidebar-item">
                     <a href="javascript:void(0)"
-                        class="sidebar-link {{ $currentRoute == 'categorynew.index' || $currentRoute == 'news.index' ? 'active' : '' }}">
+                        class="sidebar-link ">
                         <i data-feather="inbox"></i>
                         <span>Quản Lý Tin Tức</span>
                     </a>

@@ -6,48 +6,54 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\CategoryRoom;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryRoomController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $data = CategoryRoom::all();
         return view('dashboard.categoryroom.index', compact('data'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
+    
     public function create()
     {
         return view('dashboard.categoryroom.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|unique:category_rooms|max:255',
             'description' => 'max:500',
             'path_img' => 'required',
         ], [
-            'name.unique' => $this->deleteImagebyPath($request->path_img),
+            'name.required' => 'Vui lòng nhập tên.',
+            'name.unique' => 'Tên đã bị trùng vui lòng nhập tên khác',
+            'name.max' => 'Tên không được vượt quá :max ký tự.',
+            'description.max' => 'Mô tả không được vượt quá :max ký tự.',
+            'path_img.required' => 'Vui lòng chọn hình ảnh.',
         ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            if ($errors->has('name') && $errors->get('name')[0] == 'Tên đã bị trùng vui lòng nhập tên khác') {
+                $this->deleteImagebyPath($request->path_img);
+            }
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
         $loaiPhong = new CategoryRoom;
         $loaiPhong->name = $request->name;
         $loaiPhong->image = $request->path_img;
         $loaiPhong->description = $request->description ?? null;
         $result = $loaiPhong->save();
         $toast = $this->makeToast($result, 'Thêm thành công', 'Thêm thất bại');
-        $data = CategoryRoom::all();
         return redirect()->route('loai_phong')->with('toast', $toast);
     }
+    
     public function upload(Request $request)
     {
         $image = $request->file('file');
@@ -55,35 +61,38 @@ class CategoryRoomController extends Controller
         $image->move(public_path('images/categoryroom'), $imageName);
         return response()->json(['success' => $imageName]);
     }
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    
+    function show(string $id)
     {
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    
     public function edit(string $id)
     {
 
         $data = CategoryRoom::where('id', $id)->first();
         return view('dashboard.categoryroom.edit', compact('data'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request)
     {
 
-        $validated = $request->validate([
-            'name' => 'required|max:255',
-
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:255|unique:category_rooms,name,' . $request->id,
+            'description' => 'max:500',
+            'path_img' => 'required',
+        ], [
+            'name.required' => 'Vui lòng nhập tên.',
+            'name.unique' => 'Tên đã bị trùng vui lòng nhập tên khác',
+            'name.max' => 'Tên không được vượt quá :max ký tự.',
+            'description.max' => 'Mô tả không được vượt quá :max ký tự.',
+            'path_img.required' => 'Vui lòng chọn hình ảnh.',
         ]);
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
         $oldData = CategoryRoom::where('id', $request->id)->first();
-
         if ($request->path_img  == $oldData->image) {
             $newImagePath = $oldData->image;
         } else {
@@ -95,14 +104,10 @@ class CategoryRoomController extends Controller
             'description' => $request->description,
             'image' =>  $newImagePath
         ]);
-
         $toast = $this->makeToast($result, 'Cập nhật thành công', 'Cập nhật thất bại');
         return redirect()->route('loai_phong')->with('toast', $toast);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
+    
     public function destroy(string $id)
     {
         $data = CategoryRoom::where('id', $id)->first();
@@ -112,26 +117,19 @@ class CategoryRoomController extends Controller
         $data = CategoryRoom::all();
         return redirect()->route('loai_phong')->with('toast', $toast);
     }
+    
     public function deleteImagebyPath($link)
     {
-        $type = CategoryRoom::where('image', $link)->first();
-        if ($type != null) {
-            $filename = $link;
-            $path = public_path() . '\\images\\categoryroom\\' . $filename;
-            if (file_exists($path)) {
-                unlink($path);
-                return "Tên loại phòng đã tồn tại!";
-            }
-            return "Tên loại phòng đã tồn tại, Lỗi xóa ảnh";
-        } else {
-            return "";
+        $filename = $link;
+        $path = public_path() . '\\images\\categoryroom\\' . $filename;
+        if (file_exists($path)) {
+            unlink($path);
         }
     }
+    
     public function deleteImage(Request $request)
     {
-
         $filename =  $request->get('filename');
-        //ImageUpload::where('filename',$filename)->delete();
         $path = public_path() . '\\images\\categoryroom\\' . $filename;
         if (file_exists($path)) {
             unlink($path);
