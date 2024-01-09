@@ -29,20 +29,19 @@
         <div class="row">
             <div class="col">
                 <div class="title-2">
-                    <h2>PHONGTRO20 là gì ?</h2>
-                    <p class="font-roboto">Phòng trọ 20. Số 20 ở đây đại diện cho tỉnh Thái Nguyên, Đây là một trang web tìm trọ dành cho những người tìm trọ ở Thái Nguyên. PhHONGTRO20 cũng là sản phẩm được tạo ra để làm bài báo cáo thực tập cơ sở của mình. Còn mình là ai thì các bạn hãy kéo xuống dưới nha!!!</p>
+                    <h2>PHONGTRO20 - Tìm phòng đơn giản, thuê phòng giản đơn</h2>
+                    <p class="font-roboto">Nơi kết nối đơn giản giữa người thuê và chủ nhà. Tìm kiếm phòng trọ dễ dàng theo giá, vị trí và tiện nghi. Chủ nhà có thể quản lý thông tin và tương tác với khách hàng tiềm năng. Giao diện thân thiện và đặt phòng trực tuyến linh hoạt, là điểm đến tin cậy cho sinh viên, người làm việc và những người tìm kiếm ngôi nhà thoải mái.</p>
                 </div>
                 <div class="user-about">
                     <div class="row">
                         <div class="col-xl-5 col-lg-7">
                             <div class="about-content">
                                 <h3>Tại sao lại có PHONGTRO20 ?</h3>
-                                <p class="font-roboto">Sau ba năm học tập tại Thái Nguyên mình thấy việc tìm trọ của các bạn sinh viên ở đây khá là khó khăn. Đó chính là lý do mình muốn tạo nên trang web này.</p>
+                                <p class="font-roboto">PHONGTRO20 là một trang web quản lý và tìm kiếm phòng trọ tại các thành phố lớn. Nó được tạo ra để đáp ứng nhu cầu ngày càng tăng về việc tìm kiếm nơi ở thuận tiện và quản lý thông tin phòng trọ. Với giao diện thân thiện và tính năng đặt phòng linh hoạt, PHONGTRO20 nhanh chóng trở thành một điểm đến tin cậy cho cộng đồng sinh viên và người làm việc. Nền tảng này cũng tạo cơ hội cho chủ nhà quản lý thông tin và tương tác với khách hàng tiềm năng một cách thuận lợi. PHONGTRO20 không chỉ là một công cụ tìm kiếm nhà, mà còn là nơi kết nối cộng đồng, tạo ra một môi trường sống chung tích cực dựa trên phản hồi và đánh giá liên tục từ cả người thuê và chủ nhà.</p>
                             </div>
                         </div>
                         <div class="col-xl-7 map-image col-lg-5">
                             <img src="../assets/images/about/map.png" class="img-fluid bg-img" alt="">
-                            
                         </div>
                     </div>
                 </div>
@@ -53,7 +52,7 @@
 <!-- About us section end -->
 
 <!-- testimonial section start -->
-<section class="about-testimonial">
+{{-- <section class="about-testimonial">
     <div class="container">
         <div class="row">
             <div class="col">
@@ -115,7 +114,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> --}}
 <!-- testimonial section end -->
 @endsection
 

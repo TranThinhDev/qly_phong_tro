@@ -2,11 +2,8 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-6 footer-copyright">
-          <p class="mb-0">Code by Nguyễn Thành Trung.</p>
-        </div>
-        <div class="col-md-6">
-          <p class="float-end mb-0">From  <i class="fa fa-heart font-danger"></i>  with love</p>
+          <p class="mb-0">Copyright © {{ Carbon\Carbon::now()->year }} <a href="">Phongtro20</a>. <span style="font-weight: 300">All rights reserved.</span></p>
         </div>
       </div>
     </div>
-  </footer>
+</footer>

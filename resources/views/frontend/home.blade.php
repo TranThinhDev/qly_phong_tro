@@ -379,7 +379,7 @@
 <!-- blog section end -->
 
 <!-- brand section start -->
-<section class="small-section bg-light brand-wrap">
+{{-- <section class="small-section bg-light brand-wrap">
     <div class="container">
         <div class="row">
             <div class="col">
@@ -418,7 +418,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> --}}
 
 <!-- brand section end -->
 @endsection

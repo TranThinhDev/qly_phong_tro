@@ -160,7 +160,7 @@ class ListRoomController extends Controller
             foreach ($allRoom as $key => $value) {
                 $categoryCount[$value->categoryRoom->name]++;
             }
-            $districts = districts::where('province_code', 19)->get();
+            $districts = districts::where('province_code', 01)->get();
             return view('frontend.room.list', compact('room','categoryCount','districts', 'categoryRoom'));
     }
     
