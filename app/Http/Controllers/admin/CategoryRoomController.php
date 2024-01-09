@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\admin;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\CategoryRoom;
+
 class CategoryRoomController extends Controller
 {
     /**
@@ -29,35 +31,35 @@ class CategoryRoomController extends Controller
      */
     public function store(Request $request)
     {
-        
+
         $validated = $request->validate([
             'name' => 'required|unique:category_rooms|max:255',
             'description' => 'max:500',
+            'path_img' => 'required',
         ], [
             'name.unique' => $this->deleteImagebyPath($request->path_img),
         ]);
         $loaiPhong = new CategoryRoom;
         $loaiPhong->name = $request->name;
         $loaiPhong->image = $request->path_img;
-        $loaiPhong->description = $request->description;
+        $loaiPhong->description = $request->description ?? null;
         $result = $loaiPhong->save();
         $toast = $this->makeToast($result, 'Thêm thành công', 'Thêm thất bại');
         $data = CategoryRoom::all();
-        return view('dashboard.categoryroom.index', compact('data','toast'));
+        return redirect()->route('loai_phong')->with('toast', $toast);
     }
     public function upload(Request $request)
     {
         $image = $request->file('file');
         $imageName = $image->getClientOriginalName();
-        $image->move(public_path('images/categoryroom'),$imageName);
-        return response()->json(['success'=>$imageName]);
+        $image->move(public_path('images/categoryroom'), $imageName);
+        return response()->json(['success' => $imageName]);
     }
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        
     }
 
     /**
@@ -65,8 +67,8 @@ class CategoryRoomController extends Controller
      */
     public function edit(string $id)
     {
-        
-        $data = CategoryRoom::where('id',$id)->first();
+
+        $data = CategoryRoom::where('id', $id)->first();
         return view('dashboard.categoryroom.edit', compact('data'));
     }
 
@@ -75,23 +77,27 @@ class CategoryRoomController extends Controller
      */
     public function update(Request $request)
     {
-        
+
         $validated = $request->validate([
             'name' => 'required|max:255',
-    
-        ]);
-        $oldData = CategoryRoom::where('id',$request->id)->first();
-        $this->deleteImagebyPath($oldData->image);
-        $result = CategoryRoom::where('id',$request->id)->update([
-                'name' => $request->name,
-                'description' =>$request->description,
-                'image' => $request->path_img
-        ]);
-     
-        $toast = $this->makeToast($result, 'Cập nhật thành công', 'Cập nhật thất bại');
-        $data = CategoryRoom::all();
-        return view('dashboard.categoryroom.index', compact('data','toast'));
 
+        ]);
+        $oldData = CategoryRoom::where('id', $request->id)->first();
+
+        if ($request->path_img  == $oldData->image) {
+            $newImagePath = $oldData->image;
+        } else {
+            $this->deleteImagebyPath($oldData->image);
+            $newImagePath = $request->path_img;
+        }
+        $result = CategoryRoom::where('id', $request->id)->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'image' =>  $newImagePath
+        ]);
+
+        $toast = $this->makeToast($result, 'Cập nhật thành công', 'Cập nhật thất bại');
+        return redirect()->route('loai_phong')->with('toast', $toast);
     }
 
     /**
@@ -104,35 +110,33 @@ class CategoryRoomController extends Controller
         $result = CategoryRoom::where('id', $id)->delete();
         $toast = $this->makeToast($result, 'Xóa thành công', 'Xóa thất bại');
         $data = CategoryRoom::all();
-        return view('dashboard.categoryroom.index', compact('data','toast'));
-
+        return redirect()->route('loai_phong')->with('toast', $toast);
     }
     public function deleteImagebyPath($link)
     {
-       $type = CategoryRoom::where('image',$link)->first();
-       if($type != null) {
-        $filename = $link;
-        $path=public_path().'\\images\\categoryroom\\'.$filename;
-        if (file_exists($path)) {
-            unlink($path);
-            return "Tên loại phòng đã tồn tại!";
+        $type = CategoryRoom::where('image', $link)->first();
+        if ($type != null) {
+            $filename = $link;
+            $path = public_path() . '\\images\\categoryroom\\' . $filename;
+            if (file_exists($path)) {
+                unlink($path);
+                return "Tên loại phòng đã tồn tại!";
+            }
+            return "Tên loại phòng đã tồn tại, Lỗi xóa ảnh";
+        } else {
+            return "";
         }
-        return "Tên loại phòng đã tồn tại, Lỗi xóa ảnh";
-       }else {
-         return "";
-       }
-       
     }
     public function deleteImage(Request $request)
     {
-        
+
         $filename =  $request->get('filename');
         //ImageUpload::where('filename',$filename)->delete();
-        $path=public_path().'\\images\\categoryroom\\'.$filename;
+        $path = public_path() . '\\images\\categoryroom\\' . $filename;
         if (file_exists($path)) {
             unlink($path);
-            return response()->json(['success'=>$filename]);
+            return response()->json(['success' => $filename]);
         }
-        return response()->json(['error'=>$path]);
+        return response()->json(['error' => $path]);
     }
 }
