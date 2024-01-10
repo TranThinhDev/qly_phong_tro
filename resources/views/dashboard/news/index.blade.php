@@ -16,14 +16,7 @@
                     <div class="page-header-left">
                         <h3>Quản lý bài viết
                             <small>
-                                {{-- <ol class="breadcrumb">
-                                <li class="breadcrumb-item">
-                                    <a href="{{route('home')}}">
-                                        <i class="fa fa-home"></i>
-                                    </a>
-                                </li>
-                                
-                            </ol>     --}}
+                              
                             </small>
                         </h3>
                     </div>
@@ -41,9 +34,9 @@
         <div class="row agent-section property-section user-lists">
             <div class="col-lg-12">
                 <div class="property-grid-3 agent-grids ratio2_3">
-                    <div class="property-2 row column-sm property-label property-grid list-view">
+                    <div class="property-2 row column-sm property-label property-grid list-view" >
                         @foreach ($news as $item)
-                            <div class="col-md-12 col-xl-6">
+                            <div class="col-md-12 col-xl-6" >
                                 <div class="property-box">
                                     <div class="agent-image">
                                         <div>
@@ -77,8 +70,8 @@
                                         </div>
                                     </div>
                                     <div class="agent-content">
-                                        <h4>{{ Str::words($item->title, '10') }}</h4>
-                                        <p class="">{{ Str::words($item->short_content, '25') }}</p>
+                                        <h4>{{ Str::words($item->title, '7') }}</h4>
+                                        <p class="">{{ Str::words($item->short_content, '20') }}</p>
                                         <div class="row col-12">
 
                                             <h8 class="col-6">{{ $item->view }} Lượt xem</h8>

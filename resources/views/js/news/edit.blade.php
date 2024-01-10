@@ -1,4 +1,4 @@
-</script>
+
 <!-- Dropzone js -->
 <script src="{{asset('assets/js/dropzone/dropzone.js')}}"></script>
 <script>

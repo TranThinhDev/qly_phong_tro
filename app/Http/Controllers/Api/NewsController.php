@@ -37,7 +37,7 @@ class NewsController extends Controller
             'short_content' => 'required',
             'content' => 'required',
             'thumbnail' => 'required',
-            'author_id' => 'required'
+            'author_id' => 'required',
             
         ],[
             'author_id.required' => "Bạn chưa đăng nhập",
@@ -46,7 +46,7 @@ class NewsController extends Controller
             'category_id.required' => "Bạn cần chọn loại bài viết",
             'short_content.required' => "Bạn cần điền phần tóm tắt",
             'content.required' => "Bạn cần điền nội dung bài viết",
-            'thumbnail.required' => "Bạn cần chọn ảnh bài viết"
+            'thumbnail.required' => "Bạn cần chọn ảnh bài viết",
         ]);
        
         $slug = $this->makeSlugUnique($request->name);
