@@ -25,7 +25,7 @@
                                             <i class="fa fa-home"></i>
                                         </a>
                                     </li>
-                                    <li class="breadcrumb-item ">- Quản lý tài khoản</li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
                                 </ol>
                             </small>
                         </h3>
@@ -47,21 +47,24 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header pb-0">
-                        <h5>Nhập nội dung bạn muốn gửi cho {{ $user->name }}</h5>
+                        <h5>Nhập nội dung thông báo bạn muốn gửi cho {{ $user->name }}</h5>
                     </div>
-                    <div class="card-body admin-form">
-                        <form id="form_create" method="POST" action="{{ route('account.sendNotification', $user->id) }}"
-                            class="row gx-3">
+                    <div class="card-body admin-form row" >
+                        <form id="form_create" class="col-sm-6 order-2 order-sm-1" method="POST" action="{{ route('account.sendNotification', $user->id) }}"
+                            >
                             @csrf
-                            <div class="form-group col-md-6 col-sm-12">
+                            <div class="form-group  col-sm-12">
                                 <label>Nội dung <span class="font-danger">*</span></label>
-                                <input type="text"  name="message" value="" id="name_room"
-                                    class="form-control" required>
+
+                                <textarea name="message" id="name_room" class="form-control" cols="150" rows="8"></textarea>
                             </div>
-                            <div class="col-sm-12 d-flex flex-end">
-                                <button type="submit" class="btn btn-primary" >Gửi thông báo</button>
+                            <div class="col-sm-12 d-flex flex-end" >
+                                <button type="submit" class="btn btn-primary">Gửi thông báo</button>
                             </div>
                         </form>
+                        <div  class="col-sm-6 text-center order-1 order-sm-2 ">
+                            <img src="{{asset('assets/images/Learning languages-cuate.png')}}" width="300" alt="">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -70,7 +73,7 @@
     <!-- Container-fluid end -->
 @endsection
 @section('js')
-    @error('name')
+    @error('message')
         <script>
             Toastify({
                 text: "{{ $message }}",
@@ -81,17 +84,7 @@
             }).showToast();
         </script>
     @enderror
-    @error('description')
-        <script>
-            Toastify({
-                text: "{{ $message }}",
-                className: "info",
-                style: {
-                    background: "red",
-                }
-            }).showToast();
-        </script>
-    @enderror
+
     <script>
         function submitform() {
             // Get first form element
@@ -119,8 +112,5 @@
             }).showToast();
         }
     </script>
-    <!-- Dropzone js -->
-
-
-    <script src="{{ asset('assets/js/dropzone/dropzone.js') }}"></script>
+    
 @endsection

@@ -6,6 +6,9 @@
         }
     </style>
 @endsection
+@section('title')
+   Tạo loại phòng trọ
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -21,7 +24,7 @@
                                             <i class="fa fa-home"></i>
                                         </a>
                                     </li>
-                                    <li class="breadcrumb-item ">- Quản lý loại phòng</li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
                                 </ol>
                             </small>
                         </h3>
@@ -66,7 +69,7 @@
                             </div>
                         </form>
                         <div class="dropzone-admin mb-0">
-                            <label>Ảnh đại diện</label>
+                            <label>Thumbnail</label>
                             <form class="dropzone" id="singleFileUpload" action="{{ route('upload_anh_loai_phong') }}">
                                 @csrf
                                 <div class="dz-message needsclick"><i class="fas fa-cloud-upload-alt"></i>

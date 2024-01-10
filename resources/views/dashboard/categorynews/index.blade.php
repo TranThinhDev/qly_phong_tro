@@ -11,6 +11,9 @@
         }
     </style>
 @endsection
+@section('title')
+   Thể loại tin tức
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -20,7 +23,14 @@
                     <div class="page-header-left">
                         <h3>Thể loại tin tức
                             <small>
-
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ route('home') }}">
+                                            <i class="fa fa-home"></i>
+                                        </a>
+                                    </li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
+                                </ol>
                             </small>
                         </h3>
                     </div>

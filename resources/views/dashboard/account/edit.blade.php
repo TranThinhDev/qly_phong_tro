@@ -10,6 +10,9 @@
         }
     </style>
 @endsection
+@section('title')
+   Chỉnh sửa thông tin tài khoản ({{$user->name}})
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -17,7 +20,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="page-header-left">
-                        <h3>Sửa tài khoản
+                        <h3>Chỉnh sửa thông tin tài khoản ({{$user->name}})
                             <small>
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item">
@@ -25,7 +28,7 @@
                                             <i class="fa fa-home"></i>
                                         </a>
                                     </li>
-                                    <li class="breadcrumb-item ">- Quản lý tài khoản</li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
                                 </ol>
                             </small>
                         </h3>
@@ -54,16 +57,24 @@
                             class="row gx-3">
                             @csrf
                             <div class="form-group col-md-6 col-sm-12">
+                                <label>Tên Người dùng <span class="font-danger">*</span></label>
+                                <input type="text" name="name" value="{{ old('name') ? old('name') : $user->name }}"
+                                    id="name_room" class="form-control">
+
+                            </div>
+                            <div class="form-group col-md-6 col-sm-12">
                                 <label>Email <span class="font-danger">*</span></label>
-                                <input type="text" disabled name="email" value="{{  old('email') ? old('email') :$user->email }}" id="name_room"
-                                    class="form-control" required>
+                                <input type="text" disabled name="email"
+                                    value="{{ old('email') ? old('email') : $user->email }}" id="name_room"
+                                    class="form-control">
                             </div>
                             <div class="form-group col-md-6 col-sm-12">
                                 <label>Facebook <span class="font-danger">*</span></label>
                                 <div class="row">
                                     <div class="col-sm-8">
-                                        <input type="text" name="Facebook" value="{{ old('Facebook') ? old('Facebook') :$user->Facebook }}" id="name_room"
-                                            class="form-control" required>
+                                        <input type="text" name="Facebook"
+                                            value="{{ old('Facebook') ? old('Facebook') : $user->Facebook }}" id="name_room"
+                                            class="form-control">
                                     </div>
                                     <a href="{{ $user->Facebook }}" class="btn btn-info col-sm-4">Kiểm tra</a>
 
@@ -73,34 +84,29 @@
                                 <label>Zalo <span class="font-danger">*</span></label>
                                 <div class="row">
                                     <div class="col-sm-8">
-                                        <input type="text" name="Zalo" value="{{old('Zalo') ? old('Zalo') : $user->Zalo }}" id="name_room"
-                                            class="form-control " required>
+                                        <input type="text" name="Zalo"
+                                            value="{{ old('Zalo') ? old('Zalo') : $user->Zalo }}" id="name_room"
+                                            class="form-control ">
                                     </div>
                                     <a href="https://zalo.me/{{ $user->Zalo }}" class="btn btn-info col-sm-4">Kiểm tra</a>
                                 </div>
                             </div>
                             <div class="form-group col-md-6 col-sm-12">
-                                <label>Tên Người dùng <span class="font-danger">*</span></label>
-                                <input type="text" name="name" value="{{ old('name') ? old('name') : $user->name }}"
-                                    id="name_room" class="form-control" required>
-
-                            </div>
-                            <div class="form-group col-md-6 col-sm-12">
                                 <label>vai trò <span class="font-danger">*</span></label>
                                 <select class="dropdown col-12 p-2" name="role" id="">
-                                    <option value="0" {{ $user->status == 0 ? "checked" : ''}}>Người dùng</option>
-                                    <option value="0" {{ $user->status == 1 ? "checked" : ''}}>Chủ trọ</option>
+                                    <option value="0" {{ $user->status == 0 ? 'checked' : '' }}>Người dùng</option>
+                                    <option value="0" {{ $user->status == 1 ? 'checked' : '' }}>Chủ trọ</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-6 col-sm-12">
-                                <label>Lý do  cập nhật <span class="font-danger">*</span></label>
-                                <input type="text" name="ly_do" value="" placeholder="nhập lý do"
-                                    id="name_room" class="form-control" required>
+                                <label>Lý do cập nhật <span class="font-danger">*</span></label>
+                                <input type="text" name="ly_do" value="" placeholder="nhập lý do" id="name_room"
+                                    class="form-control">
                             </div>
                             <div class="col-sm-12 d-flex flex-end">
 
-                                <button type="submit" class="btn btn-primary" >Cập nhật</button>
-            
+                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+
                             </div>
                         </form>
                     </div>
@@ -122,7 +128,29 @@
             }).showToast();
         </script>
     @enderror
-    @error('description')
+    @error('Zalo')
+        <script>
+            Toastify({
+                text: "{{ $message }}",
+                className: "info",
+                style: {
+                    background: "red",
+                }
+            }).showToast();
+        </script>
+    @enderror
+    @error('Facebook')
+        <script>
+            Toastify({
+                text: "{{ $message }}",
+                className: "info",
+                style: {
+                    background: "red",
+                }
+            }).showToast();
+        </script>
+    @enderror
+    @error('role')
         <script>
             Toastify({
                 text: "{{ $message }}",

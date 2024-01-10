@@ -10,6 +10,9 @@
         }
     </style>
 @endsection
+@section('title')
+    Chỉnh sửa loại phòng ({{ $data->name }})
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -25,7 +28,7 @@
                                             <i class="fa fa-home"></i>
                                         </a>
                                     </li>
-                                    <li class="breadcrumb-item ">- Quản lý loại phòng</li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
                                 </ol>
                             </small>
                         </h3>
@@ -65,12 +68,13 @@
                                 <textarea class="form-control" name="description" rows="4">{{ old('description') ? old('description') : $data->description }}</textarea>
                             </div>
                             <div class="form-group col-md-12 col-sm-12 d-none">
-                                <input type="text" name="path_img" id="path_img" value="{{ $data->image }}" class="form-control">
+                                <input type="text" name="path_img" id="path_img" value="{{ $data->image }}"
+                                    class="form-control">
                             </div>
                         </form>
                         <div class="dropzone-admin mb-0">
                             <div>
-                                <label>Ảnh đại diện</label>
+                                <label>Thumbnail</label>
                                 <img class="rounded mx-auto d-block image_edit mb-3" id="preview_img"
                                     src="{{ asset('images/categoryroom/' . $data->image) }}" alt="">
                             </div>
@@ -212,7 +216,8 @@
                             },
                             error: function(e) {
                                 $('#path_img').val("{{ $data->image }}");
-                                $('#preview_img')[0].src ="{{ asset('images/categoryroom/' . $data->image) }}";
+                                $('#preview_img')[0].src =
+                                    "{{ asset('images/categoryroom/' . $data->image) }}";
                                 console.log(e);
                             }
                         });
@@ -242,5 +247,4 @@
         }();
         DropzoneExample.init();
     </script>
-    
 @endsection

@@ -7,6 +7,9 @@
         }
     </style>
 @endsection
+@section('title')
+    Quản lý tài khoản
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -16,14 +19,14 @@
                     <div class="page-header-left">
                         <h3>Quản lý tài khoản
                             <small>
-                                {{-- <ol class="breadcrumb">
-                                <li class="breadcrumb-item">
-                                    <a href="{{route('home')}}">
-                                        <i class="fa fa-home"></i>
-                                    </a>
-                                </li>
-                                
-                            </ol>     --}}
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ route('home') }}">
+                                            <i class="fa fa-home"></i>
+                                        </a>
+                                    </li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
+                                </ol>
                             </small>
                         </h3>
                     </div>
@@ -49,32 +52,42 @@
                             <table class="table table-bordernone m-0" id="room">
                                 <thead>
                                     <tr>
-                                       
+
+                                        <th class="light-font">Ảnh đại diện</th>
                                         <th class="light-font">Tên tài khoản</th>
-                                        <th class="light-font">Email</th>
-                                        <th class="light-font">Số điện thoại</th>
+                                        {{-- <th class="light-font">Email</th> --}}
+                                        {{-- <th class="light-font">Số điện thoại</th> --}}
                                         <th class="light-font">Ngày tạo</th>
                                         <th class="light-font">Trạng thái</th>
                                         <th class="light-font">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                              
+
                                     @foreach ($user as $key => $item)
                                         <tr>
-                                           
                                             <td>
                                                 <div class="media">
-                                                    <img src="{{ asset('images/user_avatar/' . $item->profile_photo_path) }}"
-                                                        class="img-fluid img-80" alt="">
                                                     <div class="media-body">
-                                                        <a href="{{ route('user.show', $item->id) }}"><h6>{{ $item->name }}</h6></a>
-                                                        <span class="light-font">{{ $item->role == 1 ? "Admin" : (count($item->rooms) > 0 ? "Chủ trọ" : "Người dùng") }}</span>
+                                                        <img src="{{ asset('images/user_avatar/' . $item->profile_photo_path) }}"
+                                                            class="img-fluid img-80" alt="">
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>{{ $item->email }}</td>
-                                            <td>{{ $item->PhoneNumber }}</td>
+                                            <td>
+                                                <div class="media">
+
+                                                    <div class="media-body">
+                                                        <a href="{{ route('user.show', $item->id) }}">
+                                                            <h6>{{ $item->name }}</h6>
+                                                        </a>
+                                                        <span
+                                                            class="light-font">{{ $item->role == 1 ? 'Admin' : (count($item->rooms) > 0 ? 'Chủ trọ' : 'Người dùng') }}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            {{-- <td>{{ $item->email }}</td> --}}
+                                            {{-- <td>{{ $item->PhoneNumber }}</td> --}}
                                             <td>{{ date('d-m-Y', strtotime($item->created_at)) }}</td>
                                             @if ($item->status == 1)
                                                 <td><span class="label label-light color-3">Hoạt động</span></td>
@@ -84,14 +97,22 @@
                                                 <td><span class="label label-dark label-pill">Lỗi</span></td>
                                             @endif
                                             <td>
-                                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
-                                                  <ul class="dropdown-menu p-1 " aria-labelledby="dropdownMenuButton1">
-                                                   <ul class="d-flex flex-column ">
-                                                    <li class=" btn btn-warning  mt-1"><a  a class="text-light" href="{{ route('account.edit', $item->id) }}">Sửa</a></li>
-                                                    <li class=" btn btn-danger mt-1"><a class="text-light"  href="{{ route('account.block', $item->id) }}">{{ $item->status == 1 ? "Chặn" : "Bỏ chặn" }}</a></li>
-                                                    <li class=" btn btn-info mt-1"><a a class="text-light" href="{{ route('account.sendNotification',$item->id) }}">Gửi thông báo</a></li>
-                                                   </ul>
-                                                  </ul>
+                                                <button class="btn btn-primary dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                                    aria-expanded="false"></button>
+                                                <ul class="dropdown-menu p-1 " aria-labelledby="dropdownMenuButton1">
+                                                    <ul class="d-flex flex-column gap-1">
+                                                        <li><a class="text-light  btn btn-warning w-100"
+                                                                href="{{ route('account.edit', $item->id) }}">Chỉnh sửa</a>
+                                                        </li>
+                                                        <li><a class="text-light btn btn-danger w-100"
+                                                                href="{{ route('account.block', $item->id) }}">{{ $item->status == 1 ? 'Chặn' : 'Bỏ chặn' }}</a>
+                                                        </li>
+                                                        <li><a class="btn btn-info text-light w-100"
+                                                                href="{{ route('account.sendNotification', $item->id) }}">Gửi
+                                                                thông báo</a></li>
+                                                    </ul>
+                                                </ul>
                                             </td>
                                         </tr>
                                     @endforeach

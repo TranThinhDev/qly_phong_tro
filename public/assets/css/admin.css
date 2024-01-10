@@ -20832,7 +20832,10 @@ footer {
       -ms-flex-align: center;
           align-items: center; }
   .report-table table tr td .media img {
-    border-radius: 8px; }
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    width: 55px;
+    height: 55px;
+  }
   .report-table table tr td .media .media-body {
     margin-left: 10px; }
     .report-table table tr td .media .media-body h6, .report-table table tr td .media .media-body .h6 {

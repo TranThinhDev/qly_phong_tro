@@ -1,4 +1,7 @@
 @extends('layouts.dashboard')
+@section('title')
+   Trang chủ quản trị
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">

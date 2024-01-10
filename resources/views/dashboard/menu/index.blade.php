@@ -18,6 +18,9 @@
 }
 </style>
 @endsection
+@section('title')
+   Menu động
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -27,15 +30,15 @@
                     <div class="page-header-left">
                         <h3>Menu động
                            <small>
-                            {{-- <ol class="breadcrumb">
-                                <li class="breadcrumb-item">
-                                    <a href="{{route('home')}}">
-                                        <i class="fa fa-home"></i>
-                                    </a>
-                                </li>
-                                
-                            </ol>     --}}
-                        </small> 
+                              <ol class="breadcrumb">
+                                  <li class="breadcrumb-item">
+                                      <a href="{{ route('home') }}">
+                                          <i class="fa fa-home"></i>
+                                      </a>
+                                  </li>
+                                  <li class="breadcrumb-item ">- Trang chủ</li>
+                              </ol>
+                          </small>
                         </h3>
                     </div>
                 </div>
@@ -48,7 +51,7 @@
     <div class="card-body">
         <div class="row">
            <div class="col-md-6">
-              <h5 class="mb-4 text-center bg-success text-white ">Thêm menu mới</h5>
+              <h5 class="mb-4 text-center bg-success text-white rounded-2 p-10">Thêm menu mới</h5>
               <form accept="{{ route('menus.store')}}" method="post">
                  @csrf
                   @if(count($errors) > 0)
@@ -96,13 +99,13 @@
                  </div>
                  <div class="row">
                     <div class="col-md-12">
-                       <button class="btn btn-success">Save</button>
+                       <button class="btn btn-success">Lưu</button>
                     </div>
                  </div>
               </form>
            </div>
            <div class="col-md-6">
-              <h5 class="text-center mb-4 bg-info text-white">Menu List</h5>
+              <h5 class="text-center mb-4 bg-info text-white rounded-2 p-10">Menu List</h5>
                <ul id="tree1">
                   @foreach($menus as $menu)
                      <li>

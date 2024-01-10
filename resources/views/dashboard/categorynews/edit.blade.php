@@ -10,6 +10,9 @@
         }
     </style>
 @endsection
+@section('title')
+    Chỉnh sửa thể loại ({{ $data->name }})
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -17,7 +20,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="page-header-left">
-                        <h3>Sửa loại phòng trọ
+                        <h3> Chỉnh sửa thể loại {{ $data->name }}
                             <small>
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item">
@@ -25,7 +28,7 @@
                                             <i class="fa fa-home"></i>
                                         </a>
                                     </li>
-                                    <li class="breadcrumb-item ">- Quản lý loại phòng</li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
                                 </ol>
                             </small>
                         </h3>
@@ -47,15 +50,16 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header pb-0">
-                        <h5>Điền thông tin loại phòng</h5>
+                        <h5>Điền thông tin thể loại</h5>
                     </div>
                     <div class="card-body admin-form">
-                        <form id="form_create" method="POST" action="{{ route('categorynews.update', $data->id) }}" class="row gx-3">
+                        <form id="form_create" method="POST" action="{{ route('categorynews.update', $data->id) }}"
+                            class="row gx-3">
                             @csrf
-                            @method("put")
+                            @method('put')
                             <input type="text" name="id" value="{{ $data->id }}" class="form-control d-none">
                             <div class="form-group col-md-12 col-sm-12">
-                                <label>Tên loại phòng <span class="font-danger">*</span></label>
+                                <label>Tên thể loại <span class="font-danger">*</span></label>
                                 <input type="text" name="name" value="{{ old('name') ? old('name') : $data->name }}"
                                     id="name_room" class="form-control" required>
                             </div>

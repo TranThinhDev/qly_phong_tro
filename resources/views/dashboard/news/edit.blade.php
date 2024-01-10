@@ -14,6 +14,9 @@
         }
     </style>
 @endsection
+@section('title')
+    Chỉnh sửa tin tức {{ Str::words($data->title, 2) }}
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -21,7 +24,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="page-header-left">
-                        <h3>Sửa bài viết
+                        <h3>   Chỉnh sửa tin tức {{ Str::words($data->title, 5) }}
                             <small>
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item">
@@ -29,10 +32,9 @@
                                             <i class="fa fa-home"></i>
                                         </a>
                                     </li>
-                                    <li class="breadcrumb-item ">- Quản lý bài viết</li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
                                 </ol>
                             </small>
-                        </h3>
                     </div>
                 </div>
                 <div class="col-sm-6">
@@ -51,20 +53,20 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header pb-0">
-                        <h5>Cập nhật thông tin bài viết</h5>
+                        <h5>Cập nhật thông tin tin tức</h5>
                     </div>
                     <div class="card-body admin-form">
                         <div id="form_create" class="row gx-3">
 
                             <div class="col-lg-8">
                                 <div class="form-group col-md-12 col-sm-12">
-                                    <label>Tên bài viết <span class="font-danger">*</span></label>
+                                    <label>Tên tin tức <span class="font-danger">*</span></label>
                                     <input type="text" value="{{ $data->title }}" id="name" class="form-control"
                                         required>
 
                                 </div>
                                 <div class="form-group col-md-12 col-sm-12">
-                                    <label>Loại bài viết <span class="font-danger">*</span></label>
+                                    <label>Loại tin tức <span class="font-danger">*</span></label>
                                     <select class="dropdown col-12 p-2" name="category_id" id="category_id">
                                         @foreach ($category as $item)
                                             <option value="">---</option>
@@ -81,7 +83,7 @@
                             </div>
                             <div class="col-lg-4">
                                 <div class="dropzone-admin mb-0">
-                                    <label>Ảnh đại diện</label>
+                                    <label>Thumbnail</label>
                                     <form class="dropzone" id="UploadThumnailNews"
                                         action="{{ route('news.uploadThumnail') }}">
                                         <img src="{{ asset('images/thumbnail_news/' . $data->thumbnail) }}" id="bg-img"
@@ -109,8 +111,6 @@
                                 <a href="{{ route('news.index') }}" class="btn btn-pill btn-dashed color-4">Quay lại</a>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
             </div>
@@ -142,8 +142,6 @@
             });
         @endif
     </script>
-
-
     @include('js.news.edit')
     <!-- datepicker js-->
     <script src="{{ asset('assets/js/date-picker.js') }}"></script>

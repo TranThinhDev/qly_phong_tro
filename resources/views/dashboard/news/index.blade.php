@@ -7,6 +7,9 @@
         }
     </style>
 @endsection
+@section('title')
+    Danh sách tin tức
+@endsection
 @section('content')
     <!-- Container-fluid start -->
     <div class="container-fluid">
@@ -14,9 +17,16 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="page-header-left">
-                        <h3>Quản lý bài viết
+                        <h3>Danh sách tin tức
                             <small>
-                              
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ route('home') }}">
+                                            <i class="fa fa-home"></i>
+                                        </a>
+                                    </li>
+                                    <li class="breadcrumb-item ">- Trang chủ</li>
+                                </ol>
                             </small>
                         </h3>
                     </div>
@@ -34,14 +44,14 @@
         <div class="row agent-section property-section user-lists">
             <div class="col-lg-12">
                 <div class="property-grid-3 agent-grids ratio2_3">
-                    <div class="property-2 row column-sm property-label property-grid list-view" >
+                    <div class="property-2 row column-sm property-label property-grid list-view">
                         @foreach ($news as $item)
-                            <div class="col-md-12 col-xl-6" >
+                            <div class="col-md-12 col-xl-6">
                                 <div class="property-box">
                                     <div class="agent-image">
                                         <div>
-                                            <img src="{{ asset('images/thumbnail_news/' . $item->thumbnail) }}" class="bg-img"
-                                                alt="">
+                                            <img src="{{ asset('images/thumbnail_news/' . $item->thumbnail) }}"
+                                                class="bg-img" alt="">
                                             @if ($item->status != 1)
                                                 <span class="label label-dark">{{ 'Không công khai' }}</span>
                                             @else

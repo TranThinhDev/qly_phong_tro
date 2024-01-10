@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Redirect;
 use Carbon\Carbon;
+
 class ManagerAccount extends Controller
 {
     /**
@@ -17,13 +18,12 @@ class ManagerAccount extends Controller
         $user = User::all();
         $now = Carbon::now();
         foreach ($user as $key => $value) {
-            if($value->block_at != null) {
+            if ($value->block_at != null) {
                 $day_block = $now->diffInDays($value->block_at);
-                if($value->status == 0 && $day_block > 30) {
+                if ($value->status == 0 && $day_block > 30) {
                     User::where('id', $value->id)->delete();
                 }
             }
-            
         }
         return view('dashboard.account.index', compact('user'));
     }
@@ -57,8 +57,8 @@ class ManagerAccount extends Controller
      */
     public function edit(string $id)
     {
-       $user = User::where('id',$id)->first();
-       return view('dashboard.account.edit', compact('user'));
+        $user = User::where('id', $id)->first();
+        return view('dashboard.account.edit', compact('user'));
     }
 
     /**
@@ -66,21 +66,29 @@ class ManagerAccount extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|max:255',
             'Zalo' => 'numeric|digits:10',
             'Facebook' => 'url',
             'role' => 'required|numeric'
+        ], [
+            'name.required' => 'Vui lòng nhập tên.',
+            'name.max' => 'Tên không được vượt quá 255 ký tự.',
+            'Zalo.numeric' => 'Zalo phải là một số.',
+            'Zalo.digits' => 'Zalo phải có 10 chữ số.',
+            'Facebook.url' => 'Định dạng Facebook không hợp lệ.',
+            'role.required' => 'Vui lòng chọn vai trò.',
+            'role.numeric' => 'Vai trò phải là một số.',
         ]);
-         $result = User::where('id', $id)->update([
+        $result = User::where('id', $id)->update([
             'name' => $request->name,
             'role' => $request->role,
             'Zalo' => $request->Zalo,
             'Facebook' => $request->Facebook,
         ]);
-           $this->MakeNotification($id,"Tài khoản của bạn được cập nhật thông tin bởi quản trị viên với lý do: ".$request->ly_do,'user.index', []);
-           $toast = $this->makeToast($result, 'Cập nhật thành công', 'Cập nhật thất bại');
-           return Redirect::route('account.index')->with(['toast' => $toast ]);
+        $this->MakeNotification($id, "Tài khoản của bạn được cập nhật thông tin bởi quản trị viên với lý do: " . $request->ly_do, 'user.index', []);
+        $toast = $this->makeToast($result, 'Cập nhật thành công', 'Cập nhật thất bại');
+        return Redirect::route('account.index')->with(['toast' => $toast]);
     }
     /**
      * Remove the specified resource from storage.
@@ -91,34 +99,35 @@ class ManagerAccount extends Controller
     }
     public function block(string $id)
     {
-        $user = User::where('id',$id)->first();
-        if($user->status == 1) {
+        $user = User::where('id', $id)->first();
+        if ($user->status == 1) {
             $result = User::where('id', $id)->update([
-                 'status' => 0,
-                 'block_at' => Carbon::now()
-                ]);
+                'status' => 0,
+                'block_at' => Carbon::now()
+            ]);
             $toast = $this->makeToast($result, 'Chặn thành công, Tài khoản sẽ tự động xóa sau 30 ngày bị chặn', 'Chặn thất bại');
-            return Redirect::route('account.index')->with(['toast' => $toast ]);
-        }else {
-            $result = User::where('id', $id)->update([ 'status' => 1,]);
+            return Redirect::route('account.index')->with(['toast' => $toast]);
+        } else {
+            $result = User::where('id', $id)->update(['status' => 1,]);
             $toast = $this->makeToast($result, 'Đã bỏ chặn', 'Lỗi, thử lại');
-            return Redirect::route('account.index')->with(['toast' => $toast ]);
+            return Redirect::route('account.index')->with(['toast' => $toast]);
         }
     }
     public function InputNotification($id)
     {
-        $user = User::where('id',$id)->first();
+        $user = User::where('id', $id)->first();
         return view('dashboard.account.sendNotification', compact('user'));
     }
     public function SendNotification(Request $request, $id)
     {
         $validated = $request->validate([
             'message' => 'required|max:100'
+        ],[
+            'message'=>"Bạn nhập thông tin muốn gửi."
         ]);
-        $title = "Quản trị viên: ".$request->message;
-        $result = $this->makeNotification($id,$title,'user.index');
+        $title = "Quản trị viên: " . $request->message;
+        $result = $this->makeNotification($id, $title, 'user.index');
         $toast = $this->makeToast($result, 'Đã gửi thông báo', 'Lỗi, thử lại');
-        return Redirect::route('account.index')->with(['toast' => $toast ]);
+        return Redirect::route('account.index')->with(['toast' => $toast]);
     }
-    
 }
