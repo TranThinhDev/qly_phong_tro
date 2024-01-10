@@ -66,11 +66,10 @@ class ProfileController extends Controller
             "NewPassword.min" => "Mật khẩu mới phải có tối thiểu 8 ký tự"
         ]);
         $user = Auth::user();
-       
         if(Hash::check($request->OldPassword, $user->password) ) {
             $newsPassword = Hash::make($request->NewPassword);
             $result = User::where('id', $user->id)->update(['password'=> $newsPassword]);
-            $toast = $this->makeToast($result , 'Đổi mật khẩu thành công. Mật khẩu của bạn là: '. $request->NewPassword, 'Lỗi, Thử lại');
+            $toast = $this->makeToast($result , 'Đổi mật khẩu thành công.', 'Lỗi, Thử lại');
             return Redirect::back()->with(['toast' => $toast ]);
 
         }else {

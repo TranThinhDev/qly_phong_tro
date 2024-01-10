@@ -40,7 +40,7 @@
             <ul class="sidebar-menu custom-scrollbar">
                 <li class="sidebar-item">
                     <a href="{{ route('home') }}"
-                        class="sidebar-link only-link {{ $currentRoute == 'home' ? 'active' : '' }}">
+                        class=" only-link {{ $currentRoute == 'home' ? 'active' : '' }}">
                         <i data-feather="airplay"></i>
                         <span>Trang chủ</span>
 
@@ -48,11 +48,11 @@
                 </li>
                 <li class="sidebar-item">
                     <a href="javascript:void(0)"
-                        class="sidebar-link  ">
+                        class="sidebar-link  {{ ($currentRoute == 'loai_phong' || $currentRoute == 'ManagerRoom.index') ? 'active' : '' }}">
                         <i data-feather="home"></i>
                         <span>Quản Lý Phòng Trọ</span>
                     </a>
-                    <ul class="nav-submenu menu-content ">
+                    <ul class="nav-submenu menu-content d-block">
                         <li class="sidebar-item">
                             <a href="{{ route('loai_phong') }}">
                                 <i data-feather="chevrons-right"></i>
@@ -70,11 +70,11 @@
                 </li>
                 <li class="sidebar-item">
                     <a href="javascript:void(0)"
-                        class="sidebar-link ">
+                        class="sidebar-link {{ ($currentRoute == 'categorynew.index' || $currentRoute == 'news.index') ? 'active' : '' }}">
                         <i data-feather="inbox"></i>
                         <span>Quản Lý Tin Tức</span>
                     </a>
-                    <ul class="nav-submenu menu-content">
+                    <ul class="nav-submenu menu-content d-block">
                         <li>
                             <a href="{{ route('categorynew.index') }}">
                                 <i data-feather="chevrons-right"></i>
@@ -92,19 +92,18 @@
                 </li>
                 <li class="sidebar-item">
                     <a href="{{ route('account.index') }}"
-                        class="sidebar-link only-link {{ $currentRoute == 'account.index' ? 'active' : '' }}">
+                        class="sidebar-link only-link {{ ($currentRoute == 'account.index') ? 'active' : '' }}">
                         <i data-feather="users"></i>
                         <span>Quản Lý Tài Khoản</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="javascript:void(0)"
-                        class="sidebar-link {{ $currentRoute == 'menus.index' ? 'active' : '' }}">
+                        class="sidebar-link {{ ($currentRoute == 'menus.index') ? 'active' : '' }}">
                         <i data-feather="settings"></i>
                         <span>Cài đặt website</span>
                     </a>
-                    <ul class="nav-submenu menu-content">
-
+                    <ul class="nav-submenu menu-content d-block" >
                         <li>
                             <a href="{{ route('menus.index') }}">
                                 <i data-feather="chevrons-right"></i>

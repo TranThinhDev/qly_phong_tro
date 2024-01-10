@@ -31,8 +31,8 @@ class DashboardController extends Controller
                         ->whereYear('created_at', Carbon::now()->year)->get();
         $userInMonth = User::whereMonth('created_at',  Carbon::now()->month)
                         ->whereYear('created_at', Carbon::now()->year)->get();
-        $userLastMonth = User::whereMonth('created_at',  Carbon::now()->month -1)
-                        ->whereYear('created_at', Carbon::now()->year)->get();
+        $userLastMonth = User::whereMonth('created_at',  Carbon::now()->subMonth()->month)
+                        ->whereYear('created_at', Carbon::now()->subMonth()->year)->get();
         $numberRoomInWeek = array();
         for ($i=7; $i >= 0; $i--) { 
             if($i == 0) {

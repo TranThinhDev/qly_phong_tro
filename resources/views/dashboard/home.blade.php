@@ -45,9 +45,9 @@
                     <div class="large-6 col-lg-12 col-md-6">
                         <div class="card invoice-card">
                             <div class="card-header pb-0">
-                               <div>
+                                <div>
                                     <h5>Thành viên tham gia trong tháng</h5>
-                               </div>
+                                </div>
                             </div>
                             <div class="card-body calculations">
                                 <ul>
@@ -61,12 +61,10 @@
                                         @else
                                         <h5 class="font-success">Tăng {{ $percentageUser }}%</h5>
                                         @endif
-                                       
                                         <h6 class="light-font mb-0">So với tháng trước</h6>
                                     </li>
                                 </ul>
                                 <div class="d-flex">
-                                   
                                     <a href="{{ route('account.index') }}" class="arrow-animated">
                                         Xem danh sách tài khoản
                                         <i data-feather="chevron-right"></i>
@@ -81,7 +79,6 @@
                 <div class="card sales-details">
                     <div class="card-body">
                         <div class="row">
-                          
                             <div class="col-sm-12">
                                 <div class="monthly-sales">
                                     <div class="sales-status">
@@ -95,7 +92,6 @@
                     </div>
                 </div>
             </div>
-         
         </div>
     </div>
     <!-- Container-fluid end -->

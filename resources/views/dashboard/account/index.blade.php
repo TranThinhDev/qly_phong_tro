@@ -76,7 +76,6 @@
                                             </td>
                                             <td>
                                                 <div class="media">
-
                                                     <div class="media-body">
                                                         <a href="{{ route('user.show', $item->id) }}">
                                                             <h6>{{ $item->name }}</h6>

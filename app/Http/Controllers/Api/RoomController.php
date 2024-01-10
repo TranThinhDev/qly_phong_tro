@@ -67,7 +67,6 @@ class RoomController extends Controller
         } else {
             return response()->json(['error' => $request->all()], 400);
         }
-
     }
     public function getWards(Request $request)
     {
