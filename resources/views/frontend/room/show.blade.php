@@ -167,7 +167,7 @@
                                             <div class="review-box">
                                                 <div class="media">
                                                     <img src="{{ asset('images/user_avatar') . '/' . $comment->getUser->profile_photo_path }}"
-                                                        class="img-70" alt="">
+                                                    style="border-radius: 50%;height: 55px;width: 55px" alt="">
                                                     <div class="media-body">
                                                         <h6>{{ $comment->getUser->name }}</h6>
                                                         <p>{{ $comment->updated_at->diffForHumans($current) }}</p>
@@ -277,12 +277,12 @@
                                     <div class="agent-info">
                                         <div class="media">
                                             <img src="{{ asset('images/user_avatar') . '/' . $data->User->profile_photo_path }}"
-                                                class="img-50" alt="">
+                                                alt="" style="border-radius: 50%;height: 55px;width: 55px">
                                             <div class="media-body ms-2">
                                                 <a href="{{ route('user.show', $data->User->id) }}">
                                                     <h6>{{ $data->User->name }}</h6>
                                                 </a>
-                                                <p>{{ $data->User->email }}</p>
+                                                <p>{{ Str::limit(optional($data->User)->email, 20) }}</p>
                                             </div>
                                         </div>
                                     </div>
