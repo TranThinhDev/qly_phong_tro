@@ -84,14 +84,12 @@
                     <div class="blog-list row">
                         @foreach ($news as $item)
                             <div class="col-md-12">
-                                <div class="blog-wrap wow fadeInUp">
-                                    <div class="blog-image">
-                                        <div>
+                                <div class="blog-wrap wow fadeInUp row">
+                                    <div class=" col-md-4 col-sm-12">
                                             <img src="{{ asset('images/thumbnail_news/' . $item->thumbnail) }}"
-                                                class="bg-img img-fluid" alt="">
-                                        </div>
+                                                class="img-fluid" style="height: 100%" alt="">
                                     </div>
-                                    <div class="blog-details">
+                                    <div class="blog-details col-md-8 col-sm-12">
                                         <div>
                                             <span><i data-feather="user"></i> {{ $item->getUser->name }}</span>
                                             <h3><a href="{{ route('frontend.news.show', $item->slug) }}">{{ $item->title }}</a></h3>
