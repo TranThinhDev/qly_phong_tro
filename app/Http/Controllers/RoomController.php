@@ -117,10 +117,17 @@ class RoomController extends Controller
     }
     public function sendBookingRoom(Request $request, $id)
     {
-        $validate = $request->validate([
-            'message' => 'required|max:500',
+        $request->validate([
+            'message' => 'max:500',
             'phone' => 'required',
-            'name' => 'required',
+            'email' => 'email',
+            'name' => 'required|max:20',
+        ], [
+            'message.max' => 'Nội dung không được vượt quá 500 ký tự.',
+            'phone.required' => 'Vui lòng nhập số điện thoại.',
+            'email.email' => 'Địa chỉ email không hợp lệ.',
+            'name.required' => 'Vui lòng nhập tên.',
+            'name.max' => 'Tên không được vượt quá 20 ký tự.',
         ]);
 
         $result = BookingInformation::create([
@@ -134,7 +141,7 @@ class RoomController extends Controller
         if ($result) {
             $url = route('booking.show', ['booking' => $id]);
             $room = Room::where('id', $id)->first();
-            $notification = Notification::create([
+            Notification::create([
                 'user_id' => $room->chutro_id,
                 'title' => "Bạn nhận được một yêu cầu đặt phòng",
                 'link' => $url,

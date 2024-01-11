@@ -102,7 +102,18 @@
             }).showToast();
         </script>
     @enderror
-    @error('description')
+    @error('message')
+        <script>
+            Toastify({
+                text: "{{ $message }}",
+                className: "info",
+                style: {
+                    background: "red",
+                }
+            }).showToast();
+        </script>
+    @enderror
+    @error('phone')
         <script>
             Toastify({
                 text: "{{ $message }}",

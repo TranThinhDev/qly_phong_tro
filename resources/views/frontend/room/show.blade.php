@@ -314,29 +314,30 @@
                             <div class="advance-card">
                                 <h6>Gửi thông tin liên hệ</h6>
                                 <div class="category-property">
-                                    <form method="post" action="{{ route('send_booking', $data->id) }}">
+                                    <form method="post" action="{{ route('send_booking', $data->id) }}"
+                                        id="form_message">
                                         @method('PUT')
                                         @csrf
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="name"
-                                                placeholder="Tên của bạn" required>
+                                            <input type="text" class="form-control" name="name" required
+                                                placeholder="Tên của bạn">
                                         </div>
                                         <div class="form-group">
-                                            <input type="email" name="email" class="form-control"
+                                            <input type="text" name="email" class="form-control" required
                                                 placeholder="Địa chỉ email">
                                         </div>
                                         <div class="form-group">
                                             <input placeholder="Số điện thoại" class="form-control" name="phone"
-                                                id="tbNumbers" oninput="maxLengthCheck(this)" type="tel"
-                                                onkeypress="javascript:return isNumber(event)" maxlength="10"
-                                                required="">
+                                                id="tbNumbers" oninput="maxLengthCheck(this)" type="tel" required
+                                                onkeypress="javascript:return isNumber(event)" maxlength="10">
                                         </div>
                                         <div class="form-group">
-                                            <textarea name="message" placeholder="Tin nhắn" class="form-control" rows="3"></textarea>
+                                            <textarea name="message" placeholder="Tin nhắn" class="form-control" required rows="3"></textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-gradient color-2 btn-block btn-pill">Gửi yêu
-                                            cầu</button>
                                     </form>
+                                    <button type="submit" class="btn btn-gradient color-2 btn-block btn-pill"
+                                        onclick="submitform()">Gửi yêu
+                                        cầu</button>
                                 </div>
                             </div>
                         </div>
@@ -368,8 +369,68 @@
 @endsection
 
 @section('js')
-    <script src="{{ 'assets/js/color/single-property.js' }}"></script>
+    @error('name')
+        <script>
+            Toastify({
+                text: "{{ $message }}",
+                className: "info",
+                style: {
+                    background: "red",
+                }
+            }).showToast();
+        </script>
+    @enderror
+    @error('email')
+        <script>
+            Toastify({
+                text: "{{ $message }}",
+                className: "info",
+                style: {
+                    background: "red",
+                }
+            }).showToast();
+        </script>
+    @enderror
+    @error('phone')
+        <script>
+            Toastify({
+                text: "{{ $message }}",
+                className: "info",
+                style: {
+                    background: "red",
+                }
+            }).showToast();
+        </script>
+    @enderror
+    @error('message')
+        <script>
+            Toastify({
+                text: "{{ $message }}",
+                className: "info",
+                style: {
+                    background: "red",
+                }
+            }).showToast();
+        </script>
+    @enderror
+    <script>
+        function submitform() {
+            // Get first form element
+            var $form = $('#form_message')[0];
+
+            // Check if valid using HTML5 checkValidity() builtin function
+            if ($form.checkValidity()) {
+                console.log('valid');
+                $form.submit();
+            } else {
+                makeToast('Bạn cần nhập các thông tin cần thiết', 'red')
+            }
+
+            return false
+        }
     </script>
+
+
     <script
         src='https://www.bing.com/maps/sdk/mapcontrol?key=AgyOfVqVPxgShQQEECEUy5EnGPDHdv1uhGW-RCJbf9EdrKA0YKLDv12JNYflT8gq&amp;callback=loadMapScenario'
         async defer></script>
