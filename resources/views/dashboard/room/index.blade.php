@@ -87,12 +87,17 @@
                                             <td>
                                                 <div class="d-flex flex-column py-3">
                                                     @if ($item->status != 0)
-                                                        <a href="{{ route('hide_room', $item->id) }}"
-                                                            class="btn btn-warning mb-2"><i data-feather="eye"></i></a>
+                                                        <a href="{{ route('hide_room', $item->id) }}" onclick="return confirm('Bạn có chắc chắn muốn ẩn phòng này?')" class="btn btn-warning mb-2"><i data-feather="eye-off"></i></a>
+                                                    @elseif ($item->status == 0)
+                                                        <a href="{{ route('show_room', $item->id) }}"
+                                                        class="btn btn-warning mb-2"><i data-feather="eye"></i></a>
                                                     @endif
                                                     <a onclick="event.preventDefault();
-                                                                 document.getElementById('delete-form-{{ $item->id }}').submit();"
-                                                        class="btn btn-danger"><i data-feather="trash"></i></a>
+                                                        if (confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
+                                                            document.getElementById('delete-form-{{ $item->id }}').submit();
+                                                        }" class="btn btn-danger">
+                                                        <i data-feather="trash"></i>
+                                                    </a>
                                                     <form id="delete-form-{{ $item->id }}"
                                                         action="{{ route('ManagerRoom.destroy', $item->id) }}"
                                                         method="POST" style="display: none;">
@@ -109,11 +114,6 @@
                     </div>
                 </div>
             </div>
-
-
-
-
-
         </div>
     </div>
 @endsection

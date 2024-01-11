@@ -42,5 +42,5 @@ Route::namespace('App\Http\Controllers\Api')->group(function() {
 
 Route::fallback(function(){
     return response()->json([
-        'message' => 'Page Not Found. If error persists, contact haitiger.al@gmail.com'], 404);
+        'message' => 'Page Not Found. If error persists, contact admin@gmail.com'], 404);
 });

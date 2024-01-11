@@ -88,8 +88,7 @@
                                                     class="btn btn-warning col-6 btn-table"><i data-feather="edit"></i></a>
 
                                                 <a href="{{ route('categorynew.delete', $item->id) }}"
-                                                    class="btn btn-danger col-6 btn-table"><i data-feather="trash"></i></a>
-
+                                                    class="btn btn-danger col-6 btn-table" onclick="return confirm('Bạn có chắc chắn muốn xóa?')" ><i data-feather="trash"></i></a>
                                             </div>
 
                                         </td>

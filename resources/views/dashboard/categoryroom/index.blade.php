@@ -66,8 +66,7 @@
                                                     <li><a href="{{ route('sua_loai_phong', ['id' => $item->id]) }}"> <i
                                                                 data-feather="edit"></i></a>
                                                     </li>
-                                                    <li><a href="{{ route('xoa_loai_phong', ['id' => $item->id]) }}"><i
-                                                                data-feather="trash"></i></a>
+                                                    <li><a href="{{ route('xoa_loai_phong', ['id' => $item->id]) }}"  onclick="return confirm('Bạn có chắc chắn muốn xóa?')"><i data-feather="trash"></i></a>
                                                     </li>
                                                 </ul>
                                             </div>

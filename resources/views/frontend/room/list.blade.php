@@ -168,10 +168,10 @@
                                         <ul>
                                            
                                             <li>
-                                                <i data-feather="phone-call" class="me-2"></i>037 231 2809
+                                                <i data-feather="phone-call" class="me-2"></i>037 233 8999
                                             </li>
                                             <li>
-                                                <i data-feather="mail" class="me-2"></i>haitiger.al@gmail.com
+                                                <i data-feather="mail" class="me-2"></i>admin@gmail.com
                                             </li>
                                         </ul>
                                     </div>

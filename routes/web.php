@@ -38,6 +38,7 @@ Route::middleware('blockAccount')->group(function () {
             //Phòng trọ
             Route::resource('ManagerRoom', ManagerRoom::class);
             Route::get('an-phong-tro/{id}', 'ManagerRoom@hideRoom')->name('hide_room');
+            Route::get('hien-phong-tro/{id}', 'ManagerRoom@showRoom')->name('show_room');
             // Menu
             Route::resource('menus', MenuController::class);
             Route::get('xoa-menus/{id}',  'MenuController@delete')->name('menus.delete');

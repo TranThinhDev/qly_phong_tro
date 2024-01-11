@@ -65,11 +65,11 @@
                                                             title="Sửa"> <i data-feather="edit"></i></a>
                                                     </li>
                                                     <li><a href="{{ route('news.delete', ['slug' => $item->slug]) }}"
-                                                            title="Xóa"><i data-feather="trash"></i></a>
+                                                            title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa?')"><i data-feather="trash"></i></a>
                                                     </li>
                                                     @if ($item->status == 1)
                                                         <li><a href="{{ route('news.status', ['slug' => $item->slug]) }}"
-                                                                title="Ẩn bài viết"><i data-feather="eye-off"></i></a></li>
+                                                                title="Ẩn bài viết" onclick="return confirm('Bạn có chắc chắn muốn ẩn bài viết?')"><i data-feather="eye-off"></i></a></li>
                                                     @else
                                                         <li><a href="{{ route('news.status', ['slug' => $item->slug]) }}"
                                                                 title="Hiển thị bài viết"><i data-feather="eye"></i></a>

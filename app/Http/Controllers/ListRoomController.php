@@ -70,8 +70,8 @@ class ListRoomController extends Controller
     }
     public function filter(Request $request)
     {
-    
-       if(isset($request->category_id) || isset($request->name)) {
+        // dd($request);
+        if(isset($request->category_id) || isset($request->name)) {
         // Nếu có điều kiện  lọc
         $filters = (object) $request->all(); // Lấy điều kiện mới
         
@@ -81,19 +81,14 @@ class ListRoomController extends Controller
             $filters->category_id  = "Tất cả";
         }else {
             if($request->ward_id == "Tất cả" || $request->ward_id == null) {
-            
                 $old_wards = "Tất cả";
             }else {
                 $old_wards = wards::where( 'code', $request->ward_id )->first();  
-               
             }
-          
             // Lấy tên loại phòng
             if($request->category_id == "Tất cả" || $request->category_id == null) {
                 $old_category = "Tất cả";
-                
             }else {
-                
                 $old_category = CategoryRoom::where('id', $request->category_id)->first()->name;
             }
         }
@@ -140,7 +135,6 @@ class ListRoomController extends Controller
             ->where('status', 1)
             ->orderBy($sort['sapXep'],$sort['sortBy'])
             ->paginate(6);
-        
         $allRoom = Room::query()
             ->name($filters)
             ->district($filters)
@@ -163,6 +157,4 @@ class ListRoomController extends Controller
             $districts = districts::where('province_code', 01)->get();
             return view('frontend.room.list', compact('room','categoryCount','districts', 'categoryRoom'));
     }
-    
-    
 }

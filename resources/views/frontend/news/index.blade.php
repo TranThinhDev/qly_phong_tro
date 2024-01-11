@@ -51,7 +51,7 @@
                                                 }
                                             @endphp
                                             @if ($count != 0)
-                                                <li><a href="javascript:void(0)"><i
+                                                <li><a href="{{ route('frontend.news.filter', $item->id) }}"><i
                                                             class="fas fa-arrow-right me-2"></i>{{ $item->name }}<span
                                                             class="float-end">({{ $count }})</span></a></li>
                                             @endif
