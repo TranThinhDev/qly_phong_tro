@@ -13,7 +13,7 @@
         }
         $data->list_img = json_decode($data->list_img);
         $data->latlng = json_decode($data->latlng);
-        
+
     @endphp
 
     <section class="single-property mt-0 pt-0">
@@ -32,16 +32,16 @@
                                                     class="bg-img" alt="">
                                             </div>
                                             @if ($data->list_img != null)
-                                            @foreach ($data->list_img as $item)
-                                            <div>
-                                                <div class="bg-size">
-                                                    <img src="{{ asset('images/multi_room') . '/' . $item }}" class="bg-img"
-                                                        alt="">
-                                                </div>
-                                            </div>
-                                        @endforeach 
+                                                @foreach ($data->list_img as $item)
+                                                    <div>
+                                                        <div class="bg-size">
+                                                            <img src="{{ asset('images/multi_room') . '/' . $item }}"
+                                                                class="bg-img" alt="">
+                                                        </div>
+                                                    </div>
+                                                @endforeach
                                             @endif
-                                           
+
 
 
                                         </div>
@@ -51,16 +51,16 @@
                                                     class="img-fluid" alt="">
                                             </div>
                                             @if ($data->list_img != null)
-                                            @foreach ($data->list_img as $item)
-                                            <div>
-                                                <div class="bg-size">
-                                                    <img src="{{ asset('images/multi_room') . '/' . $item }}" class="bg-img"
-                                                        alt="">
-                                                </div>
-                                            </div>
-                                        @endforeach 
+                                                @foreach ($data->list_img as $item)
+                                                    <div>
+                                                        <div class="bg-size">
+                                                            <img src="{{ asset('images/multi_room') . '/' . $item }}"
+                                                                class="bg-img" alt="">
+                                                        </div>
+                                                    </div>
+                                                @endforeach
                                             @endif
-                                           
+
                                         </div>
                                     </div>
                                 </div>
@@ -164,35 +164,35 @@
                                     <h4 class="content-title">Bình luận</h4>
                                     <div class="review">
                                         @foreach ($data->CommentRoom as $comment)
-                                       
-                                        <div class="review-box">
-                                            <div class="media">
-                                                <img src="{{ asset('images/user_avatar') . '/' . $comment->getUser->profile_photo_path }}" class="img-70" alt="">
-                                                <div class="media-body">
-                                                    <h6>{{ $comment->getUser->name }}</h6>
-                                                    <p>{{ $comment->updated_at->diffForHumans($current) }}</p>
-                                                    <p class="mb-0">{{ $comment->content }}</p>
+                                            <div class="review-box">
+                                                <div class="media">
+                                                    <img src="{{ asset('images/user_avatar') . '/' . $comment->getUser->profile_photo_path }}"
+                                                        class="img-70" alt="">
+                                                    <div class="media-body">
+                                                        <h6>{{ $comment->getUser->name }}</h6>
+                                                        <p>{{ $comment->updated_at->diffForHumans($current) }}</p>
+                                                        <p class="mb-0">{{ $comment->content }}</p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
                                         @endforeach
                                     </div>
                                     <hr />
                                     <h4 class="content-title">Viết bình luận</h4>
-                                    @if(Auth::check())
-                                    <form class="review-form" action="{{ route('commentRoom', ['id' =>$data->id]) }}" method="post">
-                                        @csrf
-                                        @method('put')
-                                        <div class="form-group">
-                                            <textarea class="form-control" name="content" placeholder="Comment"></textarea>
-                                        </div>
-                                        <button type="submit"
-                                            class="btn btn-gradient color-2 btn-pill">Gửi</button>
-                                    </form>
+                                    @if (Auth::check())
+                                        <form class="review-form" action="{{ route('commentRoom', ['id' => $data->id]) }}"
+                                            method="post">
+                                            @csrf
+                                            @method('put')
+                                            <div class="form-group">
+                                                <textarea class="form-control" name="content" placeholder="Comment"></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-gradient color-2 btn-pill">Gửi</button>
+                                        </form>
                                     @else
-                                    <div>
-                                        <p>Bạn cần <a href="{{ route('login') }}">đăng nhập</a> để bình luận</p>
-                                    </div>
+                                        <div>
+                                            <p>Bạn cần <a href="{{ route('login') }}">đăng nhập</a> để bình luận</p>
+                                        </div>
                                     @endif
                                 </div>
                             </div>
@@ -217,14 +217,14 @@
                                                         @php
                                                             $listImg = json_decode($item->list_img);
                                                         @endphp
-                                                         @if ($listImg != null)
-                                                         @foreach ($listImg as $image)
-                                                             <a href="{{ route('Room_show', $item->id) }}">
-                                                                 <img src="{{ asset('images/multi_room') . '/' . $image }}"
-                                                                     class="bg-img" alt="">
-                                                             </a>
-                                                         @endforeach
-                                                          @endif
+                                                        @if ($listImg != null)
+                                                            @foreach ($listImg as $image)
+                                                                <a href="{{ route('Room_show', $item->id) }}">
+                                                                    <img src="{{ asset('images/multi_room') . '/' . $image }}"
+                                                                        class="bg-img" alt="">
+                                                                </a>
+                                                            @endforeach
+                                                        @endif
                                                     </div>
 
 
@@ -279,7 +279,9 @@
                                             <img src="{{ asset('images/user_avatar') . '/' . $data->User->profile_photo_path }}"
                                                 class="img-50" alt="">
                                             <div class="media-body ms-2">
-                                                <a href="{{ route('user.show', $data->User->id) }}"><h6>{{ $data->User->name }}</h6></a>
+                                                <a href="{{ route('user.show', $data->User->id) }}">
+                                                    <h6>{{ $data->User->name }}</h6>
+                                                </a>
                                                 <p>{{ $data->User->email }}</p>
                                             </div>
                                         </div>

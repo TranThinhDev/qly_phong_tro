@@ -27,6 +27,17 @@ class RoomController extends Controller
                 'description' => 'required',
                 'electric' => 'required',
                 'water' => 'required',
+            ], [
+                'name.required' => 'Vui lòng nhập tên khu trọ.',
+                'name.max' => 'Tên khu trọ không được vượt quá 255 ký tự.',
+                'quantity.required' => 'Vui lòng nhập số lượng phòng cho thuê.',
+                'quantity.numeric' => 'Số lượng phải là một số.',
+                'area.required' => 'Vui lòng nhập diện tích.',
+                'price.required' => 'Vui lòng nhập giá thuê.',
+                'unit.required' => 'Vui lòng chọn thời hạn đóng tiền.',
+                'description.required' => 'Vui lòng nhập mô tả.',
+                'electric.required' => 'Vui lòng nhập giá điện.',
+                'water.required' => 'Vui lòng nhập giá nước.',
             ]);
             if ($request->id == null) {
                 $room = Room::create([
@@ -62,7 +73,6 @@ class RoomController extends Controller
                 } else {
                     return response()->json(['error' => "Lỗi cập nhật"], 400);
                 }
-
             }
         } else {
             return response()->json(['error' => $request->all()], 400);
@@ -79,14 +89,14 @@ class RoomController extends Controller
     public function createStep2(Request $request, $id)
     {
 
-        $validated = $request->validate([
-            'detail_address' => 'required',
+        $request->validate([
+            // 'detail_address' => 'required',
             'lat' => 'required',
-            'long' => 'required',
-            'ward_id' => 'required',
+            // 'ward_id' => 'required',
         ], [
-                'lat.required' => "Bạn chưa chọn địa điểm khu trọ trên bản đồ",
-            ]);
+            'lat.required' => "Bạn chưa chọn địa điểm khu trọ trên bản đồ.",
+            
+        ]);
         $latlng = [
             'lat' => $request->lat,
             'long' => $request->long,
@@ -139,32 +149,33 @@ class RoomController extends Controller
             unlink($path);
             // Xóa trong database
         }
-          $result = Room::where('id', $id_room)->first();
-            $list_img = json_decode($result->list_img);
-            $key = array_search($filename, $list_img);
-            
-            if(array_search($filename, $list_img) !== false) {
-                unset( $list_img[$key]);
-               $list_img = array_values($list_img);
-               $result = Room::where('id', $id_room)->update([
+        $result = Room::where('id', $id_room)->first();
+        $list_img = json_decode($result->list_img);
+        $key = array_search($filename, $list_img);
+
+        if (array_search($filename, $list_img) !== false) {
+            unset($list_img[$key]);
+            $list_img = array_values($list_img);
+            $result = Room::where('id', $id_room)->update([
                 'list_img' => $list_img,
-                ]);
-                if($result) {
-                    return response()->json(['success' => $filename]);
-                }else {
-                    return response()->json(['key' => $key],400);
-                }
-            }else {
-                return response()->json(['mess' => "Không tìm thấy trong database",
-                                         'list_img' => $list_img,
-                                         'filename' => $filename,
-                                        ],400);
+            ]);
+            if ($result) {
+                return response()->json(['success' => $filename]);
+            } else {
+                return response()->json(['key' => $key], 400);
             }
-           
-            
-        return response()->json(['error' => $path],400);
+        } else {
+            return response()->json([
+                'mess' => "Không tìm thấy trong database",
+                'list_img' => $list_img,
+                'filename' => $filename,
+            ], 400);
+        }
+
+
+        return response()->json(['error' => $path], 400);
     }
-    
+
 
     public function createStep3(Request $request, $id)
     {
@@ -172,9 +183,9 @@ class RoomController extends Controller
         $validated = $request->validate([
             'main_img' => 'required',
         ], [
-                'main_img.required' => "Bạn cần chọn ảnh chính",
-            ]);
-        
+            'main_img.required' => "Bạn cần chọn ảnh chính.",
+        ]);
+
         $result = Room::where('id', $id)->update([
             'main_img' => $request->main_img,
             'list_img' => $request->list_img,

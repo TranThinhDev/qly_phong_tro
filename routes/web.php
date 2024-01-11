@@ -99,7 +99,7 @@ Route::middleware(['auth','verified' , ])->namespace('App\Http\Controllers')->gr
         Route::resource('Room', RoomController::class);
         Route::get('xuat-ban-phong/{id}', 'RoomController@publish')->name('xuat_ban_phong');
         Route::get('xoa-phong/{id}', 'RoomController@destroy')->name('Room_destroy');
-        Route::get('xem-trang-mau/{id}', 'RoomController@demoRoom')->name('demo_room');
+        Route::get('xem-trang-mau/{room}', 'RoomController@demoRoom')->name('demo_room');
         Route::get('change-status-room/{id}', 'RoomController@changeStatusRoom')->name('change_status_room');
         Route::put('gui-thong-tin-dat-phong/{id}', 'RoomController@sendBookingRoom')->name('send_booking');
         // Thông báo

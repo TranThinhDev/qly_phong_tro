@@ -193,7 +193,7 @@
                                             <div class="property-btn d-flex">
                                                 <span>{{ date('d-m-Y', strtotime($item->created_at)) }}</span>
                                                 @if ($authUser->id == $user->id)
-                                                    <div class="d-flex">
+                                                    <div class="d-flex gap-1">
                                                         <a type="button" href="{{ route('Room_destroy', $item->id) }}"
                                                             class="btn btn-dashed btn-pill color-1">Xóa</a>
                                                         <a type="button" href="{{ route('Room.edit', $item->id) }}"

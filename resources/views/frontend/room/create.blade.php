@@ -421,7 +421,7 @@
                                         <input type="text" id="lat" name="lat"
                                             value="{{ isset($address->lat) ? $address->lat : '' }}" name="lat"
                                             class="d-none">
-                                        <input type="text" id="long" name="long" name="long"
+                                        <input type="text" id="long" name="long"
                                             value="{{ isset($address->long) ? $address->long : '' }}" class="d-none">
 
                                         <div class="col-12 layout-maps ">

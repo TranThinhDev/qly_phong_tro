@@ -1,9 +1,9 @@
 @extends('layouts.app')
 @section('style')
     @php
-        
+
         $latlng = json_decode($room->latlng);
-        $add_ons = json_decode($room->add_ons) == null ? []: json_decode($room->add_ons);
+        $add_ons = json_decode($room->add_ons) == null ? [] : json_decode($room->add_ons);
     @endphp
     <script
         src='https://www.bing.com/maps/sdk/mapcontrol?key=AgyOfVqVPxgShQQEECEUy5EnGPDHdv1uhGW-RCJbf9EdrKA0YKLDv12JNYflT8gq&amp;callback=loadMapScenario'
@@ -469,7 +469,8 @@
                                     <label>Media</label>
                                     <div class="row justify-content-around">
                                         <div class="d-flex flex-column align-items-center">
-                                            <img id="main_img" src="{{ asset('images/main_room') . '/' . $room->main_img }}"
+                                            <img id="main_img"
+                                                src="{{ asset('images/main_room') . '/' . $room->main_img }}"
                                                 width="400" height="250" alt="">
                                             <form class="dropzone col-sm-4 " id="singleFileUploadRoom"
                                                 action="{{ route('upload_main_image_room') }}">
@@ -489,43 +490,51 @@
                                         </div>
                                     </form>
                                     <div class="row justify-content-around" id="list_img">
-                                        @foreach (json_decode($room->list_img) as $image)
-                                            <div class="item_list_img" >
-                                                <img src="{{ asset('images/multi_room') . '/' . $image }}"
-                                                    class="item_img" alt="">
-                                                <span class="delete_image_button" name_img="{{ $image }}">X</span>
-                                            </div>
-                                        @endforeach
+                                        @if ($room->list_img)
+                                            @foreach (json_decode($room->list_img) as $image)
+                                                <div class="item_list_img">
+                                                    <img src="{{ asset('images/multi_room') . '/' . $image }}"
+                                                        class="item_img" alt="">
+                                                    <span class="delete_image_button"
+                                                        name_img="{{ $image }}">X</span>
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
 
                                     <form class="row gx-3">
                                         <div class="form-group col-sm-12">
                                             <label>Video (mp4)</label>
-                                            <input type="text" class="form-control" value="{{$room->video_link}}" id="video_link"
-                                                placeholder="Ưu tiên link youtube">
+                                            <input type="text" class="form-control" value="{{ $room->video_link }}"
+                                                id="video_link" placeholder="Ưu tiên link youtube">
                                         </div>
                                         <div class="form-group col-sm-12">
                                             <label>Thêm các tùy chọn khác</label>
                                             <div class="feature-checkbox">
 
                                                 <label for="chk-ani">
-                                                    <input class="checkbox_animated color-2 add_ons" value="Nơi để xe"  {{array_search("Nơi để xe", $add_ons) !== false ? "checked": ""}}
+                                                    <input class="checkbox_animated color-2 add_ons" value="Nơi để xe"
+                                                        {{ array_search('Nơi để xe', $add_ons) !== false ? 'checked' : '' }}
                                                         type="checkbox"> Nơi để xe
                                                 </label>
                                                 <label for="chk-ani1">
-                                                    <input class="checkbox_animated color-2 add_ons"  {{array_search("Camera an ninh", $add_ons) !== false ? "checked": ""}}
+                                                    <input class="checkbox_animated color-2 add_ons"
+                                                        {{ array_search('Camera an ninh', $add_ons) !== false ? 'checked' : '' }}
                                                         value="Camera an ninh" type="checkbox"> Camera an ninh
                                                 </label>
                                                 <label for="chk-ani2">
-                                                    <input class="checkbox_animated color-2 add_ons" value="Wifi miễn phí" {{array_search("Wifi miễn phí", $add_ons) !== false ? "checked": ""}}
+                                                    <input class="checkbox_animated color-2 add_ons" value="Wifi miễn phí"
+                                                        {{ array_search('Wifi miễn phí', $add_ons) !== false ? 'checked' : '' }}
                                                         type="checkbox"> Wifi miễn phí
                                                 </label>
                                                 <label for="chk-ani3">
-                                                    <input class="checkbox_animated color-2 add_ons" value="Điều hòa" {{array_search("Điều hòa", $add_ons) !== false ? "checked": ""}}
+                                                    <input class="checkbox_animated color-2 add_ons" value="Điều hòa"
+                                                        {{ array_search('Điều hòa', $add_ons) !== false ? 'checked' : '' }}
                                                         type="checkbox"> Điều hòa
                                                 </label>
                                                 <label for="chk-ani4">
-                                                    <input class="checkbox_animated color-2 add_ons" {{array_search("Bình nóng lạnh", $add_ons) !== false ? "checked": ""}}
+                                                    <input class="checkbox_animated color-2 add_ons"
+                                                        {{ array_search('Bình nóng lạnh', $add_ons) !== false ? 'checked' : '' }}
                                                         value="Bình nóng lạnh" type="checkbox"> Bình nóng lạnh
                                                 </label>
                                             </div>
@@ -542,24 +551,27 @@
                                 <div class="wizard-step-4 d-none">
                                     <div class="complete-details">
                                         <div>
-                                            <img src="{{asset('assets/images/inner-pages/4.svg')}}" class="img-fluid"
+                                            <img src="{{ asset('assets/images/inner-pages/4.svg') }}" class="img-fluid"
                                                 alt="">
                                             <h3>Cập nhật thành công</h3>
-                                           
-                                            @if($room->status == null)
-                                            <h6>Bạn đã điền đầy đủ thông tin, Hãy nhấn đăng bài để bài đăng phòng của bạn
-                                                lên website</h6>
-                                            <button type="submit" class="btn btn-dashed btn-pill color-1 prev3">Quay
-                                                lại</button>
-                                            <a type="submit" href="{{route('xuat_ban_phong' , $room->id)}}"
-                                                class="btn btn-gradient color-2 step-again btn-pill">Đăng bài</a>
-                                            <a type="submit" id="demo_room"
-                                                class="btn btn-gradient color-1 step-again btn-pill" href="">Xem
-                                                trang mẫu</a>
-                                                @else
+
+                                            @if ($room->status == null)
+                                                <h6>Bạn đã điền đầy đủ thông tin, Hãy nhấn đăng bài để bài đăng phòng của
+                                                    bạn
+                                                    lên website</h6>
+                                                <button type="submit" class="btn btn-dashed btn-pill color-1 prev3">Quay
+                                                    lại</button>
+                                                <a type="submit" href="{{ route('xuat_ban_phong', $room->id) }}"
+                                                    class="btn btn-gradient color-2 step-again btn-pill">Đăng bài</a>
+                                                <a type="submit" id="demo_room"
+                                                    class="btn btn-gradient color-1 step-again btn-pill"
+                                                    href="">Xem
+                                                    trang mẫu</a>
+                                            @else
                                                 <a type="submit" id=""
-                                                class="btn btn-gradient color-1 step-again btn-pill" href="{{route('user.index')}}">Trang cá nhân</a>
-                                                @endif
+                                                    class="btn btn-gradient color-1 step-again btn-pill"
+                                                    href="{{ route('user.index') }}">Trang cá nhân</a>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -615,7 +627,9 @@
                             },
                             success: function(data) {
                                 Path_main_image = Path_main_image_old;
-                                $('#main_img').attr("src",`{{url('/')}}/images/main_room/${Path_main_image}`);
+                                $('#main_img').attr("src",
+                                    `{{ url('/') }}/images/main_room/${Path_main_image}`
+                                    );
                                 console.log(data);
                             },
                             error: function(e) {
@@ -628,7 +642,8 @@
                     },
                     success: function(file, response) {
                         Path_main_image = response.success;
-                        $('#main_img').attr("src",`{{url('/')}}/images/main_room/${response.success}`);
+                        $('#main_img').attr("src",
+                            `{{ url('/') }}/images/main_room/${response.success}`);
                         console.log(response.success);
                     },
                     error: function(file, response) {
@@ -671,7 +686,7 @@
                                 if (index !== -1) {
                                     Path_multi_image.splice(index, 1);
                                 }
-                              
+
                                 console.log(Path_multi_image);
                             },
                             error: function(e) {
@@ -684,7 +699,7 @@
                     },
                     success: function(file, response) {
                         Path_multi_image.push(response.success)
-                       
+
                         console.log(Path_multi_image);
                     },
                     error: function(file, response) {
@@ -714,58 +729,60 @@
     <script src="{{ asset('assets/js/property-wizard.js') }}"></script>
     {{-- Xóa ảnh cũ --}}
     <script>
-        var Path_main_image = '{{$room->main_img}}';
-        var Path_main_image_old = '{{$room->main_img}}'
-        var Path_multi_image =  []
-        var Path_multi_image_old =JSON.parse(<?=json_encode($room->list_img) ?>);
+        var Path_main_image = '{{ $room->main_img }}';
+        var Path_main_image_old = '{{ $room->main_img }}'
+        var Path_multi_image = []
+        var Path_multi_image_old = JSON.parse(<?= json_encode($room->list_img) ?>);
         var list = document.querySelectorAll('.delete_image_button');
         delete_old_image();
+
         function delete_old_image() {
             list.forEach(function(e) {
-            e.onclick = function() {
-            name_img = e.getAttribute("name_img");
-            console.log(name_img);
-             $.ajax({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                type: 'PUT',
-                url: `{{ route('delete_image_update', ':path') }}`.replace(":path",
-                    'multi_room'),
-                data: {
-                    filename: name_img,
-                    id: id
-                },
-                success: function(data) {
-                    
-                    let index = Path_multi_image_old.indexOf(data.success);
-                    if (index !== -1) {
-                        Path_multi_image_old.splice(index, 1);
-                      
-                    }
-                    updateListImg();
-                    list = document.querySelectorAll('.delete_image_button');
-                    delete_old_image();
-                   
-                },
-                error: function(e) {
-                    console.log(e);
+                e.onclick = function() {
+                    name_img = e.getAttribute("name_img");
+                    console.log(name_img);
+                    $.ajax({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        type: 'PUT',
+                        url: `{{ route('delete_image_update', ':path') }}`.replace(":path",
+                            'multi_room'),
+                        data: {
+                            filename: name_img,
+                            id: id
+                        },
+                        success: function(data) {
+
+                            let index = Path_multi_image_old.indexOf(data.success);
+                            if (index !== -1) {
+                                Path_multi_image_old.splice(index, 1);
+
+                            }
+                            updateListImg();
+                            list = document.querySelectorAll('.delete_image_button');
+                            delete_old_image();
+
+                        },
+                        error: function(e) {
+                            console.log(e);
+                        }
+                    });
                 }
-            });
-             }
-        })
+            })
         }
+
         function updateListImg() {
             let divlist = document.getElementById('list_img');
             let html = "";
-            if(Path_multi_image_old.length > 0) {
-                Path_multi_image_old.forEach(function (e) {
-                html = ` ${html}   <div class="item_list_img" > <img src="{{url('/')}}/images/multi_room/${e}"
+            if (Path_multi_image_old.length > 0) {
+                Path_multi_image_old.forEach(function(e) {
+                    html = ` ${html}   <div class="item_list_img" > <img src="{{ url('/') }}/images/multi_room/${e}"
                                                     class="item_img" alt="">
                                                 <span class="delete_image_button" name_img="${e}">X</span> </div>`
-            })   
+                })
             }
-            divlist.innerHTML =html;         
+            divlist.innerHTML = html;
         }
     </script>
     {{-- Lưu thông tin --}}

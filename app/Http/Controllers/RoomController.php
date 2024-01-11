@@ -13,6 +13,7 @@ use Redirect;
 use App\Models\BookingInformation;
 use App\Models\Notification;
 use App\Models\CommentRoom;
+
 class RoomController extends Controller
 {
     /**
@@ -46,7 +47,7 @@ class RoomController extends Controller
      */
     public function show(string $id)
     {
-       
+
         $data = Room::where('id', $id)->first();
         $room_list = Room::where('id', '!=', $id)->where('status', 1)->take(4)->get();
         return view('frontend.room.show', compact('room_list'))->with('data', $data);
@@ -78,21 +79,21 @@ class RoomController extends Controller
     public function destroy(string $id)
     {
         $room = Room::where('id', $id)->first();
-   
+
         $this->deleteImagesByName($room->main_img, 'main_room');
-        foreach (json_decode($room->list_img) as $key => $value) {
-            $this->deleteImagesByName($value, 'multi_room');
+        if ($room->list_img !== null && is_array($decodedList = json_decode($room->list_img)) && json_last_error() === JSON_ERROR_NONE) {
+            foreach (array_filter($decodedList, fn ($value) => $value !== null) as $value) {
+                $this->deleteImagesByName($value, 'multi_room');
+            }
         }
         $result = Room::where('id', $id)->delete();
-        $user = Auth::user();
-        $data = User::where('id', $user->id)->first();
         $toast = $this->makeToast($result, 'Xóa bài thành công', 'Xóa bài thất bại');
-        return view('frontend.home', compact('toast', 'data'));
+        return Redirect::back()->with(['toast' => $toast]);
     }
-    public function demoRoom($id)
+    public function demoRoom(Room $room)
     {
         $user = Auth::user();
-        $data = Room::where('id', $id)->where('chutro_id', $user->id)->where('status', null)->first();
+        $data = Room::where('id', $room->id)->where('chutro_id', $user->id)->where('status', null)->first();
         return view('frontend.room.demo')->with('data', $data);
     }
     public function publish($id)
@@ -103,16 +104,16 @@ class RoomController extends Controller
         $user = Auth::user();
         $data = User::where('id', $user->id)->first();
         $toast = $this->makeToast($result, 'Đăng bài thành công', 'Đăng bài thất bại');
-        return Redirect::back()->with(['toast' => $toast ]);
+        return redirect()->route('Room.show', $id)->with(['toast' => $toast]);
     }
     public function changeStatusRoom($id)
     {
         $room = Room::where('id', $id)->first();
         $result = Room::where('id', $id)->update([
-            'status' => $room->status == 1 ? 0: 1,
+            'status' => $room->status == 1 ? 0 : 1,
         ]);
         $toast = $this->makeToast($result, 'Cập nhật thành công', 'Cập nhật thất bại');
-        return Redirect::back()->with(['toast' => $toast ]);
+        return Redirect::back()->with(['toast' => $toast]);
     }
     public function sendBookingRoom(Request $request, $id)
     {
@@ -121,17 +122,17 @@ class RoomController extends Controller
             'phone' => 'required',
             'name' => 'required',
         ]);
-        
+
         $result = BookingInformation::create([
             'rooms_id' => $id,
             'message' => $request->message,
             'email' => $request->email,
             'name' => $request->name,
             'phone' => $request->phone,
-            
+
         ]);
-        if($result) {
-            $url = route('booking.show', ['booking' =>$id]);
+        if ($result) {
+            $url = route('booking.show', ['booking' => $id]);
             $room = Room::where('id', $id)->first();
             $notification = Notification::create([
                 'user_id' => $room->chutro_id,
@@ -141,12 +142,12 @@ class RoomController extends Controller
             ]);
         }
         $toast = $this->makeToast($result, 'Gửi thông tin thành công', 'Gửi thông tin thất bại');
-        return Redirect::back()->with(['toast' => $toast ]);
+        return Redirect::back()->with(['toast' => $toast]);
     }
     public function comment(Request $request, $id)
     {
         $request->validate([
-            'content' =>'string|max:500|required'
+            'content' => 'string|max:500|required'
         ]);
         $author_id = Auth::user()->id;
         $result = CommentRoom::create([
@@ -154,7 +155,7 @@ class RoomController extends Controller
             'author_id' => $author_id,
             'content' => $request->content
         ]);
-        if($result) {
+        if ($result) {
             $user_id = Room::where('id', $id)->first()->User->id;
             $title = "Phòng trọ của bạn có một bình luận mới";
             $route = 'Room_show';
@@ -163,6 +164,6 @@ class RoomController extends Controller
             $notification = $this->MakeNotification($user_id, $title, $route, $element);
         }
         $toast = $this->makeToast($result, 'Bình luận đã được gửi', 'Lỗi, Thử lại');
-        return Redirect::back()->with(['toast' => $toast ]);
+        return Redirect::back()->with(['toast' => $toast]);
     }
 }
