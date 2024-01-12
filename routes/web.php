@@ -83,7 +83,9 @@ Route::middleware('blockAccount')->group(function () {
     Route::middleware(['auth', 'verified',])->namespace('App\Http\Controllers')->group(function () {
         // Route cần điền thông tin cá nhân mới được truy cập
         Route::middleware(['checkFormInformation'])->group(function () {
-            Route::get('tao-phong', 'RoomController@create')->name('room_create');
+            Route::group(['middleware' => 'CheckHost'], function () {
+                Route::get('tao-phong', 'RoomController@create')->name('room_create');
+            });
             Route::put('binh-luan-bai-viet/{id}', 'NewsController@comment')->name('frontend.news.comment');
             Route::get('xoa-binh-luan-bai-viet/{id}', 'NewsController@deleteComment')->name('news.comment.delete');
             Route::put('binh-luan-phong/{id}', 'RoomController@comment')->name('commentRoom');

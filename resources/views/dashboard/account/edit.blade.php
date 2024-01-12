@@ -11,7 +11,7 @@
     </style>
 @endsection
 @section('title')
-   Chỉnh sửa thông tin tài khoản ({{$user->name}})
+    Chỉnh sửa thông tin tài khoản ({{ $user->name }})
 @endsection
 @section('content')
     <!-- Container-fluid start -->
@@ -20,7 +20,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="page-header-left">
-                        <h3>Chỉnh sửa thông tin tài khoản ({{$user->name}})
+                        <h3>Chỉnh sửa thông tin tài khoản ({{ $user->name }})
                             <small>
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item">
@@ -58,7 +58,7 @@
                             @csrf
                             <div class="form-group col-md-6 col-sm-12">
                                 <label>Tên Người dùng <span class="font-danger">*</span></label>
-                                <input type="text" name="name" value="{{ old('name') ? old('name') : $user->name }}"
+                                <input type="text" name="name" value="{{ old('name') ? old('name') : $user->name }}" disabled
                                     id="name_room" class="form-control">
 
                             </div>
@@ -74,7 +74,7 @@
                                     <div class="col-sm-8">
                                         <input type="text" name="Facebook"
                                             value="{{ old('Facebook') ? old('Facebook') : $user->Facebook }}" id="name_room"
-                                            class="form-control">
+                                            class="form-control"  disabled>
                                     </div>
                                     <a href="{{ $user->Facebook }}" class="btn btn-info col-sm-4">Kiểm tra</a>
 
@@ -86,16 +86,17 @@
                                     <div class="col-sm-8">
                                         <input type="text" name="Zalo"
                                             value="{{ old('Zalo') ? old('Zalo') : $user->Zalo }}" id="name_room"
-                                            class="form-control ">
+                                            class="form-control " disabled>
                                     </div>
-                                    <a href="https://zalo.me/{{ $user->Zalo }}" class="btn btn-info col-sm-4">Kiểm tra</a>
+                                    <a href="https://zalo.me/{{ $user->Zalo }}" class="btn btn-info col-sm-4">Kiểm
+                                        tra</a>
                                 </div>
                             </div>
                             <div class="form-group col-md-6 col-sm-12">
                                 <label>vai trò <span class="font-danger">*</span></label>
                                 <select class="dropdown col-12 p-2" name="role" id="">
-                                    <option value="0" {{ $user->status == 0 ? 'checked' : '' }}>Người dùng</option>
-                                    <option value="0" {{ $user->status == 1 ? 'checked' : '' }}>Chủ trọ</option>
+                                    <option value="0" {{ $user->role == 0 ? 'selected' : '' }}>Người dùng</option>
+                                    <option value="2" {{ $user->role == 2 ? 'selected' : '' }}>Chủ trọ</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-6 col-sm-12">
@@ -117,29 +118,9 @@
     <!-- Container-fluid end -->
 @endsection
 @section('js')
-    @error('name')
-        <script>
-            Toastify({
-                text: "{{ $message }}",
-                className: "info",
-                style: {
-                    background: "red",
-                }
-            }).showToast();
-        </script>
-    @enderror
-    @error('Zalo')
-        <script>
-            Toastify({
-                text: "{{ $message }}",
-                className: "info",
-                style: {
-                    background: "red",
-                }
-            }).showToast();
-        </script>
-    @enderror
-    @error('Facebook')
+    
+    
+    @error('ly_do')
         <script>
             Toastify({
                 text: "{{ $message }}",

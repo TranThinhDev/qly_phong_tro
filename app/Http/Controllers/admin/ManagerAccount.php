@@ -67,18 +67,15 @@ class ManagerAccount extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'name' => 'required|max:255',
-            'Zalo' => 'numeric|digits:10',
-            'Facebook' => 'url',
-            'role' => 'required|numeric'
+            
+            'role' => 'required|numeric',
+            'ly_do' => 'required|max:255'
         ], [
-            'name.required' => 'Vui lòng nhập tên.',
-            'name.max' => 'Tên không được vượt quá 255 ký tự.',
-            'Zalo.numeric' => 'Zalo phải là một số.',
-            'Zalo.digits' => 'Zalo phải có 10 chữ số.',
-            'Facebook.url' => 'Định dạng Facebook không hợp lệ.',
+            
             'role.required' => 'Vui lòng chọn vai trò.',
             'role.numeric' => 'Vai trò phải là một số.',
+            'ly_do.required' => 'Bạn cần nhập lý do.',
+            'ly_do.max' => 'Lý do không vượt quá 200 ký tự.',
         ]);
         $result = User::where('id', $id)->update([
             'name' => $request->name,

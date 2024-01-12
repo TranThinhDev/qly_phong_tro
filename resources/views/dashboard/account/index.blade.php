@@ -81,7 +81,7 @@
                                                             <h6>{{ $item->name }}</h6>
                                                         </a>
                                                         <span
-                                                            class="light-font">{{ $item->role == 1 ? 'Admin' : (count($item->rooms) > 0 ? 'Chủ trọ' : 'Người dùng') }}</span>
+                                                            class="light-font">{{ $item->role == 1 ? 'Admin' : ($item->role == 2 ? 'Chủ trọ' : 'Người dùng') }}</span>
                                                     </div>
                                                 </div>
                                             </td>
