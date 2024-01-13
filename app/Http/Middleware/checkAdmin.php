@@ -21,7 +21,7 @@ class checkAdmin
 
         $user = Auth::user();
         
-        if($user->role == "0") {
+        if($user->role == "0" || $user->role == "2" ) {
            
             return redirect('/');
         }
