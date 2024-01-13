@@ -19,7 +19,7 @@ class HomeController extends Controller
         $rooms = Room::where('status', 1)->orderBy($sort['sapXep'],$sort['sortBy'])->take(6)->get(); 
         $news = news::where('status', 1)->orderBy('view','desc')->take(3)->get(); 
         $categoryRoom = CategoryRoom::all();
-        $districts = districts::where('province_code', 19)->get();
+        $districts = districts::where('province_code', 01)->get();
         return view('frontend.home', compact('rooms', 'categoryRoom', 'districts','news'));
     }
 

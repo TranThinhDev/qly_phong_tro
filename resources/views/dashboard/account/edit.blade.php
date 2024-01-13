@@ -58,13 +58,13 @@
                             @csrf
                             <div class="form-group col-md-6 col-sm-12">
                                 <label>Tên Người dùng <span class="font-danger">*</span></label>
-                                <input type="text" name="name" value="{{ old('name') ? old('name') : $user->name }}" disabled
+                                <input type="text" name="name" value="{{ old('name') ? old('name') : $user->name }}" readonly
                                     id="name_room" class="form-control">
 
                             </div>
                             <div class="form-group col-md-6 col-sm-12">
                                 <label>Email <span class="font-danger">*</span></label>
-                                <input type="text" disabled name="email"
+                                <input type="text" readonly name="email"
                                     value="{{ old('email') ? old('email') : $user->email }}" id="name_room"
                                     class="form-control">
                             </div>
@@ -74,7 +74,7 @@
                                     <div class="col-sm-8">
                                         <input type="text" name="Facebook"
                                             value="{{ old('Facebook') ? old('Facebook') : $user->Facebook }}" id="name_room"
-                                            class="form-control"  disabled>
+                                            class="form-control" readonly>
                                     </div>
                                     <a href="{{ $user->Facebook }}" class="btn btn-info col-sm-4">Kiểm tra</a>
 
@@ -86,7 +86,7 @@
                                     <div class="col-sm-8">
                                         <input type="text" name="Zalo"
                                             value="{{ old('Zalo') ? old('Zalo') : $user->Zalo }}" id="name_room"
-                                            class="form-control " disabled>
+                                            class="form-control" readonly>
                                     </div>
                                     <a href="https://zalo.me/{{ $user->Zalo }}" class="btn btn-info col-sm-4">Kiểm
                                         tra</a>

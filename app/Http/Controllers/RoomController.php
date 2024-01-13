@@ -29,7 +29,7 @@ class RoomController extends Controller
      */
     public function create()
     {
-        $districts = districts::where('province_code', 19)->get();
+        $districts = districts::where('province_code', 01)->get();
         $category = CategoryRoom::all();
         return view('frontend.room.create', compact('category', 'districts'));
     }

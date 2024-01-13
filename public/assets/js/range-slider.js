@@ -7,7 +7,7 @@
         range: true,
         min: 100,
         max: 5000,
-        values: [ 500, 1000 ],
+        values: [ 500, 3000 ],
         slide: function( event, ui ) {
           let html = (ui.values[ 0 ]*1000).toLocaleString('it-IT', {style : 'currency', currency : 'VND'}) + " - " + (ui.values[ 1 ]*1000).toLocaleString('it-IT', {style : 'currency', currency : 'VND'});
           $( "#amount" ).html(html);

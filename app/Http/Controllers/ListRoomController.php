@@ -70,11 +70,9 @@ class ListRoomController extends Controller
     }
     public function filter(Request $request)
     {
-        // dd($request);
         if(isset($request->category_id) || isset($request->name)) {
-        // Nếu có điều kiện  lọc
+        // Nếu có điều kiện lọc
         $filters = (object) $request->all(); // Lấy điều kiện mới
-        
         if($request->name != null) {
             $old_wards = "Tất cả";
             $old_category = "Tất cả";
@@ -83,7 +81,7 @@ class ListRoomController extends Controller
             if($request->ward_id == "Tất cả" || $request->ward_id == null) {
                 $old_wards = "Tất cả";
             }else {
-                $old_wards = wards::where( 'code', $request->ward_id )->first();  
+                $old_wards = wards::where('code', $request->ward_id )->first();  
             }
             // Lấy tên loại phòng
             if($request->category_id == "Tất cả" || $request->category_id == null) {
@@ -110,8 +108,7 @@ class ListRoomController extends Controller
         session()->put('filters', $filters);
         $sort = ["sapXep" => "created_at", "sortBy" => 'desc'];
         session()->put('sort', $sort);
-       }
-       else{
+        }else{
         // Nếu có điều kiện sắp xếp
         if(isset($request->sapXep)) {
             session()->put('sort', $request->all());
@@ -119,11 +116,9 @@ class ListRoomController extends Controller
             $sort = ["sapXep" => "created_at", "sortBy" => 'desc'];
             session()->put('sort', $sort);
         }
-       }
+        }
         $sort = session()->get('sort');
-        $filters =session()->get('filters');
-       
-        
+        $filters = session()->get('filters');
         $room = Room::query()
             ->name($filters)
             ->district($filters)

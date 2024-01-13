@@ -67,21 +67,19 @@ class ManagerAccount extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            
             'role' => 'required|numeric',
             'ly_do' => 'required|max:255'
         ], [
-            
             'role.required' => 'Vui lòng chọn vai trò.',
             'role.numeric' => 'Vai trò phải là một số.',
             'ly_do.required' => 'Bạn cần nhập lý do.',
             'ly_do.max' => 'Lý do không vượt quá 200 ký tự.',
         ]);
         $result = User::where('id', $id)->update([
-            'name' => $request->name,
+            // 'name' => $request->name,
             'role' => $request->role,
-            'Zalo' => $request->Zalo,
-            'Facebook' => $request->Facebook,
+            // 'Zalo' => $request->Zalo,
+            // 'Facebook' => $request->Facebook,
         ]);
         $this->MakeNotification($id, "Tài khoản của bạn được cập nhật thông tin bởi quản trị viên với lý do: " . $request->ly_do, 'user.index', []);
         $toast = $this->makeToast($result, 'Cập nhật thành công', 'Cập nhật thất bại');

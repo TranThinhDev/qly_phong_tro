@@ -79,9 +79,9 @@ class RoomController extends Controller
         }
     }
     public function getWards(Request $request)
-    {
-
-        $ward_list = wards::where('district_code', $request->district_code)->get();
+    {   
+        $district_code = str_pad($request->district_code, 3, '0', STR_PAD_LEFT);
+        $ward_list = wards::where('district_code', $district_code)->get();
         return response()->json([
             'ward_list' => $ward_list
         ]);
