@@ -430,10 +430,9 @@
 <script>
     function loadMapScenario() {
         var map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
-            center: new Microsoft.Maps.Location(21.586973, 105.806987),
-            zoom: 16,
+            center: new Microsoft.Maps.Location(21.028511, 105.854444),
+            zoom: 15,
             mapTypeId: Microsoft.Maps.MapTypeId.aerial,
-
         });
 
         markersData = [

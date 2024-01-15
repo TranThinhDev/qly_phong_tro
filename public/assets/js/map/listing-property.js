@@ -29,8 +29,8 @@ var
             },
             {
                 name: 'Orchard House',
-                location_latitude: 25.222578,
-                location_longitude: 55.319011,
+                location_latitude: 21.028511,
+                location_longitude: 105.854444,
                 map_image_url: '../assets/images/6.jpg',
                 name_point: 'Orchard House',
                 price: '$1200',

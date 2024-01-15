@@ -54,7 +54,7 @@
             <li class="profile-avatar onhover-dropdown">
                 <div>
                     <img src="{{ asset('images/user_avatar/' . Auth::user()->profile_photo_path) }}" class="img-fluid"
-                        alt="">
+                        alt="" style="width: 40px; height: 40px; border-radius: 100%">
                 </div>
                 <ul class="profile-dropdown onhover-show-div">
                     <li><a href="{{ route('profile.index') }}"><span>Tài khoản </span><i data-feather="user"></i></a>

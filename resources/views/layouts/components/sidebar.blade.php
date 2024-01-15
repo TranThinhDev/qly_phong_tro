@@ -25,7 +25,7 @@
         <div class="user-profile">
             <div class="d-flex align-items-center">
                 <div class="change-pic">
-                    <img src="{{ asset('images/user_avatar/' . Auth::user()->profile_photo_path) }}" class="img-fluid" width="500"
+                    <img src="{{ asset('images/user_avatar/' . Auth::user()->profile_photo_path) }}" class="img-fluid" style="width: 55px; height: 55px; border-radius: 100%"
                         alt="">
                 </div>
                 <div class="media-body w-25">

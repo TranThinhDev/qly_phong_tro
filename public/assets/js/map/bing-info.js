@@ -1,6 +1,6 @@
 function loadMapScenario() {
     var map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
-        center: new Microsoft.Maps.Location(25.206426, 55.306465),
+        center: new Microsoft.Maps.Location(21.028511, 105.854444),
         zoom: 13
     });
     var pushpins = Microsoft.Maps.TestDataGenerator.getPushpins(4, map.getBounds(),
@@ -13,8 +13,8 @@ function loadMapScenario() {
     markersData = [
         {
             name: 'Sea Breezes',
-            location_latitude: 25.206426,
-            location_longitude: 55.346465,
+            location_latitude: 21.028511,
+            location_longitude: 105.854444,
             map_image_url: '../assets/images/property/15.jpg',
             name_point: 'Sea Breezes',
             price: '$1200',
@@ -26,8 +26,8 @@ function loadMapScenario() {
         },
         {
             name: 'Orchard House',
-            location_latitude: 25.222578,
-            location_longitude: 55.319011,
+            location_latitude: 21.028511,
+            location_longitude: 105.854444,
             map_image_url: '../assets/images/6.jpg',
             name_point: 'Orchard House',
             price: '$1200',

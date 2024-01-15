@@ -28,8 +28,8 @@ var markersData = {
         },
         {
             name: 'Orchard House',
-            location_latitude: 25.222578,
-            location_longitude: 55.319011,
+            location_latitude: 21.028511,
+            location_longitude: 105.854444,
             map_image_url: '../assets/images/6.jpg',
             name_point: 'Orchard House',
             price: '$1200',
@@ -117,7 +117,7 @@ var defaultLayers = platform.createDefaultLayers();
 
 var map = new H.Map(document.getElementById('map'),
     defaultLayers.vector.normal.map, {
-    center: { lat: 25.206426, lng: 55.319011 },
+    center: { lat: 25.206426, lng: 105.854444 },
     zoom: 14,
     pixelRatio: window.devicePixelRatio || 1
 });
