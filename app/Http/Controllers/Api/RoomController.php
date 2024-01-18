@@ -15,7 +15,6 @@ class RoomController extends Controller
 
     public function createStep1(Request $request)
     {
-
         $category = CategoryRoom::where('name', $request->category)->first();
         if (isset($category->id)) {
             $request->validate([
@@ -95,7 +94,6 @@ class RoomController extends Controller
             // 'ward_id' => 'required',
         ], [
             'lat.required' => "Bạn chưa chọn địa điểm khu trọ trên bản đồ.",
-            
         ]);
         $latlng = [
             'lat' => $request->lat,

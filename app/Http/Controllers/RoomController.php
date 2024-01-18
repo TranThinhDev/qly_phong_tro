@@ -60,7 +60,7 @@ class RoomController extends Controller
     {
         $user = Auth::user();
         $room = Room::where('id', $id)->where('chutro_id', $user->id)->first();
-        $districts = districts::where('province_code', 19)->get();
+        $districts = districts::where('province_code', 01)->get();
         $category = CategoryRoom::all();
         return view('frontend.room.edit', compact('category', 'districts', 'room'));
     }

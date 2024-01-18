@@ -20,7 +20,6 @@
                         <form class="row gx-2" action="{{ route('filter_room') }}" method="GET">
                             @csrf
                             <div class="col-lg-12">
-
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <label for="">Huyện, Thành phố</label>
@@ -360,7 +359,7 @@
                                 <span class="col-6">{{ $item->created_at->diffForHumans($current) }}</span>
                                 <span class="col-6">{{ $item->view }} lượt xem</span>
                                 <h3>
-                                    <a href="blog-detail-left-sidebar.html">
+                                    <a href="{{ route('frontend.news.show', $item->slug) }}">
                                         {{ $item->title }}
                                     </a>
                                 </h3>
@@ -429,12 +428,13 @@
 @include('js.getward')
 <script>
     function loadMapScenario() {
+        //map center load location Hà Nội
         var map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
             center: new Microsoft.Maps.Location(21.028511, 105.854444),
             zoom: 15,
             mapTypeId: Microsoft.Maps.MapTypeId.aerial,
         });
-
+        //mảng markersData được tạo ra trên dữ liệu từ biến $room của laravel (đoạn php chỉ chạy khi trang web đã được render ra)
         markersData = [
             @foreach ($rooms as $room)
                 @php
@@ -453,24 +453,26 @@
                     url_point: '{{ route('Room_show', $room->id) }}'
                 },
             @endforeach
-
         ];
+        //tạo các pushpin (điểm đánh dấu) từ mảng dữ liệu phòng trọ markersData 
         var pushpins = Microsoft.Maps.TestDataGenerator.getPushpins(markersData.length, map.getBounds(), {
             icon: 'https://www.bingmapsportal.com/Content/images/poi_custom.png'
         });
-
+        //tạo ra các box khi click vào một điểm đánh dấu
         var infobox = new Microsoft.Maps.Infobox(pushpins[0].getLocation(), {
             visible: false,
             autoAlignment: true
         });
         console.log(markersData);
+        //gán infobox vào bản đồ
         infobox.setMap(map);
+        //vòng lặp qua mỗi pushpin tạo HTML cho infobox dựa trên dữ liệu từ markersData
         for (var i = 0; i < pushpins.length; i++) {
-
             //Store some metadata with the pushpin
             var pushpin = [];
             var htmldata = "";
             if (markersData[i]) {
+                // Tạo HTML cho Infobox dựa trên dữ liệu từ markersData.
                 htmldata = '<div class="infoBox">' +
                     '<div class="marker-detail">' +
                     '<img src="' + markersData[i].map_image_url + '" alt="Image"/>' +
@@ -487,6 +489,7 @@
                     '</div>' +
                     '</div>' +
                     '</div>';
+                // Tạo Pushpin và metadata tương ứng (chi tiết từng pushpin gán với từng infobox)
                 var loc = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(markersData[i].location_latitude,
                     markersData[i].location_longitude));
                 pushpin = loc;
@@ -494,7 +497,9 @@
                     title: "",
                     description: htmldata
                 };
+                // Gán Pushpin vào mảng pushpins.
                 pushpins[i] = loc;
+                // Xử lý sự kiện click cho Pushpin để hiển thị Infobox.
                 Microsoft.Maps.Events.addHandler(pushpin, 'click', function(args) {
                     infobox.setOptions({
                         location: args.target.getLocation(),
@@ -505,11 +510,12 @@
                 });
             }
         }
+        //hiển thị các pushpin trên đối tượng bản đồ (hiển thị trên bản đồ)
         map.entities.push(pushpins);
-
     }
 </script>
 
+{{-- script nhúng bản đồ Bing Maps --}}
 <script
     src='https://www.bing.com/maps/sdk/mapcontrol?key=AhJkSEdXLFcChv2vJNdVpNKbyRg4D9gIJSfhqiO-Zfpn4zTm5Ei9k6h4QoryaLln&amp;callback=loadMapScenario'
     async defer></script>
