@@ -19,24 +19,29 @@ class RoomController extends Controller
         if (isset($category->id)) {
             $request->validate([
                 'name' => 'required|max:255',
-                'quantity' => 'required|numeric',
-                'area' => 'required',
-                'price' => 'required',
+                'quantity' => 'required|numeric|gt:0',
+                'area' => 'required|numeric|gt:0',
+                'price' => 'required|numeric|gt:0',
                 'unit' => 'required',
                 'description' => 'required',
-                'electric' => 'required',
-                'water' => 'required',
+                'electric' => 'required|numeric|gt:0',
+                'water' => 'required|numeric|gt:0',
             ], [
                 'name.required' => 'Vui lòng nhập tên khu trọ.',
                 'name.max' => 'Tên khu trọ không được vượt quá 255 ký tự.',
                 'quantity.required' => 'Vui lòng nhập số lượng phòng cho thuê.',
                 'quantity.numeric' => 'Số lượng phải là một số.',
+                'quantity.gt' => 'Số lượng phải lớn hơn 0.',
                 'area.required' => 'Vui lòng nhập diện tích.',
+                'area.gt' => 'Diện tích phải lớn hơn 0.',
                 'price.required' => 'Vui lòng nhập giá thuê.',
+                'price.gt' => 'Giá phải lớn hơn 0.',
                 'unit.required' => 'Vui lòng chọn thời hạn đóng tiền.',
                 'description.required' => 'Vui lòng nhập mô tả.',
                 'electric.required' => 'Vui lòng nhập giá điện.',
+                'electric.gt' => 'Giá điện phải lớn hơn 0.',
                 'water.required' => 'Vui lòng nhập giá nước.',
+                'water.gt' => 'Giá nước phải lớn hơn 0.',
             ]);
             if ($request->id == null) {
                 $room = Room::create([
