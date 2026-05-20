@@ -23,4 +23,13 @@ class BookingInformation extends Model
     {
         return $this->belongsTo(Room::class, 'rooms_id', 'id');
     }
+
+    /**
+     * Mối quan hệ: Hóa đơn Booking này thuộc về 1 Phòng (Room) cụ thể
+     */
+    public function room()
+    {
+        // Liên kết với model Room thông qua cột 'rooms_id'
+        return $this->belongsTo(Room::class, 'rooms_id');
+    }
 }

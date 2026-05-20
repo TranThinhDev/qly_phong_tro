@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\BookingInformation;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Room;
+use Barryvdh\DomPDF\Facade\Pdf;
 class BookingController extends Controller
 {
     /**
@@ -76,5 +77,20 @@ class BookingController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function exportPdf($id)
+    {
+        // 1. Lấy dữ liệu booking (Eager load thêm thông tin phòng nếu cần)
+        $booking = \App\Models\BookingInformation::with('room')->findOrFail($id);
+
+        // 2. Trỏ tới view HTML vừa tạo và truyền biến dữ liệu vào
+        $pdf = Pdf::loadView('pdf.booking_receipt', compact('booking'));
+
+        // 3. Tùy chọn: Thiết lập khổ giấy A4
+        $pdf->setPaper('a4', 'portrait');
+
+        // 4. Trả về file PDF cho trình duyệt tải xuống
+        return $pdf->download('bien-nhan-dat-phong-' . $booking->id . '.pdf');
     }
 }

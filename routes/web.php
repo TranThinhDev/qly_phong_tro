@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\admin\ManagerRoom;
+use App\Http\Controllers\admin\MenuController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -100,6 +105,7 @@ Route::middleware('blockAccount')->group(function () {
         // Thông báo
         Route::resource('notification', NotificationController::class);
         Route::resource('booking', BookingController::class);
+        Route::get('booking/export-pdf/{id}', 'BookingController@exportPdf')->name('booking.export_pdf');
         // Đổi mật khẩu tài khoản
         Route::get('doi-mat-khau', 'UserController@changePassword')->name('user.change_password');
     });
