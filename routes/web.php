@@ -81,6 +81,12 @@ Route::middleware('blockAccount')->group(function () {
                 Route::get('/', 'ProfileController@index')->name('profile.index');
                 Route::post('doi-mat-khau', 'ProfileController@ChangePassword')->name('profile.doiMatKhau');
             });
+            // Quản lý khiếu nại - hoàn tiền
+            Route::prefix('khieu-nai')->group(function () {
+                Route::get('/', 'DisputeWebController@index')->name('admin.disputes.index');
+                Route::post('{id}/duyet', 'DisputeWebController@approve')->name('admin.disputes.approve');
+                Route::post('{id}/tu-choi', 'DisputeWebController@reject')->name('admin.disputes.reject');
+            });
         });
     });
 
