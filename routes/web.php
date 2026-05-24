@@ -106,6 +106,7 @@ Route::middleware('blockAccount')->group(function () {
         Route::resource('notification', NotificationController::class);
         Route::resource('booking', BookingController::class);
         Route::get('booking/export-pdf/{id}', 'BookingController@exportPdf')->name('booking.export_pdf');
+        Route::post('booking/refund-request', 'BookingController@submitRefundRequest')->name('booking.refund.request');
         // Đổi mật khẩu tài khoản
         Route::get('doi-mat-khau', 'UserController@changePassword')->name('user.change_password');
     });

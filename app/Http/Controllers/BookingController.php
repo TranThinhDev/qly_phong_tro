@@ -215,4 +215,119 @@ class BookingController extends Controller
         // 4. Trả về file PDF cho trình duyệt tải xuống
         return $pdf->download('bien-nhan-dat-phong-' . $booking->id . '.pdf');
     }
+
+    // =========================================================================
+    /**
+     * Xử lý yêu cầu hoàn tiền đặt cọc từ khách hàng (Web Form).
+     *
+     * POST /booking/refund-request
+     * Middleware: auth, verified
+     *
+     * Business rules:
+     *   - Booking phải thuộc về user đang đăng nhập (so khớp email).
+     *   - Trạng thái booking phải là 'paid' và chưa có refund_status.
+     *   - Phải trong vòng 48 giờ kể từ khi tạo booking.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function submitRefundRequest(Request $request)
+    {
+        // ── 1. Validate đầu vào ───────────────────────────────────────────────
+        $validated = $request->validate(
+            [
+                'booking_id'     => ['required', 'integer', 'exists:booking_information,id'],
+                'reason'         => ['required', 'string', 'min:10', 'max:500'],
+                'evidence_image' => ['nullable', 'image', 'max:2048'],   // max 2 MB
+            ],
+            [
+                'booking_id.required'    => 'Thiếu mã đặt phòng.',
+                'booking_id.exists'      => 'Đơn đặt phòng không tồn tại.',
+                'reason.required'        => 'Vui lòng nhập lý do yêu cầu hoàn tiền.',
+                'reason.min'             => 'Lý do phải có ít nhất :min ký tự.',
+                'reason.max'             => 'Lý do không được vượt quá :max ký tự.',
+                'evidence_image.image'   => 'File bằng chứng phải là ảnh (jpg, png, gif, ...).',
+                'evidence_image.max'     => 'Ảnh bằng chứng không được vượt quá 2 MB.',
+            ]
+        );
+
+        try {
+            // ── 2. Lấy booking & kiểm tra quyền sở hữu ───────────────────────
+            //
+            // Dùng email để xác định chủ sở hữu (booking_information hiện lưu
+            // email của người đặt, không có cột user_id riêng).
+            $booking = BookingInformation::findOrFail($validated['booking_id']);
+
+            if ($booking->email !== auth()->user()->email) {
+                return back()
+                    ->with('error', 'Bạn không có quyền thực hiện thao tác này.');
+            }
+
+            // ── 3. Kiểm tra lại điều kiện nghiệp vụ phía Server ──────────────
+
+            // 3a. Trạng thái phải là 'paid'
+            if ($booking->status !== 'paid') {
+                return back()
+                    ->with('error', 'Chỉ có thể yêu cầu hoàn tiền cho đơn đã thanh toán.');
+            }
+
+            // 3b. Chưa có yêu cầu hoàn tiền nào trước đó
+            if (! is_null($booking->refund_status)) {
+                return back()
+                    ->with('error', 'Đơn đặt phòng này đã có yêu cầu hoàn tiền trước đó.');
+            }
+
+            // 3c. Trong vòng 48 giờ kể từ khi tạo booking
+            if ($booking->created_at->diffInHours(now()) >= 48) {
+                return back()
+                    ->with('error', 'Đã quá thời hạn 48 giờ để yêu cầu hoàn tiền.');
+            }
+
+            // ── 4. Xử lý bên trong DB Transaction ────────────────────────────
+            DB::beginTransaction();
+
+                // 4a. Chuẩn bị dữ liệu cập nhật
+                $updateData = [
+                    'refund_status' => 'requested',
+                    'refund_reason' => $validated['reason'],
+                ];
+
+                // 4b. Xử lý upload ảnh bằng chứng (nếu có)
+                if ($request->hasFile('evidence_image')) {
+                    // Lưu vào storage/app/public/disputes/
+                    // Truy cập qua: asset('storage/disputes/filename.jpg')
+                    $imagePath = $request->file('evidence_image')
+                                         ->store('disputes', 'public');
+
+                    $updateData['evidence_image_path'] = $imagePath;
+                }
+
+                // 4c. Cập nhật booking
+                $booking->update($updateData);
+
+            DB::commit();
+
+            // ── 5. Trả về thành công ──────────────────────────────────────────
+            return back()
+                ->with('success', 'Yêu cầu hoàn tiền đã được ghi nhận. Chúng tôi sẽ xem xét và phản hồi sớm nhất.');
+
+        } catch (\Throwable $e) {
+
+            // ── 6. Rollback & log nếu có lỗi bất ngờ ─────────────────────────
+            DB::rollBack();
+
+            Log::error('[BookingController@submitRefundRequest] Lỗi không mong đợi', [
+                'user_id'    => auth()->id(),
+                'user_email' => auth()->user()->email ?? null,
+                'booking_id' => $validated['booking_id'] ?? $request->input('booking_id'),
+                'message'    => $e->getMessage(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
+            return back()
+                ->with('error', 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.')
+                ->withInput();
+        }
+    }
+    // =========================================================================
 }

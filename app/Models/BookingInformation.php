@@ -24,6 +24,7 @@ class BookingInformation extends Model
         'appointment_date',
         'refund_status',
         'refund_reason',
+        'evidence_image_path',   // Đường dẫn ảnh bằng chứng yêu cầu hoàn tiền
         'status',
     ];
 
