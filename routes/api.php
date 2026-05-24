@@ -38,6 +38,15 @@ Route::namespace('App\Http\Controllers\Api')->group(function() {
     Route::post('upload-anh-bai-viet', 'NewsController@upload')->name('news.uploadThumnail');
     Route::post('luu-bai-viet','NewsController@store')->name('news.api.store');
     Route::post('cap-nhat-bai-viet','NewsController@update')->name('news.api.update');
+
+    // ── Tranh chấp & hoàn tiền ────────────────────────────────────────────
+    // Khách hàng: yêu cầu hoàn tiền (status=paid, trong 48h)
+    Route::post('dispute/request-refund', 'DisputeController@requestRefund')
+        ->name('dispute.request-refund');
+
+    // Admin: duyệt yêu cầu hoàn tiền
+    Route::post('dispute/approve-refund', 'DisputeController@approveRefund')
+        ->name('dispute.approve-refund');
 })->middleware('auth:api');
 
 Route::fallback(function(){
