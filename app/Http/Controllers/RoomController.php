@@ -47,10 +47,11 @@ class RoomController extends Controller
      */
     public function show(string $id)
     {
-
+        
         $data = Room::where('id', $id)->first();
+        $room = $data;
         $room_list = Room::where('id', '!=', $id)->where('status', 1)->take(4)->get();
-        return view('frontend.room.show', compact('room_list'))->with('data', $data);
+        return view('frontend.room.show', compact('room_list','room'))->with('data', $data);
     }
 
     /**
@@ -160,7 +161,7 @@ class RoomController extends Controller
         $result = CommentRoom::create([
             'rooms_id' => $id,
             'author_id' => $author_id,
-            'content' => $request->content
+            'content' => $request->input('content')
         ]);
         if ($result) {
             $user_id = Room::where('id', $id)->first()->User->id;

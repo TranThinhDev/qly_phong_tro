@@ -340,6 +340,36 @@
                                         cầu</button>
                                 </div>
                             </div>
+
+                            {{-- ====== BOOKING BLOCK ====== --}}
+                            <div class="advance-card">
+                                <h6>Đặt phòng</h6>
+                                <div class="category-property">
+                                    @if ($room->is_deposit_required)
+                                        {{-- Flow 1: Yêu cầu đặt cọc → thanh toán VNPAY --}}
+                                        <form method="POST" action="{{ route('booking.checkout') }}">
+                                            @csrf
+                                            <input type="hidden" name="room_id" value="{{ $room->id }}">
+                                            <button type="submit"
+                                                class="btn btn-danger btn-block w-100 fw-semibold">
+                                                <i class="fas fa-credit-card me-2"></i>
+                                                Đặt cọc qua VNPAY<br>
+                                                <small>({{ number_format($room->deposit_amount) }} VNĐ)</small>
+                                            </button>
+                                        </form>
+                                    @else
+                                        {{-- Flow 2: Không đặt cọc → đặt lịch hẹn xem phòng --}}
+                                        <button type="button"
+                                            class="btn btn-success btn-block w-100 fw-semibold"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalAppointment">
+                                            <i class="fas fa-calendar-check me-2"></i>
+                                            Đặt lịch hẹn xem phòng
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                            {{-- ====== END BOOKING BLOCK ====== --}}
                         </div>
                     </div>
                 </div>
@@ -364,8 +394,55 @@
             </div>
         </div>
     @endif
-
     <!-- video modal end -->
+
+    {{-- ====== MODAL ĐẶT LỊCH HẸN ====== --}}
+    @if (!$room->is_deposit_required)
+        <div class="modal fade" id="modalAppointment" tabindex="-1" aria-labelledby="modalAppointmentLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalAppointmentLabel">
+                            <i class="fas fa-calendar-alt me-2 text-success"></i>
+                            Đặt lịch hẹn xem phòng
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="{{ route('booking.appointment') }}" id="form_appointment">
+                        @csrf
+                        <input type="hidden" name="room_id" value="{{ $room->id }}">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="appointment_date" class="form-label fw-semibold">
+                                    <i class="fas fa-clock me-1 text-success"></i>
+                                    Chọn ngày &amp; giờ hẹn
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    class="form-control"
+                                    id="appointment_date"
+                                    name="appointment_date"
+                                    required
+                                >
+                                <div class="form-text text-muted">Vui lòng chọn thời gian trong tương lai.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">Huỷ</button>
+                            <button type="submit" class="btn btn-success fw-semibold" id="btn_submit_appointment">
+                                <i class="fas fa-paper-plane me-1"></i>
+                                Xác nhận đặt lịch
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+    {{-- ====== END MODAL ĐẶT LỊCH HẸN ====== --}}
 @endsection
 
 @section('js')
@@ -429,6 +506,49 @@
             return false
         }
     </script>
+
+    {{-- ====== JQUERY: Chặn chọn ngày/giờ trong quá khứ cho modal đặt lịch ====== --}}
+    <script>
+        $(document).ready(function () {
+            // Tính thời gian hiện tại + 1 giờ làm giá trị min mặc định
+            var now = new Date();
+            now.setHours(now.getHours() + 1);
+            var year    = now.getFullYear();
+            var month   = String(now.getMonth() + 1).padStart(2, '0');
+            var day     = String(now.getDate()).padStart(2, '0');
+            var hours   = String(now.getHours()).padStart(2, '0');
+            var minutes = String(now.getMinutes()).padStart(2, '0');
+            var minDateTime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+
+            // Áp min cho input và set giá trị mặc định
+            $('#appointment_date').attr('min', minDateTime).val(minDateTime);
+
+            // Validate khi người dùng thay đổi giá trị
+            $('#appointment_date').on('change', function () {
+                var selectedVal = $(this).val();
+                if (!selectedVal || selectedVal < minDateTime) {
+                    makeToast('Vui lòng chọn thời gian trong tương lai (ít nhất 1 giờ từ bây giờ).', 'orange');
+                    $(this).val(minDateTime);
+                    $('#btn_submit_appointment').prop('disabled', true);
+                } else {
+                    $('#btn_submit_appointment').prop('disabled', false);
+                }
+            });
+
+            // Validate trước khi submit form appointment
+            $('#form_appointment').on('submit', function (e) {
+                var selectedVal = $('#appointment_date').val();
+                var nowCheck = new Date();
+                var selectedDate = new Date(selectedVal);
+                if (!selectedVal || selectedDate <= nowCheck) {
+                    e.preventDefault();
+                    makeToast('Ngày hẹn phải là thời điểm trong tương lai!', 'red');
+                    return false;
+                }
+            });
+        });
+    </script>
+    {{-- ====== END JQUERY DATE VALIDATION ====== --}}
 
 
     <script
