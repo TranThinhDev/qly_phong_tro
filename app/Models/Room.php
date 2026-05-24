@@ -28,7 +28,14 @@ class Room extends Model
         'quantity',
         'add_ons',
         'latlng',
-        'ward_id'
+        'ward_id',
+        'hold_until',
+        'is_deposit_required',
+    ];
+
+    protected $casts = [
+        'hold_until' => 'datetime',
+        'is_deposit_required' => 'boolean',
     ];
     public function CommentRoom()
     {

@@ -11,12 +11,24 @@ class BookingInformation extends Model
     protected $table = "booking_information";
     protected $primaryKey = 'id';
     protected $fillable = [
-      
         'rooms_id',
         'message',
         'email',
         'name',
         'phone',
+        'booking_code',
+        'booking_type',
+        'deposit_amount',
+        'payment_method',
+        'transaction_id',
+        'appointment_date',
+        'refund_status',
+        'refund_reason',
+        'status',
+    ];
+
+    protected $casts = [
+        'appointment_date' => 'datetime',
     ];
 
     public function getRoom()
