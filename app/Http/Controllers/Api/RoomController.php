@@ -26,6 +26,7 @@ class RoomController extends Controller
                 'description' => 'required',
                 'electric' => 'required|numeric|gt:0',
                 'water' => 'required|numeric|gt:0',
+                'deposit_amount' => 'nullable|numeric|min:0',
             ], [
                 'name.required' => 'Vui lòng nhập tên khu trọ.',
                 'name.max' => 'Tên khu trọ không được vượt quá 255 ký tự.',
@@ -42,6 +43,8 @@ class RoomController extends Controller
                 'electric.gt' => 'Giá điện phải lớn hơn 0.',
                 'water.required' => 'Vui lòng nhập giá nước.',
                 'water.gt' => 'Giá nước phải lớn hơn 0.',
+                'deposit_amount.numeric' => 'Số tiền cọc phải là một số.',
+                'deposit_amount.min' => 'Số tiền cọc không được nhỏ hơn 0.',
             ]);
             if ($request->id == null) {
                 $room = Room::create([
@@ -56,6 +59,7 @@ class RoomController extends Controller
                     'electric' => $request->electric,
                     'water' => $request->water,
                     'is_deposit_required' => (bool) $request->is_deposit_required,
+                    'deposit_amount' => $request->is_deposit_required ? $request->deposit_amount : null,
                 ]);
                 return response()->json(['data' => $room]);
             } else {
@@ -71,6 +75,7 @@ class RoomController extends Controller
                     'electric' => $request->electric,
                     'water' => $request->water,
                     'is_deposit_required' => (bool) $request->is_deposit_required,
+                    'deposit_amount' => $request->is_deposit_required ? $request->deposit_amount : null,
                 ]);
                 if ($result) {
                     return response()->json(['data' => "Thành công"]);

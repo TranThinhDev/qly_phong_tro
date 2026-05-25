@@ -31,6 +31,7 @@ class Room extends Model
         'ward_id',
         'hold_until',
         'is_deposit_required',
+        'deposit_amount',
     ];
 
     protected $casts = [

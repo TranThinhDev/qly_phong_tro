@@ -403,6 +403,10 @@
                                                                         Khách hàng phải thanh toán tiền cọc trước khi phòng được giữ chỗ.
                                                                         Phòng sẽ bị khoá trong 15 phút khi khách bắt đầu thanh toán.
                                                                     </small>
+                                                                    <div class="mt-3 collapse show" id="deposit_amount_container">
+                                                                        <label for="deposit_amount" class="form-label" style="font-size: 0.85rem">Mức tiền cọc yêu cầu (VNĐ) <span class="text-danger">*</span></label>
+                                                                        <input type="number" id="deposit_amount" name="deposit_amount" class="form-control form-control-sm" placeholder="VD: 500000" min="0">
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -763,9 +767,11 @@
             if (selected === '1') {
                 $('#card_deposit').addClass('selected');
                 $('#card_appointment').removeClass('selected');
+                $('#deposit_amount_container').collapse('show');
             } else {
                 $('#card_appointment').addClass('selected');
                 $('#card_deposit').removeClass('selected');
+                $('#deposit_amount_container').collapse('hide');
             }
         }
         // Chạy khi trang load để highlight lựa chọn mặc định
@@ -867,7 +873,8 @@
                 electric : $('#electric').val(),
                 water: $('#water').val(),
                 description: description,
-                is_deposit_required: isDepositRequired
+                is_deposit_required: isDepositRequired,
+                deposit_amount: $('#deposit_amount').val()
             }
             $.ajax({
                 type: "post",
