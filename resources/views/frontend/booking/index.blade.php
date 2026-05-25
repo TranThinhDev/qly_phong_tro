@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('style')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         /* ── Table styling ── */
         .booking-table-wrap {
@@ -363,6 +364,7 @@
 @endsection
 
 @section('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
     {{-- Toast các lỗi validation từ server (nếu có) --}}
     @error('reason')
@@ -375,6 +377,32 @@
             makeToast("{{ $message }}", "red");
         </script>
     @enderror
+
+    @if (session('error'))
+        <script>
+            makeToast("{{ session('error') }}", "red");
+        </script>
+    @endif
+
+    {{-- ── Hiển thị kết quả VNPay Sandbox sau khi thanh toán xong ── --}}
+    @if (session('vnpay_success'))
+    <script>
+        $(document).ready(function () {
+            Swal.fire({
+                icon: 'success',
+                title: 'Đặt cọc thành công! 🎉',
+                html: '<div class="text-start">' +
+                      '<p class="mb-1"><i class="fas fa-hashtag text-primary me-1"></i> Mã đơn: <strong>{{ session('vnpay_booking_code') }}</strong></p>' +
+                      '<p class="mb-1"><i class="fas fa-money-bill text-success me-1"></i> Số tiền: <strong>{{ number_format(session('vnpay_amount')) }} VNĐ</strong></p>' +
+                      '<p class="mb-0"><i class="fas fa-university text-info me-1"></i> Ngân hàng: <strong>{{ session('vnpay_bank') }}</strong></p>' +
+                      '</div>',
+                confirmButtonText: 'Hoàn tất',
+                confirmButtonColor: '#198754',
+                allowOutsideClick: false,
+            });
+        });
+    </script>
+    @endif
 
     <script>
         $(document).ready(function () {

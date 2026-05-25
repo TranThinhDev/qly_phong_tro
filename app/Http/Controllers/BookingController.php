@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBookingRequest;
 use App\Models\BookingInformation;
 use App\Models\Room;
+use App\Services\VnpayService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -87,7 +88,7 @@ class BookingController extends Controller
                         'status'       => 'pending',
                         'name'         => auth()->user()->name,
                         'email'        => auth()->user()->email,
-                        'phone'        => auth()->user()->phone ?? null,
+                        'phone'        => auth()->user()->PhoneNumber ?? null,
                     ]);
 
                     // Khoá phòng trong 15 phút (status = 2: đang giữ chỗ)
@@ -137,7 +138,7 @@ class BookingController extends Controller
                     'appointment_date' => $request->appointment_date,
                     'name'             => auth()->user()->name,
                     'email'            => auth()->user()->email,
-                    'phone'            => auth()->user()->phone ?? null,
+                    'phone'            => auth()->user()->PhoneNumber ?? null,
                 ]);
 
                 return response()->json([
@@ -215,21 +216,18 @@ class BookingController extends Controller
     }
 
     /**
-     * Xử lý thanh toán VNPay (tạo link thanh toán và redirect).
+     * Tạo URL thanh toán VNPay Sandbox và redirect user.
      *
      * POST /booking/vnpay-payment
-     * Body: booking_id, room_id
-     *
-     * TODO: Tích hợp VNPay SDK thật và thay thế redirect giả lập bên dưới.
+     * Body: booking_id
      */
     public function createVnpayPayment(Request $request)
     {
         $request->validate([
             'booking_id' => ['required', 'integer', 'exists:booking_information,id'],
-            'room_id'    => ['required', 'integer', 'exists:rooms,id'],
         ]);
 
-        $booking = BookingInformation::findOrFail($request->booking_id);
+        $booking = BookingInformation::with('room')->findOrFail($request->booking_id);
 
         // Authorization: chỉ người đặt mới được thanh toán
         if ($booking->email !== auth()->user()->email) {
@@ -240,23 +238,33 @@ class BookingController extends Controller
             return back()->with('error', 'Đơn đặt phòng này không ở trạng thái chờ thanh toán.');
         }
 
-        /*
-         * ── TODO: Tích hợp VNPay thật ──────────────────────────────────────────
-         * Sau khi cài package vnpay (hoặc tự cài VNPay SDK), thay đoạn dưới bằng:
-         *
-         *   $vnpayUrl = VnpayHelper::createPaymentUrl([
-         *       'amount'     => $booking->room->deposit_amount,
-         *       'order_id'   => $booking->booking_code,
-         *       'order_info' => 'Dat coc phong ' . $booking->room->name,
-         *       'return_url' => route('vnpay.return'),
-         *   ]);
-         *   return redirect($vnpayUrl);
-         *
-         * ───────────────────────────────────────────────────────────────────────
-         */
+        // Kiểm tra thời gian giữ chỗ còn hiệu lực
+        $room = $booking->room;
+        if ($room->hold_until && $room->hold_until->lt(now())) {
+            $room->update(['status' => 1, 'hold_until' => null]);
+            $booking->update(['status' => 'cancelled']);
+            return back()->with('error', 'Phần giữ chỗ đã hết hạn. Vui lòng thực hiện đặt phòng lại.');
+        }
 
-        // Giả lập: redirect đến trang fake payment
-        return redirect()->route('booking.payment.fake', ['booking_code' => $booking->booking_code]);
+        // Tạo URL thanh toán VNPay
+        $vnpay      = new VnpayService();
+        $amount     = (int) ($room->deposit_amount ?? 0);
+        $orderInfo  = 'Dat coc phong ' . preg_replace('/[^a-zA-Z0-9 ]/', '', $room->name ?? '');
+        $ipAddr     = $request->ip();
+
+        $paymentUrl = $vnpay->createPaymentUrl(
+            $booking->booking_code,
+            $amount,
+            $orderInfo,
+            $ipAddr
+        );
+
+        Log::info('[BookingController] Redirecting to VNPay Sandbox', [
+            'booking_code' => $booking->booking_code,
+            'amount'       => $amount,
+        ]);
+
+        return redirect($paymentUrl);
     }
 
     /**
@@ -277,6 +285,96 @@ class BookingController extends Controller
             : 0;
 
         return view('frontend.booking.checkout', compact('booking', 'room', 'timeLeftInSeconds'));
+    }
+
+    /**
+     * Xử lý callback từ VNPay sau khi thanh toán (Return URL).
+     *
+     * GET /vnpay-return
+     * (Không cần auth — VNPay redirect thẳng vào URL này)
+     */
+    public function vnpayReturn(Request $request)
+    {
+        $vnpData = $request->all();
+        $vnpay   = new VnpayService();
+
+        // ── 1. Xác thực chữ ký (bảo vệ chống giả mạo) ─────────────────────────
+        if (! $vnpay->verifySignature($vnpData)) {
+            Log::warning('[VNPay Return] Chữ ký không hợp lệ', ['data' => $vnpData]);
+            return redirect()->route('home')
+                ->with('error', 'Chữ ký thanh toán không hợp lệ. Vui lòng liên hệ hỗ trợ.');
+        }
+
+        $bookingCode = $vnpData['vnp_TxnRef'] ?? '';
+        $responseCode = $vnpData['vnp_ResponseCode'] ?? '';
+        $transactionId = $vnpData['vnp_TransactionNo'] ?? '';
+        $bankCode      = $vnpData['vnp_BankCode'] ?? '';
+        $amount        = isset($vnpData['vnp_Amount']) ? (int)($vnpData['vnp_Amount'] / 100) : 0;
+
+        // ── 2. Tìm booking tương ứng ───────────────────────────────────────────
+        $booking = BookingInformation::with('room')
+            ->where('booking_code', $bookingCode)
+            ->first();
+
+        if (! $booking) {
+            Log::error('[VNPay Return] Không tìm thấy booking', ['booking_code' => $bookingCode]);
+            return redirect()->route('home')
+                ->with('error', 'Không tìm thấy đơn đặt phòng tương ứng.');
+        }
+
+        // ── 3. Xử lý kết quả thanh toán ───────────────────────────────────────
+        if ($vnpay->isSuccess($vnpData)) {
+
+            // Chỉ cập nhật nếu chưa được xử lý trước (chống IPN replay)
+            if ($booking->status === 'pending') {
+                DB::transaction(function () use ($booking, $transactionId, $bankCode, $amount) {
+                    // 3a. Cập nhật booking → paid
+                    $booking->update([
+                        'status'         => 'paid',
+                        'payment_method' => 'vnpay',
+                        'transaction_id' => $transactionId,
+                        'deposit_amount' => $amount,
+                    ]);
+
+                    // 3b. Cập nhật phòng → đã bán / có người ở (status = 3)
+                    //     Và xóa thời gian giữ chỗ
+                    if ($booking->room) {
+                        $booking->room->update([
+                            'status'     => 3,        // 3 = đã có người cọc / đã bọn
+                            'hold_until' => null,
+                        ]);
+                    }
+                });
+            }
+
+            Log::info('[VNPay Return] Thanh toán thành công', [
+                'booking_code'  => $bookingCode,
+                'transaction_id' => $transactionId,
+                'amount'        => $amount,
+                'bank'          => $bankCode,
+            ]);
+
+            return redirect()->route('booking.index')
+                ->with('vnpay_success', true)
+                ->with('vnpay_booking_code', $bookingCode)
+                ->with('vnpay_amount', $amount)
+                ->with('vnpay_bank', $bankCode);
+
+        } else {
+            // Thanh toán thất bại / bị huỷ → trả phòng về trống
+            if ($booking->status === 'pending' && $booking->room) {
+                $booking->room->update(['status' => 1, 'hold_until' => null]);
+            }
+            $booking->update(['status' => 'cancelled']);
+
+            Log::warning('[VNPay Return] Thanh toán thất bại', [
+                'booking_code'  => $bookingCode,
+                'response_code' => $responseCode,
+            ]);
+
+            return redirect()->route('Room_show', $booking->rooms_id)
+                ->with('error', 'Thanh toán không thành công (mã lỗi: ' . $responseCode . '). Phòng đã được trả lại.');
+        }
     }
 
     /**

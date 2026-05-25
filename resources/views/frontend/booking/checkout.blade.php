@@ -131,7 +131,6 @@
                         <div class="card-footer bg-transparent p-4 pt-0">
                             <form method="POST" action="{{ route('vnpay.payment') }}" id="form-checkout">
                                 @csrf
-                                <input type="hidden" name="room_id" value="{{ $room->id ?? '' }}">
                                 <input type="hidden" name="booking_id" value="{{ $booking->id ?? '' }}">
 
                                 <button type="submit"

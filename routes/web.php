@@ -149,3 +149,6 @@ Route::middleware('blockAccount')->group(function () {
 Route::get('khoa-tai-khoan', function () {
     return view('errors.block');
 })->name('error.block');
+
+// VNPay Return URL — không cần auth (VNPay redirect trực tiếp)
+Route::get('vnpay-return', [BookingController::class, 'vnpayReturn'])->name('vnpay.return');
