@@ -69,6 +69,13 @@
                     </ul>
                 </li>
                 <li class="sidebar-item">
+                    <a href="{{ route('admin.disputes.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'admin.disputes.index') ? 'active' : '' }}">
+                        <i data-feather="alert-triangle"></i>
+                        <span>Khiếu nại & Hoàn tiền</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a href="javascript:void(0)"
                         class="sidebar-link {{ ($currentRoute == 'categorynew.index' || $currentRoute == 'news.index') ? 'active' : '' }}">
                         <i data-feather="inbox"></i>

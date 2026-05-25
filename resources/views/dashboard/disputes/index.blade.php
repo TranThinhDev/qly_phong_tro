@@ -268,14 +268,7 @@
                                             </td>
 
                                         </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="9" class="text-center py-5 text-muted">
-                                                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                                Chưa có yêu cầu hoàn tiền nào.
-                                            </td>
-                                        </tr>
-                                    @endforelse
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
