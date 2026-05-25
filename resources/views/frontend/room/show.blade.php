@@ -346,11 +346,12 @@
                                 <h6>Đặt phòng</h6>
                                 <div class="category-property">
                                     @if ($room->is_deposit_required)
-                                        {{-- Flow 1: Yêu cầu đặt cọc → thanh toán VNPAY --}}
-                                        <form method="POST" action="{{ route('booking.checkout') }}">
+                                        {{-- Flow 1: Yêu cầu đặt cọc → thanh toán VNPAY (AJAX) --}}
+                                        <form id="booking-form-deposit">
                                             @csrf
                                             <input type="hidden" name="room_id" value="{{ $room->id }}">
                                             <button type="submit"
+                                                id="btn-deposit-submit"
                                                 class="btn btn-danger btn-block w-100 fw-semibold">
                                                 <i class="fas fa-credit-card me-2"></i>
                                                 Đặt cọc qua VNPAY<br>
@@ -410,7 +411,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <form method="POST" action="{{ route('booking.store') }}" id="form_appointment">
+                    <form id="form_appointment">
                         @csrf
                         <input type="hidden" name="room_id" value="{{ $room->id }}">
                         <div class="modal-body">
@@ -535,20 +536,88 @@
                 }
             });
 
-            // Validate trước khi submit form appointment
+            // Validate và submit AJAX cho form appointment
             $('#form_appointment').on('submit', function (e) {
+                e.preventDefault();
+
                 var selectedVal = $('#appointment_date').val();
                 var nowCheck = new Date();
                 var selectedDate = new Date(selectedVal);
                 if (!selectedVal || selectedDate <= nowCheck) {
-                    e.preventDefault();
                     makeToast('Ngày hẹn phải là thời điểm trong tương lai!', 'red');
                     return false;
                 }
+
+                var $btn = $('#btn_submit_appointment');
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Đang gửi...');
+
+                $.ajax({
+                    url: '{{ route('booking.store') }}',
+                    method: 'POST',
+                    data: {
+                        _token: $('input[name=_token]', '#form_appointment').val(),
+                        room_id: $('input[name=room_id]', '#form_appointment').val(),
+                        appointment_date: selectedVal,
+                    },
+                    success: function (response) {
+                        $('#modalAppointment').modal('hide');
+                        makeToast(response.message || 'Đặt lịch hẹn thành công!', 'green');
+                    },
+                    error: function (xhr) {
+                        var msg = 'Có lỗi xảy ra, vui lòng thử lại.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        makeToast(msg, 'red');
+                    },
+                    complete: function () {
+                        $btn.prop('disabled', false).html('<i class="fas fa-paper-plane me-1"></i> Xác nhận đặt lịch');
+                    }
+                });
             });
         });
     </script>
     {{-- ====== END JQUERY DATE VALIDATION ====== --}}
+
+    {{-- ====== AJAX: Form đặt cọc (Deposit Flow) ====== --}}
+    @if ($room->is_deposit_required)
+    <script>
+        $(document).ready(function () {
+            $('#booking-form-deposit').on('submit', function (e) {
+                e.preventDefault();
+
+                var $btn = $('#btn-deposit-submit');
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Đang xử lý...');
+
+                $.ajax({
+                    url: '{{ route('booking.store') }}',
+                    method: 'POST',
+                    data: {
+                        _token: $('input[name=_token]', '#booking-form-deposit').val(),
+                        room_id: $('input[name=room_id]', '#booking-form-deposit').val(),
+                    },
+                    success: function (response) {
+                        if (response.success && response.payment_url) {
+                            window.location.href = response.payment_url;
+                        } else {
+                            makeToast(response.message || 'Không thể tạo liên kết thanh toán.', 'orange');
+                            $btn.prop('disabled', false).html('<i class="fas fa-credit-card me-2"></i> Đặt cọc qua VNPAY<br><small>({{ number_format($room->deposit_amount) }} VNĐ)</small>');
+                        }
+                    },
+                    error: function (xhr) {
+                        var msg = 'Có lỗi xảy ra, vui lòng thử lại.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        makeToast(msg, 'red');
+                        $btn.prop('disabled', false).html('<i class="fas fa-credit-card me-2"></i> Đặt cọc qua VNPAY<br><small>({{ number_format($room->deposit_amount) }} VNĐ)</small>');
+                    }
+                });
+            });
+        });
+    </script>
+    @endif
+    {{-- ====== END AJAX: Form đặt cọc ====== --}}
 
 
     <script

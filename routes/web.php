@@ -110,9 +110,20 @@ Route::middleware('blockAccount')->group(function () {
 
         // Thông báo
         Route::resource('notification', NotificationController::class);
-        Route::resource('booking', BookingController::class);
+        // ── Booking: custom routes phải đặt TRƯỚC Route::resource để tránh conflict ──
+        // booking.store được tạo tự động bởi Route::resource (POST /booking)
+        // Trang xác nhận đặt cọc (checkout summary + countdown timer)
+        Route::get('booking/checkout/{booking_code}', 'BookingController@checkout')->name('booking.checkout');
+        // Xử lý thanh toán VNPay (POST từ form tại trang checkout)
+        Route::post('booking/vnpay-payment', 'BookingController@createVnpayPayment')->name('vnpay.payment');
+        // Trang thanh toán giả lập (dùng khi chưa tích hợp VNPay thật)
+        Route::get('booking/payment-fake/{booking_code}', 'BookingController@fakePayment')->name('booking.payment.fake');
+        // Export PDF biên nhận
         Route::get('booking/export-pdf/{id}', 'BookingController@exportPdf')->name('booking.export_pdf');
+        // Yêu cầu hoàn tiền
         Route::post('booking/refund-request', 'BookingController@submitRefundRequest')->name('booking.refund.request');
+        // ── Route::resource tạo các CRUD routes còn lại (index, create, store, show, edit, update, destroy)
+        Route::resource('booking', BookingController::class);
         // Đổi mật khẩu tài khoản
         Route::get('doi-mat-khau', 'UserController@changePassword')->name('user.change_password');
     });

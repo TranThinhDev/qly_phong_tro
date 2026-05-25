@@ -193,6 +193,93 @@ class BookingController extends Controller
     }
 
     /**
+     * Hiển thị trang xác nhận đặt cọc (checkout summary + countdown timer).
+     *
+     * GET /booking/checkout/{booking_code}
+     */
+    public function checkout(string $booking_code)
+    {
+        $booking = BookingInformation::where('booking_code', $booking_code)
+            ->where('email', auth()->user()->email)
+            ->where('status', 'pending')
+            ->with('room')
+            ->firstOrFail();
+
+        $room = $booking->room;
+
+        // Tính số giây còn lại trong thời gian giữ chỗ
+        $holdUntil = $room->hold_until;
+        $timeLeftInSeconds = $holdUntil ? max(0, now()->diffInSeconds($holdUntil, false)) : 0;
+
+        return view('frontend.booking.checkout', compact('booking', 'room', 'timeLeftInSeconds'));
+    }
+
+    /**
+     * Xử lý thanh toán VNPay (tạo link thanh toán và redirect).
+     *
+     * POST /booking/vnpay-payment
+     * Body: booking_id, room_id
+     *
+     * TODO: Tích hợp VNPay SDK thật và thay thế redirect giả lập bên dưới.
+     */
+    public function createVnpayPayment(Request $request)
+    {
+        $request->validate([
+            'booking_id' => ['required', 'integer', 'exists:booking_information,id'],
+            'room_id'    => ['required', 'integer', 'exists:rooms,id'],
+        ]);
+
+        $booking = BookingInformation::findOrFail($request->booking_id);
+
+        // Authorization: chỉ người đặt mới được thanh toán
+        if ($booking->email !== auth()->user()->email) {
+            abort(403, 'Bạn không có quyền thực hiện thanh toán này.');
+        }
+
+        if ($booking->status !== 'pending') {
+            return back()->with('error', 'Đơn đặt phòng này không ở trạng thái chờ thanh toán.');
+        }
+
+        /*
+         * ── TODO: Tích hợp VNPay thật ──────────────────────────────────────────
+         * Sau khi cài package vnpay (hoặc tự cài VNPay SDK), thay đoạn dưới bằng:
+         *
+         *   $vnpayUrl = VnpayHelper::createPaymentUrl([
+         *       'amount'     => $booking->room->deposit_amount,
+         *       'order_id'   => $booking->booking_code,
+         *       'order_info' => 'Dat coc phong ' . $booking->room->name,
+         *       'return_url' => route('vnpay.return'),
+         *   ]);
+         *   return redirect($vnpayUrl);
+         *
+         * ───────────────────────────────────────────────────────────────────────
+         */
+
+        // Giả lập: redirect đến trang fake payment
+        return redirect()->route('booking.payment.fake', ['booking_code' => $booking->booking_code]);
+    }
+
+    /**
+     * Trang thanh toán giả lập (chỉ dùng khi chưa tích hợp VNPay thật).
+     *
+     * GET /booking/payment-fake/{booking_code}
+     */
+    public function fakePayment(string $booking_code)
+    {
+        $booking = BookingInformation::where('booking_code', $booking_code)
+            ->where('email', auth()->user()->email)
+            ->with('room')
+            ->firstOrFail();
+
+        $room = $booking->room;
+        $timeLeftInSeconds = $room->hold_until
+            ? max(0, now()->diffInSeconds($room->hold_until, false))
+            : 0;
+
+        return view('frontend.booking.checkout', compact('booking', 'room', 'timeLeftInSeconds'));
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
