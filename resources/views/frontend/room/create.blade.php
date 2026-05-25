@@ -236,6 +236,17 @@
         .layout-maps .leaflet-container::before {
             display: none;
         }
+
+        /* ── Booking Option Card ── */
+        .booking-option-card {
+            border-color: #dee2e6 !important;
+            background-color: #fff;
+        }
+        .booking-option-card.selected {
+            border-color: var(--theme-default2, #4776e6) !important;
+            background-color: #f0f4ff;
+            box-shadow: 0 0 0 3px rgba(71, 118, 230, 0.15);
+        }
     </style>
 @endsection
 @section('content')
@@ -367,6 +378,61 @@
                                             <label>Mô tả phòng</label>
                                             <textarea class="form-control" id="description" rows="4"></textarea>
                                         </div>
+
+                                        {{-- ====== HÌNH THỨC ĐẶT PHÒNG ====== --}}
+                                        <div class="form-group col-sm-12">
+                                            <label class="d-block mb-2 fw-semibold">Hình thức đặt phòng <span class="text-danger">*</span></label>
+                                            <p class="text-muted mb-3" style="font-size:0.88rem">
+                                                Chọn hình thức khách hàng có thể sử dụng khi muốn đặt phòng của bạn.
+                                            </p>
+                                            <div class="row gx-3">
+                                                {{-- Lựa chọn 1: Đặt cọc --}}
+                                                <div class="col-md-6">
+                                                    <label for="booking_deposit" class="d-block" style="cursor:pointer">
+                                                        <div class="booking-option-card p-3 rounded border" id="card_deposit" style="border-width:2px!important; transition:all 0.25s;">
+                                                            <div class="d-flex align-items-center gap-3">
+                                                                <input class="form-check-input mt-0 flex-shrink-0" type="radio"
+                                                                    name="booking_mode" id="booking_deposit"
+                                                                    value="1" checked>
+                                                                <div>
+                                                                    <div class="fw-bold">
+                                                                        <i class="fas fa-hand-holding-usd me-1 text-primary"></i>
+                                                                        Yêu cầu đặt cọc giữ chỗ
+                                                                    </div>
+                                                                    <small class="text-muted">
+                                                                        Khách hàng phải thanh toán tiền cọc trước khi phòng được giữ chỗ.
+                                                                        Phòng sẽ bị khoá trong 15 phút khi khách bắt đầu thanh toán.
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                                {{-- Lựa chọn 2: Hẹn xem --}}
+                                                <div class="col-md-6">
+                                                    <label for="booking_appointment" class="d-block" style="cursor:pointer">
+                                                        <div class="booking-option-card p-3 rounded border" id="card_appointment" style="border-width:2px!important; transition:all 0.25s;">
+                                                            <div class="d-flex align-items-center gap-3">
+                                                                <input class="form-check-input mt-0 flex-shrink-0" type="radio"
+                                                                    name="booking_mode" id="booking_appointment"
+                                                                    value="0">
+                                                                <div>
+                                                                    <div class="fw-bold">
+                                                                        <i class="fas fa-calendar-check me-1 text-success"></i>
+                                                                        Chỉ hẹn xem phòng
+                                                                    </div>
+                                                                    <small class="text-muted">
+                                                                        Khách hàng đặt lịch hẹn xem phòng trực tiếp, không cần thanh toán cọc.
+                                                                        Bạn sẽ xác nhận hoặc từ chối lịch hẹn.
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {{-- ====== END HÌNH THỨC ĐẶT PHÒNG ====== --}}
                                     </form>
                                     <div class="next-btn text-end">
                                         <button type="button" id="complete_1"
@@ -690,6 +756,25 @@
     <!-- property wizard js -->
     <script src="{{ asset('assets/js/property-wizard.js') }}"></script>
 
+    {{-- Highlight booking option card khi chọn --}}
+    <script>
+        function updateBookingCards() {
+            var selected = $('input[name="booking_mode"]:checked').val();
+            if (selected === '1') {
+                $('#card_deposit').addClass('selected');
+                $('#card_appointment').removeClass('selected');
+            } else {
+                $('#card_appointment').addClass('selected');
+                $('#card_deposit').removeClass('selected');
+            }
+        }
+        // Chạy khi trang load để highlight lựa chọn mặc định
+        $(document).ready(function () {
+            updateBookingCards();
+            $('input[name="booking_mode"]').on('change', updateBookingCards);
+        });
+    </script>
+
 
     {{-- Lưu thông tin --}}
     <script>
@@ -769,6 +854,7 @@
         var id = null;
         $('#complete_1').on('click', function(ev) {
             var description = CKEDITOR.instances['description'].getData();
+            var isDepositRequired = $('input[name="booking_mode"]:checked').val();
             var data = {
                 id: id,
                 user_id : {{ $user = auth()->user()->id }},
@@ -780,7 +866,8 @@
                 unit : $('#unit_room').html(),
                 electric : $('#electric').val(),
                 water: $('#water').val(),
-                description: description
+                description: description,
+                is_deposit_required: isDepositRequired
             }
             $.ajax({
                 type: "post",

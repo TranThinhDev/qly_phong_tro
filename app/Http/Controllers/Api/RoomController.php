@@ -55,7 +55,7 @@ class RoomController extends Controller
                     'quantity' => $request->quantity,
                     'electric' => $request->electric,
                     'water' => $request->water,
-
+                    'is_deposit_required' => (bool) $request->is_deposit_required,
                 ]);
                 return response()->json(['data' => $room]);
             } else {
@@ -70,7 +70,7 @@ class RoomController extends Controller
                     'quantity' => $request->quantity,
                     'electric' => $request->electric,
                     'water' => $request->water,
-
+                    'is_deposit_required' => (bool) $request->is_deposit_required,
                 ]);
                 if ($result) {
                     return response()->json(['data' => "Thành công"]);
