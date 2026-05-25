@@ -232,6 +232,12 @@
                                                                 class="btn btn-dashed btn-pill color-1">Xóa</a>
                                                             <a type="button" href="{{ route('Room.edit', $item->id) }}"
                                                                 class="btn btn-dashed btn-pill color-2">Sửa</a>
+                                                            <a type="button" href="{{ route('booking.show', $item->id) }}"
+                                                                class="btn btn-dashed btn-pill color-3"
+                                                                title="Xem danh sách người đặt cọc và hẹn xem phòng"
+                                                                data-bs-toggle="tooltip">
+                                                                <i class="fas fa-calendar-alt me-1"></i> Xem lịch đặt
+                                                            </a>
                                                         </div>
                                                     @endif
                                                 </div>
