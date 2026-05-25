@@ -410,7 +410,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <form method="POST" action="{{ route('booking.appointment') }}" id="form_appointment">
+                    <form method="POST" action="{{ route('booking.store') }}" id="form_appointment">
                         @csrf
                         <input type="hidden" name="room_id" value="{{ $room->id }}">
                         <div class="modal-body">
