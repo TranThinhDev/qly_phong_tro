@@ -17,19 +17,18 @@ class BookingController extends Controller
 {
     /**
      * Display a listing of the resource.
+     *
+     * Hiển thị danh sách đơn đặt phòng của khách hàng đang đăng nhập.
+     * Dùng email làm định danh vì booking_information không có cột user_id.
      */
     public function index()
     {
-        $user = Auth::user();
-        $Rooms = Room::where('chutro_id', $user->id)->get();
-        $BookingList =  array();
-        foreach ($Rooms as $key => $value) {
-            foreach ($value->getBooking as $item) {
-                array_push($BookingList,$item);
-            }
-        }
-    
-        return view('frontend.booking.show', compact('BookingList'));
+        $bookings = BookingInformation::with('room')
+            ->where('email', Auth::user()->email)
+            ->latest()
+            ->paginate(10);
+
+        return view('frontend.booking.index', compact('bookings'));
     }
 
     /**
@@ -206,13 +205,24 @@ class BookingController extends Controller
         // 1. Lấy dữ liệu booking (Eager load thêm thông tin phòng nếu cần)
         $booking = \App\Models\BookingInformation::with('room')->findOrFail($id);
 
-        // 2. Trỏ tới view HTML vừa tạo và truyền biến dữ liệu vào
+        // 2. Authorization — chống IDOR
+        //    Dự án dùng email làm định danh sở hữu (booking_information không có user_id).
+        //    Admin (role = 1) được phép download mọi booking để hỗ trợ khách hàng.
+        $currentUser = auth()->user();
+        $isOwner     = $booking->email === $currentUser->email;
+        $isAdmin     = $currentUser->isAdmin();
+
+        if (! $isOwner && ! $isAdmin) {
+            abort(403, 'Bạn không có quyền tải biên nhận của đơn đặt phòng này.');
+        }
+
+        // 3. Trỏ tới view HTML và truyền biến dữ liệu vào
         $pdf = Pdf::loadView('pdf.booking_receipt', compact('booking'));
 
-        // 3. Tùy chọn: Thiết lập khổ giấy A4
+        // 4. Thiết lập khổ giấy A4
         $pdf->setPaper('a4', 'portrait');
 
-        // 4. Trả về file PDF cho trình duyệt tải xuống
+        // 5. Trả về file PDF cho trình duyệt tải xuống
         return $pdf->download('bien-nhan-dat-phong-' . $booking->id . '.pdf');
     }
 

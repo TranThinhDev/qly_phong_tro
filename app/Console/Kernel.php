@@ -13,7 +13,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('app:release-expired-holds')->everyMinute();
+        $schedule->command('app:release-expired-holds')
+                 ->everyMinute()
+                 ->withoutOverlapping(); // Ngăn 2 process chạy song song nếu lần trước chưa xong
     }
 
     /**

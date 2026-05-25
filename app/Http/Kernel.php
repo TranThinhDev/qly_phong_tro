@@ -63,9 +63,11 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'checkAdmin' => Middleware\checkAdmin::class,
-        'checkFormInformation' => Middleware\checkFormInformation::class,
-        'CheckHost' => Middleware\CheckHost::class,
-        'blockAccount' => Middleware\blockAccount::class,
+        'checkAdmin'          => Middleware\checkAdmin::class,
+        'checkFormInformation'=> Middleware\checkFormInformation::class,
+        'CheckHost'           => Middleware\CheckHost::class,
+        'blockAccount'        => Middleware\blockAccount::class,
+        // API-safe admin guard — trả về JSON 403 thay vì redirect
+        'admin.api'           => Middleware\EnsureApiAdmin::class,
     ];
 }

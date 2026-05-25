@@ -180,10 +180,40 @@
                 return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
             }
 
-            // Render ngay lập tức (tránh giật hình khi setTimeout chưa chạy)
+            // ── 3. Guard: xử lý trường hợp trang được render sau khi hết giờ ─────
+            // Kịch bản: user mở tab → bỏ đó 15 phút → quay lại (server đã hết hold)
+            // hoặc cronjob đã nhả phòng trước khi user load trang checkout.
+            if (timeLeft <= 0) {
+                // a) Hiển thị 00:00 và badge đỏ ngay lập tức
+                $display.text('00:00');
+                $badge.addClass('danger');
+
+                // b) Disable nút thanh toán — không cho submit form
+                $btnPay.prop('disabled', true);
+
+                // c) Hiển thị thông báo hết giờ ngay khi trang load xong
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Đã hết thời gian giữ phòng',
+                    text: 'Phiên giữ chỗ đã hết hạn. Vui lòng quay lại và thực hiện đặt phòng lại từ đầu.',
+                    confirmButtonText: 'Về trang chủ',
+                    confirmButtonColor: '#2c7be5',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('home') }}";
+                    }
+                });
+
+                // d) Dừng sớm — không khởi động timer
+                return;
+            }
+
+            // ── 4. Render giá trị ban đầu ngay lập tức (tránh giật khi setInterval chưa tick)
             $display.text(formatTime(timeLeft));
 
-            // ── 3. setInterval đếm ngược mỗi giây ────────────────────────────────
+            // ── 5. setInterval đếm ngược mỗi giây ────────────────────────────────
             var timer = setInterval(function () {
 
                 timeLeft--;
@@ -196,7 +226,7 @@
                     $badge.addClass('danger');
                 }
 
-                // ── 4. Xử lý khi đếm về 0 ───────────────────────────────────────
+                // ── 6. Xử lý khi đếm về 0 ───────────────────────────────────────
                 if (timeLeft <= 0) {
 
                     // a) Dừng timer
@@ -230,3 +260,4 @@
         });
     </script>
 @endsection
+

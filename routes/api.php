@@ -44,10 +44,21 @@ Route::namespace('App\Http\Controllers\Api')->group(function() {
     Route::post('dispute/request-refund', 'DisputeController@requestRefund')
         ->name('dispute.request-refund');
 
-    // Admin: duyệt yêu cầu hoàn tiền
-    Route::post('dispute/approve-refund', 'DisputeController@approveRefund')
-        ->name('dispute.approve-refund');
 })->middleware('auth:api');
+
+// ── Route dành riêng cho Admin ────────────────────────────────────────────────
+// Middleware: auth:api (xác thực token) → admin.api (kiểm tra role, trả JSON 403)
+// Tách thành group riêng để không ảnh hưởng các route khách hàng phía trên.
+Route::namespace('App\Http\Controllers\Api')
+    ->middleware(['auth:api', 'admin.api'])
+    ->prefix('admin')
+    ->group(function () {
+
+        // Duyệt yêu cầu hoàn tiền: huỷ booking + giải phóng phòng
+        Route::post('dispute/approve-refund', 'DisputeController@approveRefund')
+            ->name('dispute.approve-refund');
+
+    });
 
 Route::fallback(function(){
     return response()->json([

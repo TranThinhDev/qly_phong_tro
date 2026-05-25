@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\BookingInformation;
+use App\Models\Room;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -100,7 +101,7 @@ class DisputeController extends Controller
     /**
      * Admin duyệt yêu cầu hoàn tiền: hủy booking và giải phóng phòng.
      *
-     * POST /api/dispute/approve-refund
+     * POST /api/admin/dispute/approve-refund
      * Body: { booking_id }
      * Middleware: auth:api + role:admin
      */
@@ -115,49 +116,92 @@ class DisputeController extends Controller
         ]);
 
         try {
-            // ── 2. Lấy booking & kiểm tra trạng thái yêu cầu hoàn tiền ─────
-            $booking = BookingInformation::with('room')->findOrFail($validated['booking_id']);
-
-            if ($booking->refund_status !== 'requested') {
+            // ── 2. Kiểm tra sơ bộ trước khi vào transaction ─────────────────
+            // (Optimistic pre-check — giảm tải transaction, không phải guard chính)
+            $preCheck = BookingInformation::findOrFail($validated['booking_id']);
+            if ($preCheck->refund_status !== 'requested') {
                 return response()->json([
                     'success' => false,
                     'message' => 'Booking này không có yêu cầu hoàn tiền đang chờ xử lý.',
-                    'data'    => ['refund_status' => $booking->refund_status],
+                    'data'    => ['refund_status' => $preCheck->refund_status],
                 ], 422);
             }
 
-            // ── 3. DB Transaction: cập nhật booking + giải phóng phòng ──────
-            DB::transaction(function () use ($booking) {
+            // ── 3. DB Transaction với pessimistic locking ────────────────────
+            $result = DB::transaction(function () use ($validated): array {
 
-                // 3a. Duyệt hoàn tiền và hủy booking
+                // 3a. Re-fetch booking với lock — serialise với các request đồng thời
+                // (ví dụ: 2 admin cùng approve 1 booking, hoặc customer gửi lại request)
+                $booking = BookingInformation::lockForUpdate()
+                    ->findOrFail($validated['booking_id']);
+
+                // 3b. Re-check idempotent sau khi có lock
+                // Nếu request khác vừa approve xong, refund_status sẽ không còn là 'requested'
+                if ($booking->refund_status !== 'requested') {
+                    throw new \RuntimeException(
+                        'Yêu cầu hoàn tiền này đã được xử lý trước đó (refund_status: ' . $booking->refund_status . ').'
+                    );
+                }
+
+                // 3c. Cập nhật booking: duyệt hoàn tiền và huỷ đơn
                 $booking->update([
                     'refund_status' => 'refunded',
                     'status'        => 'cancelled',
                 ]);
 
-                // 3b. Giải phóng phòng liên quan về trạng thái trống
-                if ($booking->room) {
-                    $booking->room->update([
-                        'status'     => 1,        // 1 = Phòng trống
-                        'hold_until' => null,
-                    ]);
+                // 3d. Giải phóng phòng — với validation trạng thái chặt chẽ
+                if ($booking->rooms_id) {
+                    // Re-fetch room với lock, không dùng eager-load cũ (có thể stale)
+                    $room = Room::lockForUpdate()->find($booking->rooms_id);
+
+                    if ($room) {
+                        // Guard: chỉ nhả phòng khi đang ở trạng thái 'Đã đặt' (Booked = 3)
+                        // Nếu status != 3, phòng có thể đã được xử lý bởi luồng khác
+                        // hoặc đang ở trạng thái không liên quan → KHÔNG nhả để tránh data corruption
+                        if ($room->status !== 3) {
+                            throw new \RuntimeException(
+                                'Phòng này hiện không ở trạng thái Đã đặt (Booked). ' .
+                                'Status hiện tại: ' . $room->status . '. Không thể giải phóng.'
+                            );
+                        }
+
+                        $room->update([
+                            'status'     => 1,    // 1 = Available (Phòng trống)
+                            'hold_until' => null,
+                        ]);
+                    }
                 }
 
                 // TODO: Tích hợp VNPAY Refund API
-                // Gọi API hoàn tiền VNPAY với $booking->transaction_id
                 // VnpayService::refund($booking->transaction_id, $booking->deposit_amount);
+
+                return [
+                    'booking_code'   => $booking->booking_code,
+                    'refund_status'  => $booking->refund_status,
+                    'booking_status' => $booking->status,
+                    'room_id'        => $booking->rooms_id,
+                ];
             });
 
             return response()->json([
                 'success' => true,
                 'message' => 'Duyệt hoàn tiền thành công. Booking đã được hủy và phòng đã được giải phóng.',
-                'data'    => [
-                    'booking_code'  => $booking->booking_code,
-                    'refund_status' => $booking->fresh()->refund_status,
-                    'booking_status'=> $booking->fresh()->status,
-                    'room_id'       => $booking->rooms_id,
-                ],
+                'data'    => $result,
             ], 200);
+
+        } catch (\RuntimeException $e) {
+            // Lỗi nghiệp vụ có thể đoán trước (double-approve, room status sai)
+            Log::warning('[DisputeController@approveRefund] Lỗi nghiệp vụ', [
+                'admin_id'   => auth()->id(),
+                'booking_id' => $validated['booking_id'] ?? null,
+                'message'    => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data'    => null,
+            ], 422);
 
         } catch (\Throwable $e) {
             Log::error('[DisputeController@approveRefund] Lỗi không mong đợi', [
