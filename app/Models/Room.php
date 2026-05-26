@@ -32,11 +32,17 @@ class Room extends Model
         'hold_until',
         'is_deposit_required',
         'deposit_amount',
+        // --- Tọa độ riêng biệt (dùng cho tìm kiếm theo bán kính) ---
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
-        'hold_until' => 'datetime',
+        'hold_until'          => 'datetime',
         'is_deposit_required' => 'boolean',
+        'latlng'              => 'array',   // auto decode/encode JSON
+        'latitude'            => 'decimal:8',
+        'longitude'           => 'decimal:8',
     ];
     public function CommentRoom()
     {
@@ -144,5 +150,49 @@ class Room extends Model
             }
             return $query;
         }
+    }
+
+    /**
+     * Scope lọc phòng trong bán kính từ một tọa độ trung tâm.
+     * Dùng công thức Haversine tính trực tiếp trên MySQL.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  float  $lat      Vĩ độ trung tâm (độ)
+     * @param  float  $lng      Kinh độ trung tâm (độ)
+     * @param  float  $radiusKm Bán kính tìm kiếm (km), mặc định 3km
+     * @return \Illuminate\Database\Eloquent\Builder
+     *
+     * Cách dùng:
+     *   Room::nearby(21.0285, 105.8542, 3)->where('status', 1)->get();
+     */
+    public function scopeNearby($query, float $lat, float $lng, float $radiusKm = 3.0)
+    {
+        // R = 6371 km (bán kính trái đất)
+        // Công thức Haversine:
+        //   d = 2R * asin( sqrt(
+        //         sin²(Δlat/2) + cos(lat1)*cos(lat2)*sin²(Δlng/2)
+        //       ))
+        $haversine = "(
+            6371 * ACOS(
+                LEAST(1.0, -- tránh lỗi floating point làm ACOS trả về NULL
+                    COS(RADIANS(?)) * COS(RADIANS(latitude))
+                    * COS(RADIANS(longitude) - RADIANS(?))
+                    + SIN(RADIANS(?)) * SIN(RADIANS(latitude))
+                )
+            )
+        )";
+
+        return $query
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            // Bounding box sơ bộ: lọc nhanh bằng index trước khi tính Haversine
+            // 1 độ latitude ≈ 111 km → offset = radius / 111
+            ->whereBetween('latitude',  [$lat - $radiusKm / 111, $lat + $radiusKm / 111])
+            ->whereBetween('longitude', [$lng - $radiusKm / 85,  $lng + $radiusKm / 85])
+            // Lọc chính xác bằng Haversine
+            ->whereRaw("{$haversine} <= ?", [$lat, $lng, $lat, $radiusKm])
+            // Thêm cột distance_km vào kết quả để frontend hiển thị
+            ->selectRaw("rooms.*, {$haversine} AS distance_km", [$lat, $lng, $lat])
+            ->orderByRaw("{$haversine} ASC", [$lat, $lng, $lat]);
     }
 }
