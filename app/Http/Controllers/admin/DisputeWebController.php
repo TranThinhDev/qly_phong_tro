@@ -4,6 +4,8 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BookingInformation;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -72,6 +74,26 @@ class DisputeWebController extends Controller
                 // VnpayService::refund($booking->transaction_id, $booking->deposit_amount);
             });
 
+            // ── Gửi thông báo cho Khách hàng SAU khi transaction commit ────────
+            $roomName    = $booking->room->name ?? 'N/A';
+            $customerUser = User::where('email', $booking->email)->first();
+            if ($customerUser) {
+                try {
+                    Notification::create([
+                        'user_id' => $customerUser->id,
+                        'title'   => 'Yêu cầu hoàn tiền phòng ' . $roomName
+                                   . ' của bạn đã được Admin phê duyệt.',
+                        'status'  => 0,
+                        'link'    => route('booking.index'),
+                    ]);
+                } catch (\Throwable $notifEx) {
+                    Log::warning('[DisputeWebController@approve] Không thể tạo thông báo cho khách hàng', [
+                        'email'   => $booking->email,
+                        'message' => $notifEx->getMessage(),
+                    ]);
+                }
+            }
+
             return back()->with(
                 'toast',
                 ['Đã duyệt hoàn tiền thành công. Booking đã bị huỷ và phòng đã được giải phóng.', 'green']
@@ -115,6 +137,27 @@ class DisputeWebController extends Controller
             $booking->update([
                 'refund_status' => 'rejected',
             ]);
+
+            // ── Gửi thông báo cho Khách hàng ─────────────────────────────────────
+            // Thực hiện ngoài transaction vì reject() không dùng DB::transaction
+            $roomName     = optional($booking->load('room')->room)->name ?? 'N/A';
+            $customerUser = User::where('email', $booking->email)->first();
+            if ($customerUser) {
+                try {
+                    Notification::create([
+                        'user_id' => $customerUser->id,
+                        'title'   => 'Yêu cầu hoàn tiền phòng ' . $roomName
+                                   . ' của bạn đã bị từ chối.',
+                        'status'  => 0,
+                        'link'    => route('booking.index'),
+                    ]);
+                } catch (\Throwable $notifEx) {
+                    Log::warning('[DisputeWebController@reject] Không thể tạo thông báo cho khách hàng', [
+                        'email'   => $booking->email,
+                        'message' => $notifEx->getMessage(),
+                    ]);
+                }
+            }
 
             return back()->with(
                 'toast',

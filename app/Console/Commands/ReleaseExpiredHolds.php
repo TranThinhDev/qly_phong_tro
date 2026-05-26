@@ -3,8 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Notification;
 use App\Models\Room;
 use App\Models\BookingInformation;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -112,10 +114,32 @@ class ReleaseExpiredHolds extends Command
                     ->where('status', 'pending')
                     ->lockForUpdate()   // Block nếu IPN đang update booking này
                     ->get()
-                    ->each(function ($booking) {
+                    ->each(function ($booking) use ($room) {
                         // Re-check trạng thái booking sau khi có lock
                         if ($booking->status === 'pending') {
                             $booking->update(['status' => 'cancelled']);
+
+                            // ── Thông báo cho Khách hàng ─────────────────────────
+                            // Wrap trong try-catch: lỗi thông báo không được gây
+                            // rollback transaction đang chạy.
+                            $customerUser = User::where('email', $booking->email)->first();
+                            if ($customerUser) {
+                                try {
+                                    Notification::create([
+                                        'user_id' => $customerUser->id,
+                                        'title'   => 'Thời gian giữ chỗ phòng ' . ($room->name ?? 'N/A')
+                                                   . ' đã hết hạn do chưa thanh toán.',
+                                        'status'  => 0,  // 0 = chưa đọc
+                                        'link'    => null,
+                                    ]);
+                                } catch (\Throwable $notifEx) {
+                                    Log::warning('[ReleaseExpiredHolds] Không thể tạo thông báo cho khách hàng', [
+                                        'booking_id' => $booking->id,
+                                        'email'      => $booking->email,
+                                        'message'    => $notifEx->getMessage(),
+                                    ]);
+                                }
+                            }
                         }
                     })
                     ->count();

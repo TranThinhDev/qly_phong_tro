@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBookingRequest;
 use App\Models\BookingInformation;
+use App\Models\Notification;
 use App\Models\Room;
+use App\Models\User;
 use App\Services\VnpayService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
@@ -140,6 +142,35 @@ class BookingController extends Controller
                     'email'            => auth()->user()->email,
                     'phone'            => auth()->user()->PhoneNumber ?? null,
                 ]);
+
+                // ── Thông báo cho chủ trọ về lịch hẹn mới ─────────────────
+                // Lấy thông tin phòng & chủ trọ (đã load $room bên trên)
+                // Thực hiện NGOÀI transaction chính (đây là phần cuối của closure)
+                $appointmentDateStr = $booking->appointment_date
+                    ? $booking->appointment_date->format('d/m/Y H:i')
+                    : 'chưa xác định';
+
+                $chuTroForAppointment = $room->chutro_id
+                    ? User::find($room->chutro_id)
+                    : null;
+
+                if ($chuTroForAppointment) {
+                    try {
+                        Notification::create([
+                            'user_id' => $chuTroForAppointment->id,
+                            'title'   => 'Khách hàng ' . auth()->user()->name
+                                       . ' vừa đặt lịch xem phòng ' . $room->name
+                                       . ' vào ngày ' . $appointmentDateStr . '.',
+                            'status'  => 0,  // 0 = chưa đọc
+                            'link'    => route('booking.show', $room->id),
+                        ]);
+                    } catch (\Throwable $notifEx) {
+                        Log::warning('[BookingController@store] Không thể tạo thông báo cho chủ trọ', [
+                            'chutro_id' => $chuTroForAppointment->id,
+                            'message'   => $notifEx->getMessage(),
+                        ]);
+                    }
+                }
 
                 return response()->json([
                     'success'          => true,
@@ -345,6 +376,48 @@ class BookingController extends Controller
                         ]);
                     }
                 });
+
+                // ── Gửi thông báo SAU khi transaction đã commit ────────────
+                // Wrap trong try-catch độc lập để lỗi thông báo không ảnh hưởng
+                // đến luồng xử lý thanh toán.
+                $roomForNotif = $booking->room;
+
+                // (A) Thông báo cho Chủ trọ
+                if ($roomForNotif && $roomForNotif->chutro_id) {
+                    try {
+                        Notification::create([
+                            'user_id' => $roomForNotif->chutro_id,
+                            'title'   => 'Khách hàng ' . $booking->name
+                                       . ' đã đặt cọc thành công phòng ' . $roomForNotif->name . '.',
+                            'status'  => 0,
+                            'link'    => route('booking.show', $roomForNotif->id),
+                        ]);
+                    } catch (\Throwable $notifEx) {
+                        Log::warning('[VNPay Return] Không thể tạo thông báo cho chủ trọ', [
+                            'chutro_id' => $roomForNotif->chutro_id,
+                            'message'   => $notifEx->getMessage(),
+                        ]);
+                    }
+                }
+
+                // (B) Thông báo cho Khách hàng (tìm user qua email)
+                $customerUser = User::where('email', $booking->email)->first();
+                if ($customerUser) {
+                    try {
+                        Notification::create([
+                            'user_id' => $customerUser->id,
+                            'title'   => 'Thanh toán thành công. Bạn đã đặt cọc phòng '
+                                       . ($roomForNotif->name ?? 'N/A') . '.',
+                            'status'  => 0,
+                            'link'    => route('booking.index'),
+                        ]);
+                    } catch (\Throwable $notifEx) {
+                        Log::warning('[VNPay Return] Không thể tạo thông báo cho khách hàng', [
+                            'email'   => $booking->email,
+                            'message' => $notifEx->getMessage(),
+                        ]);
+                    }
+                }
             }
 
             Log::info('[VNPay Return] Thanh toán thành công', [
@@ -607,7 +680,50 @@ class BookingController extends Controller
 
             DB::commit();
 
-            // ── 5. Trả về thành công ──────────────────────────────────────────
+            // ── 5. Gửi thông báo SAU khi DB commit thành công ────────────────
+            $roomForDispute = $booking->room ?? $booking->load('room')->room;
+
+            // (A) Thông báo cho Admin (role = '1')
+            $admins = User::where('role', '1')->get();
+            foreach ($admins as $admin) {
+                try {
+                    Notification::create([
+                        'user_id' => $admin->id,
+                        'title'   => 'Khách hàng ' . auth()->user()->name
+                                   . ' vừa gửi yêu cầu hoàn tiền cho phòng '
+                                   . ($roomForDispute->name ?? 'N/A')
+                                   . '. Lý do: ' . $validated['reason'],
+                        'status'  => 0,
+                        'link'    => route('admin.disputes.index'),
+                    ]);
+                } catch (\Throwable $notifEx) {
+                    Log::warning('[BookingController@submitRefundRequest] Không thể tạo thông báo cho admin', [
+                        'admin_id' => $admin->id,
+                        'message'  => $notifEx->getMessage(),
+                    ]);
+                }
+            }
+
+            // (B) Thông báo cho Chủ trọ (nếu phòng có chủ trọ)
+            if ($roomForDispute && $roomForDispute->chutro_id) {
+                try {
+                    Notification::create([
+                        'user_id' => $roomForDispute->chutro_id,
+                        'title'   => 'Khách hàng ' . auth()->user()->name
+                                   . ' vừa gửi yêu cầu hoàn tiền cho phòng '
+                                   . $roomForDispute->name . '.',
+                        'status'  => 0,
+                        'link'    => route('booking.show', $roomForDispute->id),
+                    ]);
+                } catch (\Throwable $notifEx) {
+                    Log::warning('[BookingController@submitRefundRequest] Không thể tạo thông báo cho chủ trọ', [
+                        'chutro_id' => $roomForDispute->chutro_id,
+                        'message'   => $notifEx->getMessage(),
+                    ]);
+                }
+            }
+
+            // ── 6. Trả về thành công ──────────────────────────────────────────
             return back()
                 ->with('success', 'Yêu cầu hoàn tiền đã được ghi nhận. Chúng tôi sẽ xem xét và phản hồi sớm nhất.');
 
