@@ -34,8 +34,32 @@
         .badge-refunded   { background: #d1e7dd; color: #0a3622; border: 1px solid #198754; }
         .badge-rejected   { background: #f8d7da; color: #842029; border: 1px solid #dc3545; }
 
+        /* ── Action buttons in table ── */
+        .btn-action-group { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+        .btn-resume {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: .78rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            transition: opacity .2s;
+        }
+        .btn-resume:hover { opacity: .85; color: #fff; }
+        .countdown-badge {
+            font-size: .72rem;
+            background: #fff3cd;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            border-radius: 20px;
+            padding: 2px 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
         /* ── Modal evidence preview ── */
-        #evidence-preview {
+        .evidence-preview {
             display: none;
             max-width: 100%;
             max-height: 180px;
@@ -83,6 +107,7 @@
                                     <th>#</th>
                                     <th>Mã đặt phòng</th>
                                     <th>Phòng</th>
+                                    <th>Loại / Ngày hẹn</th>
                                     <th>Tiền cọc</th>
                                     <th>Trạng thái</th>
                                     <th>Ngày đặt</th>
@@ -118,6 +143,25 @@
                                             @endif
                                         </td>
 
+                                        {{-- Loại / Ngày hẹn --}}
+                                        <td>
+                                            @if ($booking->booking_type === 'appointment')
+                                                <span class="badge bg-info text-dark rounded-pill px-2 py-1 small">
+                                                    <i class="fas fa-calendar-check me-1"></i>Hẹn xem
+                                                </span>
+                                                @if ($booking->appointment_date)
+                                                    <div class="text-muted small mt-1">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        {{ $booking->appointment_date->format('d/m/Y H:i') }}
+                                                    </div>
+                                                @endif
+                                            @else
+                                                <span class="badge bg-primary rounded-pill px-2 py-1 small">
+                                                    <i class="fas fa-hand-holding-usd me-1"></i>Đặt cọc
+                                                </span>
+                                            @endif
+                                        </td>
+
                                         {{-- Tiền cọc --}}
                                         <td class="fw-bold text-danger">
                                             {{ $booking->deposit_amount
@@ -138,59 +182,98 @@
                                             @endphp
                                             <span class="badge {{ $st['class'] }} rounded-pill px-3 py-2">
                                                 {{ $st['label'] }}
-                                            </span>
-                                        </td>
-
-                                        {{-- Ngày đặt --}}
-                                        <td class="text-muted small">
-                                            {{ $booking->created_at->format('d/m/Y H:i') }}
-                                        </td>
-
-                                        {{-- ══════════════════════════════════════════════════
-                                             CỘT THAO TÁC — Logic hoàn tiền
-                                        ═══════════════════════════════════════════════════ --}}
+                                                     {{-- ══════════════════════════════════════════════════
+                                             CỘT THAO TÁC — Logic đầy đủ
+                                        ═════════════════════════════════════════════════ --}}
                                         <td class="text-center">
+                                            @php
+                                                $isPending   = $booking->status === 'pending';
+                                                $isDeposit   = $booking->booking_type === 'deposit';
+                                                $isAppoint   = $booking->booking_type === 'appointment';
+                                                $holdUntil   = $booking->room?->hold_until;
+                                                $holdActive  = $holdUntil && $holdUntil->gt(now());
+                                                $secsLeft    = $holdActive ? now()->diffInSeconds($holdUntil) : 0;
+                                            @endphp
+                                            <div class="btn-action-group">
 
-                                            @if (
-                                                $booking->status === 'paid' &&
-                                                is_null($booking->refund_status) &&
-                                                $booking->created_at->diffInHours(now()) < 48
-                                            )
-                                                {{-- ① Đủ điều kiện: hiển thị nút mở modal hoàn tiền --}}
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-danger fw-semibold"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#refundModal-{{ $booking->id }}"
-                                                    title="Yêu cầu hoàn tiền trong vòng 48h">
-                                                    <i class="fas fa-undo-alt me-1"></i>
-                                                    Yêu cầu hoàn tiền
-                                                </button>
+                                                {{-- ① Deposit pending còn thời gian giữ chỗ → Tiếp tục + Hủy --}}
+                                                @if ($isPending && $isDeposit && $holdActive)
+                                                    <a href="{{ route('booking.resume', $booking->booking_code) }}"
+                                                       class="btn-resume">
+                                                        <i class="fas fa-credit-card me-1"></i>Tiếp tục thanh toán
+                                                    </a>
+                                                    <span class="countdown-badge" data-seconds="{{ $secsLeft }}" id="cd-{{ $booking->id }}">
+                                                        <i class="fas fa-hourglass-half"></i>
+                                                        <span class="cd-text">{{ gmdate('i:s', $secsLeft) }}</span>
+                                                    </span>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-secondary fw-semibold btn-cancel-booking"
+                                                            data-id="{{ $booking->id }}"
+                                                            data-type="deposit"
+                                                            title="Hủy đặt cọ">
+                                                        <i class="fas fa-times me-1"></i>Hủy giữ chỗ
+                                                    </button>
 
-                                            @elseif ($booking->refund_status === 'requested')
-                                                {{-- ② Đang chờ xử lý --}}
-                                                <span class="badge-refund badge-requested">
-                                                    <i class="fas fa-clock"></i> Đang xử lý
-                                                </span>
+                                                {{-- ② Deposit pending nhưng đã hết giờ → chỉ hủy --}}
+                                                @elseif ($isPending && $isDeposit && !$holdActive)
+                                                    <span class="badge bg-danger text-white small mb-1">
+                                                        <i class="fas fa-clock me-1"></i>Hết giờ giữ chỗ
+                                                    </span>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-secondary fw-semibold btn-cancel-booking"
+                                                            data-id="{{ $booking->id }}"
+                                                            data-type="deposit"
+                                                            title="Hủy đơn">
+                                                        <i class="fas fa-times me-1"></i>Hủy đơn
+                                                    </button>
 
-                                            @elseif ($booking->refund_status === 'refunded')
-                                                {{-- ③ Đã hoàn tiền --}}
-                                                <span class="badge-refund badge-refunded">
-                                                    <i class="fas fa-check-circle"></i> Đã hoàn tiền
-                                                </span>
+                                                {{-- ③ Appointment pending → Nút Hủy lịch hẹn --}}
+                                                @elseif ($isPending && $isAppoint)
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-danger fw-semibold btn-cancel-booking"
+                                                            data-id="{{ $booking->id }}"
+                                                            data-type="appointment"
+                                                            title="Hủy lịch hẹn xem phòng">
+                                                        <i class="fas fa-calendar-times me-1"></i>Hủy lịch hẹn
+                                                    </button>
 
-                                            @elseif ($booking->refund_status === 'rejected')
-                                                {{-- ④ Bị từ chối --}}
-                                                <span class="badge-refund badge-rejected">
-                                                    <i class="fas fa-times-circle"></i> Bị từ chối
-                                                </span>
+                                                {{-- ④ Paid và đủ điều kiện hoàn tiền --}}
+                                                @elseif (
+                                                    $booking->status === 'paid' &&
+                                                    is_null($booking->refund_status) &&
+                                                    $booking->created_at->diffInHours(now()) < 48
+                                                )
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-outline-danger fw-semibold"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#refundModal-{{ $booking->id }}"
+                                                        title="Yêu cầu hoàn tiền trong vòng 48h">
+                                                        <i class="fas fa-undo-alt me-1"></i>
+                                                        Yêu cầu hoàn tiền
+                                                    </button>
 
-                                            @else
-                                                {{-- ⑤ Không đủ điều kiện / đã quá 48h --}}
-                                                <span class="text-muted small">—</span>
+                                                {{-- ⑤ Refund statuses --}}
+                                                @elseif ($booking->refund_status === 'requested')
+                                                    <span class="badge-refund badge-requested">
+                                                        <i class="fas fa-clock"></i> Đang xử lý
+                                                    </span>
 
-                                            @endif
+                                                @elseif ($booking->refund_status === 'refunded')
+                                                    <span class="badge-refund badge-refunded">
+                                                        <i class="fas fa-check-circle"></i> Đã hoàn tiền
+                                                    </span>
 
+                                                @elseif ($booking->refund_status === 'rejected')
+                                                    <span class="badge-refund badge-rejected">
+                                                        <i class="fas fa-times-circle"></i> Bị từ chối
+                                                    </span>
+
+                                                @else
+                                                    <span class="text-muted small">—</span>
+                                                @endif
+
+                                            </div>
                                         </td>
                                         {{-- ══════════════════════════════════════════════════ --}}
 
@@ -408,29 +491,23 @@
         $(document).ready(function () {
 
             // ── 1. Preview ảnh bằng chứng khi user chọn file ─────────────────
-            //    Dùng event delegation để xử lý tất cả input[type=file] trong vòng lặp
             $(document).on('change', 'input[type="file"][data-preview]', function () {
                 var previewId = $(this).data('preview');
                 var $preview  = $('#' + previewId);
                 var file      = this.files[0];
-
                 if (file && file.type.startsWith('image/')) {
                     var reader = new FileReader();
-                    reader.onload = function (e) {
-                        $preview.attr('src', e.target.result).show();
-                    };
+                    reader.onload = function (e) { $preview.attr('src', e.target.result).show(); };
                     reader.readAsDataURL(file);
                 } else {
                     $preview.hide().attr('src', '#');
                 }
             });
 
-            // ── 2. Client-side validation form hoàn tiền trước khi submit ────
+            // ── 2. Validate form hoàn tiền trước khi submit ──────────────────
             $(document).on('submit', 'form[id^="refundForm-"]', function (e) {
                 var $textarea = $(this).find('textarea[name="reason"]');
-                var reason    = $.trim($textarea.val());
-
-                if (reason.length < 10) {
+                if ($.trim($textarea.val()).length < 10) {
                     e.preventDefault();
                     makeToast('Vui lòng nhập lý do hoàn tiền ít nhất 10 ký tự.', 'orange');
                     $textarea.focus();
@@ -442,11 +519,88 @@
             @if ($errors->any() && old('booking_id'))
                 var bookingId = "{{ old('booking_id') }}";
                 var $modal    = $('#refundModal-' + bookingId);
-                if ($modal.length) {
-                    var bsModal = new bootstrap.Modal($modal[0]);
-                    bsModal.show();
-                }
+                if ($modal.length) { new bootstrap.Modal($modal[0]).show(); }
             @endif
+
+            // ── 4. AJAX Huỷ booking (appointment hoặc deposit-pending) ───────
+            $(document).on('click', '.btn-cancel-booking', function () {
+                var bookingId   = $(this).data('id');
+                var bookingType = $(this).data('type');
+                var $row        = $(this).closest('tr');
+
+                var confirmText = bookingType === 'appointment'
+                    ? 'Bạn có chắc muốn huỷ lịch hẹn xem phòng này không?'
+                    : 'Bạn có chắc muốn huỷ đặt cọc? Phòng sẽ được trả lại trạng thái trống.';
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Xác nhận huỷ',
+                    text: confirmText,
+                    showCancelButton: true,
+                    confirmButtonText: 'Huỷ đơn',
+                    cancelButtonText: 'Giữ lại',
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor:  '#6c757d',
+                    reverseButtons: true,
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+
+                    $.ajax({
+                        url: '{{ route("booking.cancel") }}',
+                        method: 'POST',
+                        data: {
+                            _token:     '{{ csrf_token() }}',
+                            booking_id: bookingId,
+                        },
+                        success: function (res) {
+                            if (res.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Đã huỷ',
+                                    text: res.message,
+                                    timer: 2000,
+                                    showConfirmButton: false,
+                                }).then(function () {
+                                    location.reload();
+                                });
+                            } else {
+                                makeToast(res.message || 'Có lỗi xảy ra.', 'red');
+                            }
+                        },
+                        error: function (xhr) {
+                            var msg = xhr.responseJSON?.message || 'Lỗi hệ thống, vui lòng thử lại.';
+                            makeToast(msg, 'red');
+                        },
+                    });
+                });
+            });
+
+            // ── 5. Countdown timer đếm ngược thời gian giữ chỗ ─────────────
+            $('.countdown-badge[data-seconds]').each(function () {
+                var $badge = $(this);
+                var secs   = parseInt($badge.data('seconds'), 10);
+
+                if (secs <= 0) {
+                    $badge.find('.cd-text').text('Hết giờ');
+                    return;
+                }
+
+                var timer = setInterval(function () {
+                    secs--;
+                    if (secs <= 0) {
+                        clearInterval(timer);
+                        $badge.find('.cd-text').text('Hết giờ');
+                        // Reload trang để cập nhật trạng thái nút
+                        setTimeout(function () { location.reload(); }, 1500);
+                        return;
+                    }
+                    var m = Math.floor(secs / 60);
+                    var s = secs % 60;
+                    $badge.find('.cd-text').text(
+                        (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s
+                    );
+                }, 1000);
+            });
 
         });
     </script>

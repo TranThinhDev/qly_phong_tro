@@ -377,6 +377,110 @@ class BookingController extends Controller
         }
     }
 
+    // =========================================================================
+    /**
+     * Huỷ đơn đặt phòng (appointment hoặc deposit chưa thanh toán).
+     *
+     * POST /booking/cancel
+     * Body: booking_id
+     *
+     * Business rules:
+     *   - Chỉ huỷ được booking thuộc về mình (so email).
+     *   - Appointment: chỉ huỷ khi status = 'pending'.
+     *   - Deposit:     chỉ huỷ khi status = 'pending' (chưa thanh toán).
+     *     Khi huỷ deposit-pending → trả phòng về status=1, xoá hold_until.
+     */
+    public function cancelBooking(Request $request)
+    {
+        $request->validate([
+            'booking_id' => ['required', 'integer', 'exists:booking_information,id'],
+        ]);
+
+        $booking = BookingInformation::with('room')->findOrFail($request->booking_id);
+
+        // ── Authorization ────────────────────────────────────────────────────
+        if ($booking->email !== auth()->user()->email) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền thực hiện thao tác này.'], 403);
+        }
+
+        // ── Chỉ cho phép huỷ khi status = pending ───────────────────────────
+        if ($booking->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể huỷ đơn này. Chỉ huỷ được khi đơn đang ở trạng thái chờ.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($booking) {
+            // Nếu là deposit → giải phóng phòng
+            if ($booking->booking_type === 'deposit' && $booking->room) {
+                $booking->room->update([
+                    'status'     => 1,       // trống
+                    'hold_until' => null,
+                ]);
+            }
+
+            $booking->update(['status' => 'cancelled']);
+        });
+
+        Log::info('[BookingController@cancelBooking] Đơn đã bị huỷ bởi người dùng', [
+            'booking_id'   => $booking->id,
+            'booking_type' => $booking->booking_type,
+            'user_email'   => auth()->user()->email,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $booking->booking_type === 'appointment'
+                ? 'Đã huỷ lịch hẹn xem phòng thành công.'
+                : 'Đã huỷ đặt cọc. Phòng được trả về trạng thái trống.',
+        ]);
+    }
+    // =========================================================================
+
+    // =========================================================================
+    /**
+     * Tiếp tục thanh toán khi user lỡ thoát trang checkout.
+     *
+     * GET /booking/resume/{booking_code}
+     *
+     * Logic:
+     *   - Nếu hold_until còn hiệu lực → redirect về checkout (tạo link VNPay mới).
+     *   - Nếu hold_until đã hết → huỷ booking, trả phòng, báo lỗi.
+     */
+    public function resumePayment(string $booking_code)
+    {
+        $booking = BookingInformation::with('room')
+            ->where('booking_code', $booking_code)
+            ->where('email', auth()->user()->email)
+            ->where('booking_type', 'deposit')
+            ->where('status', 'pending')
+            ->first();
+
+        if (! $booking) {
+            return redirect()->route('booking.index')
+                ->with('error', 'Không tìm thấy giao dịch cần tiếp tục hoặc giao dịch đã được xử lý.');
+        }
+
+        $room = $booking->room;
+
+        // Kiểm tra thời gian giữ chỗ
+        if ($room && $room->hold_until && $room->hold_until->lt(now())) {
+            // Hết giờ → huỷ tự động
+            DB::transaction(function () use ($booking, $room) {
+                $room->update(['status' => 1, 'hold_until' => null]);
+                $booking->update(['status' => 'cancelled']);
+            });
+
+            return redirect()->route('booking.index')
+                ->with('error', 'Thời gian giữ chỗ 15 phút đã hết. Vui lòng thực hiện đặt cọc lại.');
+        }
+
+        // Còn thời gian → về trang checkout
+        return redirect()->route('booking.checkout', ['booking_code' => $booking_code]);
+    }
+    // =========================================================================
+
     /**
      * Remove the specified resource from storage.
      */
@@ -384,6 +488,7 @@ class BookingController extends Controller
     {
         //
     }
+
 
     public function exportPdf($id)
     {

@@ -52,8 +52,10 @@ class VnpayService
         string $orderInfo,
         string $ipAddr = '127.0.0.1'
     ): string {
-        $createDate = date('YmdHis');
-        $expireDate = date('YmdHis', strtotime('+15 minutes'));
+        // VNPay yêu cầu thời gian theo giờ Việt Nam (UTC+7).
+        // Timezone đã được cấu hình toàn cục tại config/app.php → now() tự dùng Asia/Ho_Chi_Minh.
+        $createDate = now()->format('YmdHis');
+        $expireDate = now()->addMinutes(15)->format('YmdHis');
 
         $inputData = [
             'vnp_Version'    => $this->version,
@@ -93,6 +95,7 @@ class VnpayService
             'orderId'    => $orderId,
             'amount'     => $amount,
             'createDate' => $createDate,
+            'expireDate' => $expireDate,
         ]);
 
         return $paymentUrl;

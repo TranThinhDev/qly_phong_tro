@@ -122,6 +122,11 @@ Route::middleware('blockAccount')->group(function () {
         Route::get('booking/export-pdf/{id}', 'BookingController@exportPdf')->name('booking.export_pdf');
         // Yêu cầu hoàn tiền
         Route::post('booking/refund-request', 'BookingController@submitRefundRequest')->name('booking.refund.request');
+        // Huỷ lịch hẹn hoặc huỷ đặt cọc chưa thanh toán
+        Route::post('booking/cancel', 'BookingController@cancelBooking')->name('booking.cancel');
+        // Tiếp tục thanh toán khi lỡ thoát trang checkout
+        Route::get('booking/resume/{booking_code}', 'BookingController@resumePayment')->name('booking.resume');
+
         // ── Route::resource tạo các CRUD routes còn lại (index, create, store, show, edit, update, destroy)
         Route::resource('booking', BookingController::class);
         // Đổi mật khẩu tài khoản
