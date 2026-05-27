@@ -139,6 +139,8 @@ Route::middleware('blockAccount')->group(function () {
         Route::get('xem-phong/{id}', 'RoomController@show')->name('Room_show');
         Route::get('/', 'HomeController@index')->name('trang_chu');
         Route::get('danh-sach-phong', 'ListRoomController@filter')->name('filter_room');
+        // ── Bản đồ tìm kiếm thông minh theo bán kính ──────────────────────────
+        Route::get('ban-do-tim-phong', 'HomeController@mapSearch')->name('map.search');
         Route::get('gioi-thieu', function () {
             return view('frontend.about');
         })->name('about');

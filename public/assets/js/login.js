@@ -7,7 +7,9 @@
      var ele = document.getElementById('pwd-input');
      var eleother = document.getElementById('pwd-input1');
 
-     document.getElementById('pwd-icon').onclick = function() {
+     var pwdIcon = document.getElementById('pwd-icon');
+     if (pwdIcon) {
+         pwdIcon.onclick = function() {
         if( this.classList.contains(open) ) {
         ele.type="password";
         this.classList.remove(open);
@@ -17,4 +19,5 @@
             this.classList.remove(close);
             this.className += ' '+open;
         }
+     }
      }

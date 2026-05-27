@@ -14,6 +14,11 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # ── Suppress Source Map 404s ──────────────────────────────────
+    # Browser tự tìm .map files từ minified JS/CSS → trả 204 thay 404
+    # Không ảnh hưởng chức năng, chỉ dọn sạch log server / ngrok.
+    RewriteRule \.map$ - [R=204,L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f

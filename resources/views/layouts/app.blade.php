@@ -32,6 +32,8 @@
     <!-- Template css -->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/bootstrap.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/color1.css')}}">
+    <!-- SweetAlert2 CSS (dùng toàn cục cho bất kỳ view nào cần Swal) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     @yield('style')
 </head>
 
@@ -51,7 +53,6 @@
 
      <!-- popper js-->
      <script src="{{asset('assets/js/popper.min.js')}}"></script>
-     @yield('js')
      <!-- magnific js -->
      <script src="{{asset('assets/js/jquery.magnific-popup.js')}}"></script>
      <script src="{{asset('assets/js/zoom-gallery.js')}}"></script>
@@ -92,7 +93,13 @@
      <!-- Color-picker js-->
      <script src="{{asset('assets/js/color/template-color.js')}}"></script>
      <script src="{{asset('assets/js/color/layout10.js')}}"></script>
-    
+
+     <!-- global script để dùng sweetalert2 -->
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+     @yield('js')
+     @stack('scripts')
+
 
     {{-- <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">

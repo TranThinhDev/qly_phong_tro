@@ -60,6 +60,11 @@ Route::namespace('App\Http\Controllers\Api')
 
     });
 
+// ── Bản đồ tìm kiếm theo bán kính (Public – không cần auth) ──────────────────
+// Cho phép cả GET (test trên browser) lẫn POST (từ Leaflet JS fetch)
+Route::match(['get', 'post'], 'map/rooms', 'App\Http\Controllers\Api\MapController@getRooms')
+    ->name('api.map.rooms');
+
 Route::fallback(function(){
     return response()->json([
         'message' => 'Page Not Found. If error persists, contact admin@gmail.com'], 404);
