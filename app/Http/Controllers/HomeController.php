@@ -24,6 +24,15 @@ class HomeController extends Controller
     }
 
     /**
+     * Trang bản đồ thông minh tìm kiếm phòng theo bán kính.
+     * Không cần truyền dữ liệu phòng — trang sẽ gọi API /api/map/rooms qua AJAX (Bước 4).
+     */
+    public function mapSearch()
+    {
+        return view('frontend.room.map');
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()

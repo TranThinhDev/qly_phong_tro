@@ -156,7 +156,8 @@
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
-                                    <button type="submit" class="btn btn-gradient color-4 mt-2">Tìm kiếm</button>
+                                    <button type="submit" class="btn btn-gradient color-4 mt-2" style="width: 100%; margin-bottom: 10px;">Tìm kiếm danh sách</button>
+                                    <a href="/ban-do-tim-phong" class="btn btn-solid color-4" style="width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; font-weight: bold; padding: 12px 0;">📍 Tìm phòng trên Bản đồ Thông minh</a>
                                 </div>
                         </form>
                     </div>
