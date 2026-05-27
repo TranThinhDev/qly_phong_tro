@@ -165,7 +165,7 @@ class MapController extends Controller
                 'unit'         => $room->unit,
                 'status'       => $room->status,
                 'main_img'     => $room->main_img
-                                    ? asset('storage/' . $room->main_img)
+                                    ? asset('images/main_room/' . $room->main_img)
                                     : null,
                 'latitude'     => (float) $room->latitude,
                 'longitude'    => (float) $room->longitude,
