@@ -134,6 +134,7 @@ Route::middleware('blockAccount')->group(function () {
         Route::post('contracts/draft', 'ContractController@createDraft')->name('contracts.draft');
         Route::post('contracts/{contract}/generate-pdf', 'ContractController@generateAndSavePDF')->name('contracts.generate_pdf');
         Route::get('contracts/{contract}/download-pdf', 'ContractController@downloadPDF')->name('contracts.download_pdf');
+        Route::get('contracts/{contract}/sign', 'ContractController@showSignPage')->name('contracts.sign');
         Route::post('contracts/{contract}/agree-and-pay', 'ContractController@agreeAndPay')->name('contracts.agree_pay');
 
         // Đổi mật khẩu tài khoản

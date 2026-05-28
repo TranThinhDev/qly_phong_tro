@@ -131,21 +131,44 @@ class ContractController extends Controller
         $fileName = 'contract_' . $contract->contract_code . '.pdf';
         $filePath = 'contracts/' . $fileName;
 
-        // Kiểm tra file có tồn tại không
+        // Kiểm tra file có tồn tại không, nếu chưa thì tự tạo để tránh 404
         if (!Storage::exists($filePath)) {
-            // Tùy chọn: tự động tạo lại nếu chưa có
-            // $this->generateAndSavePDF($contractId);
-            abort(404, 'File hợp đồng chưa được tạo.');
+            $this->generateAndSavePDF($contractId);
         }
 
-        // Stream file (xem trực tiếp trên trình duyệt) hoặc Download
-        // Trả về file từ storage, đảm bảo an toàn vì không nằm trong /public
+        // Nếu có tham số ?inline=1 thì hiển thị trực tiếp trên trình duyệt (phù hợp cho iframe)
+        if (request()->has('inline')) {
+            return response()->file(storage_path('app/' . $filePath), [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $fileName . '"'
+            ]);
+        }
+
+        // Ngược lại thì tải xuống
         return Storage::download($filePath, $fileName, [
             'Content-Type' => 'application/pdf',
         ]);
-        
-        // Nếu muốn hiển thị inline trên trình duyệt:
-        // return response()->file(storage_path('app/' . $filePath));
+    }
+
+    /**
+     * Hiển thị giao diện ký hợp đồng dành cho Khách thuê (Tenant)
+     */
+    public function showSignPage($contractId)
+    {
+        $contract = Contract::with(['tenant', 'landlord', 'room'])->findOrFail($contractId);
+        $userId = Auth::id();
+
+        // 1. Kiểm tra quyền: Chỉ khách thuê (tenant) của hợp đồng này mới được truy cập
+        if ($contract->tenant_id !== $userId) {
+            abort(403, 'Bạn không có quyền truy cập trang ký hợp đồng này.');
+        }
+
+        // 2. Kiểm tra trạng thái: Hợp đồng phải ở trạng thái draft (chờ ký)
+        if ($contract->status !== 'draft') {
+            return redirect()->back()->with('error', 'Hợp đồng này đã được ký hoặc đang chờ thanh toán.');
+        }
+
+        return view('contracts.sign', compact('contract'));
     }
 
     /**
