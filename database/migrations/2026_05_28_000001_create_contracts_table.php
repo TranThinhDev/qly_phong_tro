@@ -75,9 +75,9 @@ return new class extends Migration
 
             // ── Trạng thái hợp đồng ──────────────────────────────────────
             // ENUM: DB-level constraint, chặn giá trị không hợp lệ
-            $table->enum('status', ['draft', 'active', 'expired', 'terminated'])
+            $table->enum('status', ['draft', 'pending_payment', 'active', 'expired', 'terminated'])
                   ->default('draft')
-                  ->comment('draft=nháp, active=hiệu lực, expired=hết hạn, terminated=chấm dứt');
+                  ->comment('draft=nháp, pending_payment=chờ thanh toán, active=hiệu lực, expired=hết hạn, terminated=chấm dứt');
 
             // ── Nội dung hợp đồng ─────────────────────────────────────────
             $table->longText('terms_content')->nullable()

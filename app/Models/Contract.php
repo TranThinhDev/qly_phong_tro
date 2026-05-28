@@ -183,10 +183,11 @@ class Contract extends Model
     public function transitionTo(string $newStatus): bool
     {
         $allowedTransitions = [
-            'draft'      => ['active'],
-            'active'     => ['expired', 'terminated'],
-            'expired'    => [],
-            'terminated' => [],
+            'draft'           => ['pending_payment', 'active'],
+            'pending_payment' => ['active', 'draft'], // Có thể quay lại draft nếu thanh toán lỗi
+            'active'          => ['expired', 'terminated'],
+            'expired'         => [],
+            'terminated'      => [],
         ];
 
         $current = $this->status;

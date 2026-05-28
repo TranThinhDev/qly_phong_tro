@@ -129,6 +129,13 @@ Route::middleware('blockAccount')->group(function () {
 
         // ── Route::resource tạo các CRUD routes còn lại (index, create, store, show, edit, update, destroy)
         Route::resource('booking', BookingController::class);
+        
+        // ── Contract & Deposit Routes ─────────────────────────────────────────
+        Route::post('contracts/draft', 'ContractController@createDraft')->name('contracts.draft');
+        Route::post('contracts/{contract}/generate-pdf', 'ContractController@generateAndSavePDF')->name('contracts.generate_pdf');
+        Route::get('contracts/{contract}/download-pdf', 'ContractController@downloadPDF')->name('contracts.download_pdf');
+        Route::post('contracts/{contract}/agree-and-pay', 'ContractController@agreeAndPay')->name('contracts.agree_pay');
+
         // Đổi mật khẩu tài khoản
         Route::get('doi-mat-khau', 'UserController@changePassword')->name('user.change_password');
     });
