@@ -136,6 +136,14 @@ class Contract extends Model
         return $this->hasOne(PendingWallet::class, 'contract_id', 'id');
     }
 
+    /**
+     * Lấy danh sách những người ở trong phòng thuộc hợp đồng này
+     */
+    public function roomOccupants(): HasMany
+    {
+        return $this->hasMany(RoomOccupant::class);
+    }
+
     // ══════════════════════════════════════════════════════════════════════
     // CLICKWRAP / IMMUTABILITY HELPERS
     // ══════════════════════════════════════════════════════════════════════

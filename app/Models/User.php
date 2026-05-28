@@ -95,4 +95,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class, 'payer_id', 'id');
     }
+
+    /**
+     * Lấy danh sách các hợp đồng của người dùng
+     */
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class);
+    }
 }

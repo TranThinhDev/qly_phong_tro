@@ -86,6 +86,15 @@ class Room extends Model
         return $this->hasOne(Contract::class, 'room_id', 'id')
                     ->where('status', 'active');
     }
+
+    /**
+     * Lấy trực tiếp danh sách người đang ở trong phòng
+     */
+    public function roomOccupants()
+    {
+        return $this->hasMany(RoomOccupant::class);
+    }
+
     public function scopeName($query, $request)
     {
         if (isset($request->name)) {
