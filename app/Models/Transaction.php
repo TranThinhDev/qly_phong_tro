@@ -113,16 +113,16 @@ class Transaction extends Model
             );
         }
 
-        $data = [
+        $this->forceFill([
             'status'  => 'completed',
             'paid_at' => now(),
-        ];
+        ]);
 
         if ($gatewayResponse !== null) {
-            $data['gateway_response'] = $gatewayResponse;
+            $this->forceFill(['gateway_response' => $gatewayResponse]);
         }
 
-        return $this->update($data);
+        return $this->save();
     }
 
     /**
@@ -138,10 +138,12 @@ class Transaction extends Model
             );
         }
 
-        return $this->update([
+        $this->forceFill([
             'status' => 'failed',
             'note'   => $reason ?? $this->note,
         ]);
+
+        return $this->save();
     }
 
     /**
