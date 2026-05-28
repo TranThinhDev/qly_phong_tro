@@ -64,7 +64,7 @@ class ContractController extends Controller
             'tenant_id'      => $validated['tenant_id'],
             'room_id'        => $validated['room_id'],
             'start_date'     => $validated['start_date'],
-            'end_date'       => $validated['end_date'],
+            'end_date'       => $validated['end_date'] ?? null,
             'monthly_rent'   => $validated['monthly_rent'],
             'deposit_amount' => $validated['deposit_amount'],
             'terms_content'  => $validated['terms_content'] ?? null,

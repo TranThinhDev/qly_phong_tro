@@ -165,13 +165,15 @@ class Contract extends Model
             );
         }
 
-        // Dùng update() thay vì fill() để bypass $fillable guard
+        // Dùng forceFill() để bypass $fillable guard
         // vì ba trường này cố tình KHÔNG nằm trong $fillable
-        return $this->update([
+        $this->forceFill([
             'signed_at'          => now(),
             'tenant_ip'          => $ip,
             'tenant_user_agent'  => $userAgent,
-        ]);
+        ])->save();
+        
+        return true;
     }
 
     /**

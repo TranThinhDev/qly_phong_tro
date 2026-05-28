@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('rooms', function (Blueprint $table) {
-            $table->tinyInteger('status')->default(1)->comment('1: Available, 2: Holding, 3: Booked, 4: Rented');
-            $table->timestamp('hold_until')->nullable();
-            $table->boolean('is_deposit_required')->default(0);
+            if (!Schema::hasColumn('rooms', 'status')) {
+                $table->tinyInteger('status')->default(1)->comment('1: Available, 2: Holding, 3: Booked, 4: Rented');
+            }
+            if (!Schema::hasColumn('rooms', 'hold_until')) {
+                $table->timestamp('hold_until')->nullable();
+            }
+            if (!Schema::hasColumn('rooms', 'is_deposit_required')) {
+                $table->boolean('is_deposit_required')->default(0);
+            }
         });
     }
 
