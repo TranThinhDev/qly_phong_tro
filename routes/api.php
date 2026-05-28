@@ -65,6 +65,10 @@ Route::namespace('App\Http\Controllers\Api')
 Route::match(['get', 'post'], 'map/rooms', 'App\Http\Controllers\Api\MapController@getRooms')
     ->name('api.map.rooms');
 
+// ── VNPay IPN Webhook (Public – không cần auth, gọi từ server VNPay) ──────────
+Route::get('vnpay/ipn', 'App\Http\Controllers\PaymentController@vnpayIpn')
+    ->name('api.vnpay.ipn');
+
 Route::fallback(function(){
     return response()->json([
         'message' => 'Page Not Found. If error persists, contact admin@gmail.com'], 404);
