@@ -66,4 +66,33 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class, 'user_id', 'id');
     }
+
+    // ── Module Contract & Deposit ────────────────────────────────────────
+
+    /**
+     * Các hợp đồng user đang là KHÁCH THUÊ.
+     * User hasMany Contract (users.id → contracts.tenant_id)
+     */
+    public function contractsAsTenant()
+    {
+        return $this->hasMany(Contract::class, 'tenant_id', 'id');
+    }
+
+    /**
+     * Các hợp đồng user đang là CHỦ TRỌ.
+     * User hasMany Contract (users.id → contracts.landlord_id)
+     */
+    public function contractsAsLandlord()
+    {
+        return $this->hasMany(Contract::class, 'landlord_id', 'id');
+    }
+
+    /**
+     * Tất cả giao dịch tài chính user đã thực hiện.
+     * User hasMany Transaction (users.id → transactions.payer_id)
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'payer_id', 'id');
+    }
 }

@@ -66,6 +66,26 @@ class Room extends Model
     {
         return $this->belongsTo(User::class, 'chutro_id', 'id');
     }
+
+    /**
+     * Các hợp đồng thuê phòng gắn với phòng này.
+     * Room hasMany Contract (rooms.id → contracts.room_id)
+     * Sử dụng withTrashed() để bao gồm cả hợp đồng đã xóa mềm.
+     */
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class, 'room_id', 'id');
+    }
+
+    /**
+     * Hợp đồng đang hiệu lực của phòng (nếu có).
+     * Room hasOne Contract (lọc theo status = active)
+     */
+    public function activeContract()
+    {
+        return $this->hasOne(Contract::class, 'room_id', 'id')
+                    ->where('status', 'active');
+    }
     public function scopeName($query, $request)
     {
         if (isset($request->name)) {
