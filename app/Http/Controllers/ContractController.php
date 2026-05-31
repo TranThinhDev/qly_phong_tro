@@ -16,36 +16,43 @@ use App\Services\VnpayService;
 class ContractController extends Controller
 {
     /**
-     * Tạo bản nháp hợp đồng (Draft)
-     * Yêu cầu: validate dữ liệu khắt khe (giá, cọc > 0).
+     * Hiển thị giao diện Tạo Hợp đồng cho Chủ trọ
      */
-    public function createDraft(Request $request)
+    public function create()
     {
-        // 1. Validate dữ liệu đầu vào
+        $landlordId = Auth::id();
+        
+        // Lấy danh sách các phòng thuộc sở hữu của chủ trọ
+        // (Có thể thêm điều kiện phòng đang trống nếu bạn có cột trạng thái cho thuê)
+        $rooms = Room::where('chutro_id', $landlordId)->get();
+        
+        return view('contracts.create', compact('rooms'));
+    }
+
+    /**
+     * Khởi tạo bản nháp hợp đồng (Draft) - Manual Flow (Khách vãng lai)
+     */
+    public function store(Request $request)
+    {
+        // 1. Validate dữ liệu đầu vào (Không cần tenant_id vì ta sẽ tự xử lý)
         $validated = $request->validate([
-            'tenant_id'      => 'required|exists:users,id',
+            'tenant_name'    => 'required|string|max:255',
+            'tenant_email'   => 'required|email|max:255',
+            'tenant_phone'   => 'required|string|max:20',
             'room_id'        => 'required|exists:rooms,id',
             'start_date'     => 'required|date|after_or_equal:today',
             'end_date'       => 'nullable|date|after:start_date',
-            // Giá thuê và cọc phải > 0
             'monthly_rent'   => 'required|numeric|gt:0',
             'deposit_amount' => 'required|numeric|gt:0',
-            // Bổ sung validate các chỉ số nếu cần (ở đây ví dụ điện nước >= 0 nếu có gửi lên)
-            'electric_index' => 'nullable|numeric|gte:0',
-            'water_index'    => 'nullable|numeric|gte:0',
             'terms_content'  => 'nullable|string',
             'notes'          => 'nullable|string',
         ], [
             'monthly_rent.gt'   => 'Giá thuê hàng tháng phải lớn hơn 0.',
             'deposit_amount.gt' => 'Số tiền cọc phải lớn hơn 0.',
-            'electric_index.gte'=> 'Chỉ số điện phải lớn hơn hoặc bằng 0.',
-            'water_index.gte'   => 'Chỉ số nước phải lớn hơn hoặc bằng 0.',
         ]);
 
-        // Đảm bảo người tạo là chủ trọ (hoặc admin tùy logic dự án)
-        $landlordId = Auth::id(); // Lấy ID người đang đăng nhập (chủ trọ)
+        $landlordId = Auth::id(); 
         
-        // Có thể thêm bước kiểm tra room_id này có đúng thuộc về landlordId không
         $room = Room::where('id', $validated['room_id'])
                     ->where('chutro_id', $landlordId)
                     ->first();
@@ -54,30 +61,61 @@ class ContractController extends Controller
             return response()->json(['error' => 'Phòng không tồn tại hoặc bạn không có quyền.'], 403);
         }
 
-        // Sinh mã hợp đồng duy nhất
-        $contractCode = 'CT-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+        try {
+            DB::beginTransaction();
 
-        // 2. Tạo record với status = 'draft'
-        $contract = Contract::create([
-            'contract_code'  => $contractCode,
-            'landlord_id'    => $landlordId,
-            'tenant_id'      => $validated['tenant_id'],
-            'room_id'        => $validated['room_id'],
-            'start_date'     => $validated['start_date'],
-            'end_date'       => $validated['end_date'] ?? null,
-            'monthly_rent'   => $validated['monthly_rent'],
-            'deposit_amount' => $validated['deposit_amount'],
-            'terms_content'  => $validated['terms_content'] ?? null,
-            'notes'          => $validated['notes'] ?? null,
-            // Trạng thái mặc định từ DB/Model đã là 'draft', nhưng có thể set rõ ràng
-            // 'status' => 'draft', (Không cần thiết nếu Model/DB đã có default, và status không ở $fillable)
-        ]);
+            // 2. Xử lý Logic tạo User
+            $plainPassword = null;
+            // Ưu tiên tìm theo Email hoặc SĐT
+            $tenant = User::where('email', $validated['tenant_email'])
+                          ->orWhere('phone', $validated['tenant_phone'])
+                          ->first();
 
-        // Trả về response (hoặc redirect)
-        return response()->json([
-            'message' => 'Tạo nháp hợp đồng thành công.',
-            'data'    => $contract
-        ], 201);
+            if (!$tenant) {
+                // Khách hàng hoàn toàn mới -> Tự động tạo tài khoản
+                $plainPassword = Str::random(8); // Mật khẩu raw 8 ký tự ngẫu nhiên
+                
+                $tenant = User::create([
+                    'name'     => $validated['tenant_name'],
+                    'email'    => $validated['tenant_email'],
+                    'phone'    => $validated['tenant_phone'],
+                    'password' => bcrypt($plainPassword),
+                    // 'role' => 'tenant' // Bổ sung role nếu hệ thống của bạn có phân quyền
+                ]);
+            }
+
+            // 3. Sinh mã hợp đồng duy nhất và Tạo Hợp Đồng
+            $contractCode = 'CT-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+
+            $contract = Contract::create([
+                'contract_code'  => $contractCode,
+                'landlord_id'    => $landlordId,
+                'tenant_id'      => $tenant->id,
+                'room_id'        => $validated['room_id'],
+                'start_date'     => $validated['start_date'],
+                'end_date'       => $validated['end_date'] ?? null,
+                'monthly_rent'   => $validated['monthly_rent'],
+                'deposit_amount' => $validated['deposit_amount'],
+                'terms_content'  => $validated['terms_content'] ?? null,
+                'notes'          => $validated['notes'] ?? null,
+            ]);
+
+            DB::commit();
+
+            // 4. Gửi Email thông báo (Đưa vào Queue)
+            \Illuminate\Support\Facades\Mail::to($tenant->email)->send(
+                new \App\Mail\SendContractAndAccountInfoMail($contract, $tenant, $plainPassword)
+            );
+
+            return response()->json([
+                'message' => 'Khởi tạo hợp đồng thành công.',
+                'data'    => $contract
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Đã xảy ra lỗi hệ thống: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

@@ -131,7 +131,8 @@ Route::middleware('blockAccount')->group(function () {
         Route::resource('booking', BookingController::class);
         
         // ── Contract & Deposit Routes ─────────────────────────────────────────
-        Route::post('contracts/draft', 'ContractController@createDraft')->name('contracts.draft');
+        Route::get('contracts/create', 'ContractController@create')->name('contracts.create');
+        Route::post('contracts/draft', 'ContractController@store')->name('contracts.draft');
         Route::post('contracts/{contract}/generate-pdf', 'ContractController@generateAndSavePDF')->name('contracts.generate_pdf');
         Route::get('contracts/{contract}/download-pdf', 'ContractController@downloadPDF')->name('contracts.download_pdf');
         Route::get('contracts/{contract}/sign', 'ContractController@showSignPage')->name('contracts.sign');
