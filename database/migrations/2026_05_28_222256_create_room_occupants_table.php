@@ -13,22 +13,30 @@ return new class extends Migration
     {
         Schema::create('room_occupants', function (Blueprint $table) {
             $table->id();
-            
-            // Các khóa ngoại (Foreign Keys)
-            $table->foreignId('contract_id')->constrained('contracts')->cascadeOnDelete();
-            $table->foreignId('room_id')->constrained('rooms')->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            
+
+            // ── Khóa ngoại ───────────────────────────────────────────────
+            // contracts.id là BIGINT (dùng $table->id()) → unsignedBigInteger
+            $table->unsignedBigInteger('contract_id');
+            $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
+
+            // rooms.id là UNSIGNED INT (dùng $table->increments()) → unsignedInteger
+            $table->unsignedInteger('room_id');
+            $table->foreign('room_id')->references('id')->on('rooms')->onDelete('cascade');
+
+            // users.id là UNSIGNED INT (dùng $table->increments()) → unsignedInteger
+            $table->unsignedInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+
             // Thông tin cá nhân
             $table->string('full_name');
             $table->string('phone')->nullable();
             $table->string('identity_card_number');
             $table->date('dob')->nullable();
             $table->string('hometown')->nullable();
-            
+
             // Đánh dấu người đại diện phòng
             $table->boolean('is_representative')->default(false);
-            
+
             $table->timestamps();
         });
     }

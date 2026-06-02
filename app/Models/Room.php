@@ -95,6 +95,20 @@ class Room extends Model
         return $this->hasMany(RoomOccupant::class);
     }
 
+    // ── Module Auto-Billing ───────────────────────────────────────────────
+
+    /**
+     * Tất cả các bản ghi chỉ số điện/nước của phòng.
+     * Room hasMany UtilityReading (rooms.id → utility_readings.room_id)
+     *
+     * Cách dùng:
+     *   $room->utilityReadings()->forMonth(6, 2026)->first();
+     */
+    public function utilityReadings()
+    {
+        return $this->hasMany(UtilityReading::class, 'room_id', 'id');
+    }
+
     public function scopeName($query, $request)
     {
         if (isset($request->name)) {

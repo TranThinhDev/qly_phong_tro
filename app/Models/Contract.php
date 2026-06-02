@@ -144,6 +144,20 @@ class Contract extends Model
         return $this->hasMany(RoomOccupant::class);
     }
 
+    // ── Module Auto-Billing ───────────────────────────────────────────────
+
+    /**
+     * Tất cả hóa đơn được sinh từ hợp đồng này.
+     * Contract hasMany Invoice (contracts.id → invoices.contract_id)
+     *
+     * Cách dùng:
+     *   $contract->invoices()->forBillingMonth('06/2026')->first();
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'contract_id', 'id');
+    }
+
     // ══════════════════════════════════════════════════════════════════════
     // CLICKWRAP / IMMUTABILITY HELPERS
     // ══════════════════════════════════════════════════════════════════════
