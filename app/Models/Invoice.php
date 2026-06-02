@@ -168,7 +168,9 @@ class Invoice extends Model
      */
     public function recalculateTotal(): bool
     {
-        $subtotal = $this->items()->sum('total');
+        // Bỏ qua item late_fee để cộng riêng bằng cột late_fee, tránh tính đúp
+        $subtotal = $this->items()->where('type', '!=', 'late_fee')->sum('total');
+        
         $this->forceFill([
             'total_amount' => $subtotal + (float) $this->late_fee,
         ]);
@@ -183,14 +185,24 @@ class Invoice extends Model
      */
     public function applyLateFee(float $lateFeeAmount): bool
     {
-        $subtotal = $this->items()->sum('total');
-
+        // 1. Cập nhật cột late_fee
         $this->forceFill([
-            'late_fee'     => $lateFeeAmount,
-            'total_amount' => $subtotal + $lateFeeAmount,
-        ]);
+            'late_fee' => $lateFeeAmount,
+        ])->save();
 
-        return $this->save();
+        // 2. Tạo hoặc cập nhật InvoiceItem cho khoản phạt này
+        $this->items()->updateOrCreate(
+            ['type' => 'late_fee'],
+            [
+                'description' => 'Phí phạt trễ hạn thanh toán',
+                'quantity'    => 1,
+                'unit_price'  => $lateFeeAmount,
+                'total'       => $lateFeeAmount,
+            ]
+        );
+
+        // 3. Tính lại tổng
+        return $this->recalculateTotal();
     }
 
     /**

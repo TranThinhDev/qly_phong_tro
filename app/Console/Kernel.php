@@ -28,6 +28,20 @@ class Kernel extends ConsoleKernel
                  ->withoutOverlapping()
                  ->sendOutputTo(storage_path('logs/billing-monthly.log'))
                  ->emailOutputOnFailure(config('mail.from.address'));
+
+        // ── Nhắc nhở chủ trọ nhập chỉ số điện nước (ngày 28 hàng tháng) ──
+        $schedule->command('billing:remind-utility')
+                 ->monthlyOn(28, '08:00')
+                 ->withoutOverlapping()
+                 ->sendOutputTo(storage_path('logs/billing-remind-utility.log'));
+
+        // ── Xử lý hóa đơn quá hạn (chạy vào 01:00 hàng ngày) ──────────────
+        // Chạy hàng ngày để tính từ lúc due_date trôi qua
+        // (Thường là due_date là ngày 10, nếu qua ngày 11 lúc 01:00 sẽ bị phạt)
+        $schedule->command('billing:process-overdue')
+                 ->dailyAt('01:00')
+                 ->withoutOverlapping()
+                 ->sendOutputTo(storage_path('logs/billing-process-overdue.log'));
     }
 
     /**
