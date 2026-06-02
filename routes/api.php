@@ -44,6 +44,18 @@ Route::namespace('App\Http\Controllers\Api')->group(function() {
     Route::post('dispute/request-refund', 'DisputeController@requestRefund')
         ->name('dispute.request-refund');
 
+    // ── Module Auto-Billing: Chỉ số điện/nước ────────────────────────────
+    // Prefix 'landlord' phân biệt với các route tenant/admin
+    Route::prefix('landlord')->group(function () {
+        // Lấy danh sách phòng active + chỉ số tháng hiện tại
+        Route::get('utility-readings/rooms', 'UtilityReadingController@activeRooms')
+            ->name('landlord.utility-readings.rooms');
+
+        // Lưu/cập nhật chỉ số điện nước (multipart/form-data vì có upload ảnh)
+        Route::post('utility-readings', 'UtilityReadingController@store')
+            ->name('landlord.utility-readings.store');
+    });
+
 })->middleware('auth:api');
 
 // ── Route dành riêng cho Admin ────────────────────────────────────────────────

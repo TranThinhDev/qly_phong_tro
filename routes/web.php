@@ -138,6 +138,11 @@ Route::middleware('blockAccount')->group(function () {
         Route::get('contracts/{contract}/sign', 'ContractController@showSignPage')->name('contracts.sign');
         Route::post('contracts/{contract}/agree-and-pay', 'ContractController@agreeAndPay')->name('contracts.agree_pay');
 
+        // ── Module Auto-Billing: Nhập chỉ số điện/nước ───────────────────────
+        Route::get('utility-readings', function () {
+            return view('billing.utility-readings');
+        })->name('billing.utility-readings');
+
         // Đổi mật khẩu tài khoản
         Route::get('doi-mat-khau', 'UserController@changePassword')->name('user.change_password');
     });
