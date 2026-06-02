@@ -56,6 +56,12 @@ Route::namespace('App\Http\Controllers\Api')->group(function() {
             ->name('landlord.utility-readings.store');
     });
 
+    // ── Module Auto-Billing: Thanh toán hóa đơn (auth – chỉ tenant) ─────
+    // Tenant gọi để lấy VNPAY checkout URL cho một hóa đơn cụ thể.
+    Route::get('invoices/{id}/payment-url', 'InvoicePaymentController@generatePaymentUrl')
+        ->name('invoices.payment-url')
+        ->where('id', '[0-9]+');
+
 })->middleware('auth:api');
 
 // ── Route dành riêng cho Admin ────────────────────────────────────────────────
@@ -77,9 +83,15 @@ Route::namespace('App\Http\Controllers\Api')
 Route::match(['get', 'post'], 'map/rooms', 'App\Http\Controllers\Api\MapController@getRooms')
     ->name('api.map.rooms');
 
-// ── VNPay IPN Webhook (Public – không cần auth, gọi từ server VNPay) ──────────
+// ── VNPay IPN Webhook: Tiền cọc hợp đồng (Public – không cần auth) ──────────────
 Route::get('vnpay/ipn', 'App\Http\Controllers\PaymentController@vnpayIpn')
     ->name('api.vnpay.ipn');
+
+// ── VNPay IPN Webhook: Hóa đơn hàng tháng (Public – không cần auth) ─────────────
+// Tách endpoint riêng để log/debug độc lập với luồng deposit.
+// VNPAY gọi GET đến URL này sau khi giao dịch hoàn tất (bất kể thành công hay thất bại).
+Route::get('webhooks/vnpay-invoice-ipn', 'App\Http\Controllers\Api\InvoicePaymentController@vnpayIpn')
+    ->name('api.invoices.vnpay.ipn');
 
 Route::fallback(function(){
     return response()->json([
