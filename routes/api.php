@@ -54,6 +54,16 @@ Route::namespace('App\Http\Controllers\Api')->group(function() {
         // Lưu/cập nhật chỉ số điện nước (multipart/form-data vì có upload ảnh)
         Route::post('utility-readings', 'UtilityReadingController@store')
             ->name('landlord.utility-readings.store');
+
+        // ── Module 4: KYC – Chủ trọ nộp hồ sơ xác minh danh tính ─────────
+        // POST: nộp hồ sơ KYC (CMND 2 mặt + giấy tờ sở hữu)
+        // File lưu trong storage/app/private_kyc/{user_id}/ (KHÔNG public)
+        Route::post('kyc', 'KycController@submit')
+            ->name('landlord.kyc.submit');
+
+        // GET: kiểm tra trạng thái KYC của chính mình
+        Route::get('kyc/status', 'KycController@status')
+            ->name('landlord.kyc.status');
     });
 
     // ── Module Auto-Billing: Thanh toán hóa đơn (auth – chỉ tenant) ─────
@@ -76,6 +86,39 @@ Route::namespace('App\Http\Controllers\Api')
         Route::post('dispute/approve-refund', 'DisputeController@approveRefund')
             ->name('dispute.approve-refund');
 
+        // ── Module 4: KYC – Admin xét duyệt hồ sơ ─────────────────────────
+        // GET  /api/admin/kyc              Danh sách KYC (có filter ?status=)
+        // GET  /api/admin/kyc/{id}         Chi tiết + secure preview URLs
+        // POST /api/admin/kyc/{id}/approve Phê duyệt + tạo Wallet
+        // POST /api/admin/kyc/{id}/reject  Từ chối kèm lý do
+        Route::prefix('kyc')->group(function () {
+            Route::get('/', 'AdminKycController@index')
+                ->name('admin.kyc.index');
+            Route::get('{id}', 'AdminKycController@show')
+                ->name('admin.kyc.show')
+                ->where('id', '[0-9]+');
+            Route::post('{id}/approve', 'AdminKycController@approve')
+                ->name('admin.kyc.approve')
+                ->where('id', '[0-9]+');
+            Route::post('{id}/reject', 'AdminKycController@reject')
+                ->name('admin.kyc.reject')
+                ->where('id', '[0-9]+');
+        });
+
+    });
+
+// ── Module 4: Phục vụ file KYC riêng tư (Admin only) ──────────────────────────
+// Route tách riêng để tường minh middleware stack.
+// Middleware: auth:api (xác thực) + admin.api (chỉ role=1)
+//
+// GET /api/private-files/kyc?path={encoded_storage_path}
+// → Stream file từ storage/app/private_kyc/ về client
+// → Không bao giờ expose URL trực tiếp của storage
+Route::namespace('App\Http\Controllers\Api')
+    ->middleware(['auth:api', 'admin.api'])
+    ->group(function () {
+        Route::get('private-files/kyc', 'PrivateFileController@streamKycFile')
+            ->name('private-files.kyc');
     });
 
 // ── Bản đồ tìm kiếm theo bán kính (Public – không cần auth) ──────────────────
