@@ -2,6 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\KycController;
+use App\Http\Controllers\Api\WithdrawalController;
+use App\Http\Controllers\Api\AdminKycController;
+use App\Http\Controllers\Api\AdminWithdrawalController;
+use App\Http\Controllers\Api\PrivateFileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,6 +69,10 @@ Route::namespace('App\Http\Controllers\Api')->group(function() {
         // GET: kiểm tra trạng thái KYC của chính mình
         Route::get('kyc/status', 'KycController@status')
             ->name('landlord.kyc.status');
+
+        // Yêu cầu rút tiền từ ví
+        Route::post('withdraw', 'WithdrawalController@withdraw')
+            ->name('landlord.withdraw');
     });
 
     // ── Module Auto-Billing: Thanh toán hóa đơn (auth – chỉ tenant) ─────
@@ -102,6 +111,18 @@ Route::namespace('App\Http\Controllers\Api')
                 ->where('id', '[0-9]+');
             Route::post('{id}/reject', 'AdminKycController@reject')
                 ->name('admin.kyc.reject')
+                ->where('id', '[0-9]+');
+        });
+
+        // ── Module 4: Yêu cầu rút tiền – Admin xét duyệt ──────────────────
+        Route::prefix('withdrawals')->group(function () {
+            Route::get('/', 'AdminWithdrawalController@index')
+                ->name('admin.withdrawals.index');
+            Route::post('{id}/approve', 'AdminWithdrawalController@approve')
+                ->name('admin.withdrawals.approve')
+                ->where('id', '[0-9]+');
+            Route::post('{id}/reject', 'AdminWithdrawalController@reject')
+                ->name('admin.withdrawals.reject')
                 ->where('id', '[0-9]+');
         });
 
