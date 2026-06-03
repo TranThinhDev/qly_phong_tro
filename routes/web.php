@@ -87,6 +87,16 @@ Route::middleware('blockAccount')->group(function () {
                 Route::post('{id}/duyet', 'DisputeWebController@approve')->name('admin.disputes.approve');
                 Route::post('{id}/tu-choi', 'DisputeWebController@reject')->name('admin.disputes.reject');
             });
+
+            // ── Module 4: Quản lý KYC (Admin) ──────────────────────────────────
+            Route::prefix('kyc')->group(function () {
+                Route::get('/', 'KycWebController@index')->name('admin.kyc_web.index');
+            });
+
+            // ── Module 4: Quản lý Rút Tiền (Admin) ─────────────────────────────
+            Route::prefix('withdrawals')->group(function () {
+                Route::get('/', 'WithdrawalWebController@index')->name('admin.withdrawals_web.index');
+            });
         });
     });
 
@@ -142,6 +152,14 @@ Route::middleware('blockAccount')->group(function () {
         Route::get('utility-readings', function () {
             return view('billing.utility-readings');
         })->name('billing.utility-readings');
+
+        // ── Khách thuê: Danh sách Hóa đơn & Thanh toán ────────────────────
+        Route::get('tenant/invoices', 'TenantInvoiceWebController@index')->name('tenant.invoices.index');
+        Route::get('tenant/invoices/{id}', 'TenantInvoiceWebController@show')->name('tenant.invoices.show');
+
+        // ── Chủ trọ: Quản lý Hóa đơn & Ví tiền ────────────────────────────
+        Route::get('landlord/invoices', 'LandlordInvoiceWebController@index')->name('landlord.invoices.index');
+        Route::get('landlord/wallet', 'WalletWebController@index')->name('landlord.wallet.index');
 
         // Đổi mật khẩu tài khoản
         Route::get('doi-mat-khau', 'UserController@changePassword')->name('user.change_password');
