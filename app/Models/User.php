@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -102,5 +104,45 @@ class User extends Authenticatable
     public function contracts()
     {
         return $this->hasMany(Contract::class);
+    }
+
+    // ── Module 4: Escrow Wallet & KYC ────────────────────────────────────
+
+    /**
+     * Ví điện tử của người dùng (quan hệ 1-1).
+     * User hasOne Wallet (users.id → wallets.user_id)
+     *
+     * Cách dùng:
+     *   $user->wallet           // Wallet|null
+     *   $user->wallet->available_balance
+     */
+    public function wallet(): HasOne
+    {
+        return $this->hasOne(Wallet::class, 'user_id', 'id');
+    }
+
+    /**
+     * Tất cả yêu cầu xác minh danh tính (KYC) của người dùng.
+     * User hasMany KycRequest (users.id → kyc_requests.user_id)
+     *
+     * Cách dùng:
+     *   $user->kycRequests()->latest()->first()
+     */
+    public function kycRequests(): HasMany
+    {
+        return $this->hasMany(KycRequest::class, 'user_id', 'id');
+    }
+
+    /**
+     * Kiểm tra người dùng đã hoàn thành KYC (có ít nhất 1 request 'verified').
+     *
+     * Được dùng ở middleware, view directive, và business logic
+     * (ví dụ: chỉ cho phép chủ trọ đã KYC mới đăng phòng).
+     */
+    public function isKycVerified(): bool
+    {
+        return $this->kycRequests()
+                    ->where('status', 'verified')
+                    ->exists();
     }
 }

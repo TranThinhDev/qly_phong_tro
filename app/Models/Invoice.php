@@ -150,11 +150,6 @@ class Invoice extends Model
 
         $this->forceFill(['status' => $newStatus]);
 
-        // Ghi nhận thời điểm thanh toán hoàn tất
-        if ($newStatus === 'paid') {
-            $this->forceFill(['paid_at' => now()]);
-        }
-
         return $this->save();
     }
 
