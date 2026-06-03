@@ -7,6 +7,7 @@ use App\Jobs\GenerateInvoicePdfAndSendEmailJob;
 use App\Models\Invoice;
 use App\Models\PaymentTransaction;
 use App\Services\VnpayService;
+use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -174,7 +175,7 @@ class InvoicePaymentController extends Controller
      *  6. Cập nhật PaymentTransaction với kết quả
      *  7. Trả {"RspCode":"00","Message":"Confirm Success"}
      */
-    public function vnpayIpn(Request $request, VnpayService $vnpayService): JsonResponse
+    public function vnpayIpn(Request $request, VnpayService $vnpayService, WalletService $walletService): JsonResponse
     {
         $inputData = $request->all();
 
@@ -221,7 +222,7 @@ class InvoicePaymentController extends Controller
             // ── 4. Toàn bộ xử lý bên trong DB::transaction + lockForUpdate ──
             return DB::transaction(function () use (
                 $paymentTxn, $vnpAmountVnd, $vnpTransactionNo,
-                $responseCode, $inputData, $vnpayService
+                $responseCode, $inputData, $vnpayService, $walletService
             ) {
                 // Lock Invoice row để chống race condition với IPN đồng thời
                 $invoice = Invoice::lockForUpdate()->find($paymentTxn->invoice_id);
@@ -265,6 +266,25 @@ class InvoicePaymentController extends Controller
                     if ($totalPaidAfter >= (float) $invoice->total_amount) {
                         // Thanh toán ĐỦ hoặc dư → chuyển sang 'paid'
                         $invoice->transitionTo('paid');
+
+                        // Thêm tiền vào ví escrow của chủ trọ (pending_balance)
+                        $contract = $invoice->contract()->with('room')->first();
+                        $landlordId = $contract ? $contract->room->chutro_id : null;
+                        
+                        if ($landlordId) {
+                            $walletService->addPendingFunds(
+                                $landlordId,
+                                (float) $invoice->total_amount,
+                                $invoice,
+                                "Thanh toán hóa đơn {$invoice->invoice_code} (chờ giải phóng)"
+                            );
+                            
+                            Log::info('[InvoiceIPN] Tiền đã vào escrow của chủ trọ', [
+                                'invoice_id'  => $invoice->id,
+                                'landlord_id' => $landlordId,
+                                'amount'      => $invoice->total_amount,
+                            ]);
+                        }
 
                         Log::info('[InvoiceIPN] Invoice PAID in full', [
                             'invoice_id'   => $invoice->id,

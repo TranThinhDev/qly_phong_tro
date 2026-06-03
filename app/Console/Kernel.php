@@ -42,6 +42,12 @@ class Kernel extends ConsoleKernel
                  ->dailyAt('01:00')
                  ->withoutOverlapping()
                  ->sendOutputTo(storage_path('logs/billing-process-overdue.log'));
+
+        // ── Module 4: Tự động giải phóng tiền cọc/thanh toán sau 24h ───────
+        $schedule->command('escrow:release-funds')
+                 ->hourly()
+                 ->withoutOverlapping()
+                 ->sendOutputTo(storage_path('logs/escrow-release-funds.log'));
     }
 
     /**

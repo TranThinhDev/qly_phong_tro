@@ -59,9 +59,10 @@ class Invoice extends Model
 
     // ── Type Casting ──────────────────────────────────────────────────────
     protected $casts = [
-        'due_date'     => 'date',
-        'total_amount' => 'decimal:2',
-        'late_fee'     => 'decimal:2',
+        'due_date'         => 'date',
+        'total_amount'     => 'decimal:2',
+        'late_fee'         => 'decimal:2',
+        'is_fund_released' => 'boolean',
     ];
 
     // ══════════════════════════════════════════════════════════════════════
