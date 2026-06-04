@@ -157,6 +157,18 @@ Route::get('vnpay/ipn', 'App\Http\Controllers\PaymentController@vnpayIpn')
 Route::get('webhooks/vnpay-invoice-ipn', 'App\Http\Controllers\Api\InvoicePaymentController@vnpayIpn')
     ->name('api.invoices.vnpay.ipn');
 
+// ── Chatbot AI tư vấn phòng trọ (Public – không yêu cầu đăng nhập) ──────────
+// POST /api/chatbot/send-message   → Gửi tin nhắn, nhận phản hồi từ Gemini AI
+// POST /api/chatbot/clear-history  → Xóa lịch sử hội thoại khỏi Session
+Route::prefix('chatbot')
+    ->namespace('App\Http\Controllers\Api')
+    ->group(function () {
+        Route::post('send-message', 'ChatController@sendMessage')
+            ->name('chatbot.send-message');
+        Route::post('clear-history', 'ChatController@clearHistory')
+            ->name('chatbot.clear-history');
+    });
+
 Route::fallback(function(){
     return response()->json([
         'message' => 'Page Not Found. If error persists, contact admin@gmail.com'], 404);
