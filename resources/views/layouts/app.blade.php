@@ -11,7 +11,7 @@
     <meta name="keywords" content="sheltos">
     <meta name="author" content="sheltos">
     <link rel="icon" href="{{asset('assets/images/logo/favicon.png')}}" type="image/x-icon" />
-    <title>PHONGTRO20 - Tìm phòng đơn giản, thuê phòng giản đơn</title>
+    <title>CityHouse - Tìm phòng đơn giản, thuê phòng giản đơn</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!--Google font-->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,500,500i,600,600i,700,700i,800,800i" rel="stylesheet">

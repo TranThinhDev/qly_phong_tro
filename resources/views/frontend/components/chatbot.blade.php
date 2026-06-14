@@ -387,7 +387,7 @@
       </div>
       <div>
         <div class="cb-bubble bot">
-          👋 Xin chào! Tôi là trợ lý AI của <strong>PhongTro20</strong>.<br>
+          👋 Xin chào! Tôi là trợ lý AI của <strong>CityHouse</strong>.<br>
           Tôi có thể giúp bạn tìm phòng trọ phù hợp với nhu cầu và ngân sách. Bạn muốn tìm phòng ở khu vực nào? 🏠
         </div>
         <div class="cb-time" id="cb-welcome-time"></div>

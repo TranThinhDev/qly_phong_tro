@@ -29,15 +29,15 @@
         <div class="row">
             <div class="col">
                 <div class="title-2">
-                    <h2>PHONGTRO20 - Tìm phòng đơn giản, thuê phòng giản đơn</h2>
+                    <h2>CityHouse - Tìm phòng đơn giản, thuê phòng giản đơn</h2>
                     <p class="font-roboto">Nơi kết nối đơn giản giữa người thuê và chủ nhà. Tìm kiếm phòng trọ dễ dàng theo giá, vị trí và tiện nghi. Chủ nhà có thể quản lý thông tin và tương tác với khách hàng tiềm năng. Giao diện thân thiện và đặt phòng trực tuyến linh hoạt, là điểm đến tin cậy cho sinh viên, người làm việc và những người tìm kiếm ngôi nhà thoải mái.</p>
                 </div>
                 <div class="user-about">
                     <div class="row">
                         <div class="col-xl-5 col-lg-7">
                             <div class="about-content">
-                                <h3>Tại sao lại có PHONGTRO20 ?</h3>
-                                <p class="font-roboto">PHONGTRO20 là một trang web quản lý và tìm kiếm phòng trọ tại các thành phố lớn. Nó được tạo ra để đáp ứng nhu cầu ngày càng tăng về việc tìm kiếm nơi ở thuận tiện và quản lý thông tin phòng trọ. Với giao diện thân thiện và tính năng đặt phòng linh hoạt, PHONGTRO20 nhanh chóng trở thành một điểm đến tin cậy cho cộng đồng sinh viên và người làm việc. Nền tảng này cũng tạo cơ hội cho chủ nhà quản lý thông tin và tương tác với khách hàng tiềm năng một cách thuận lợi. PHONGTRO20 không chỉ là một công cụ tìm kiếm nhà, mà còn là nơi kết nối cộng đồng, tạo ra một môi trường sống chung tích cực dựa trên phản hồi và đánh giá liên tục từ cả người thuê và chủ nhà.</p>
+                                <h3>Tại sao lại có CityHouse ?</h3>
+                                <p class="font-roboto">CityHouse là một trang web quản lý và tìm kiếm phòng trọ tại các thành phố lớn. Nó được tạo ra để đáp ứng nhu cầu ngày càng tăng về việc tìm kiếm nơi ở thuận tiện và quản lý thông tin phòng trọ. Với giao diện thân thiện và tính năng đặt phòng linh hoạt, CityHouse nhanh chóng trở thành một điểm đến tin cậy cho cộng đồng sinh viên và người làm việc. Nền tảng này cũng tạo cơ hội cho chủ nhà quản lý thông tin và tương tác với khách hàng tiềm năng một cách thuận lợi. CityHouse không chỉ là một công cụ tìm kiếm nhà, mà còn là nơi kết nối cộng đồng, tạo ra một môi trường sống chung tích cực dựa trên phản hồi và đánh giá liên tục từ cả người thuê và chủ nhà.</p>
                             </div>
                         </div>
                         <div class="col-xl-7 map-image col-lg-5">
@@ -57,7 +57,7 @@
         <div class="row">
             <div class="col">
                 <div class="title-2">
-                    <h2>Ai đã tạo ra PHONGTRO20</h2>
+                    <h2>Ai đã tạo ra CityHouse</h2>
                     <p class="font-roboto">Một anh chàng coder xây dựng trang web này bằng cả trái tim ❤️</p>
                 </div>
                 <div class="testimonial-4">
