@@ -115,14 +115,15 @@ Route::namespace('App\Http\Controllers\Api')
         });
 
         // ── Module 4: Yêu cầu rút tiền – Admin xét duyệt ──────────────────
+        // Các route này đã được chuyển sang web.php để tương thích với Blade view (session/CSRF)
         Route::prefix('withdrawals')->group(function () {
             Route::get('/', 'AdminWithdrawalController@index')
-                ->name('admin.withdrawals.index');
+                ->name('api.admin.withdrawals.index');
             Route::post('{id}/approve', 'AdminWithdrawalController@approve')
-                ->name('admin.withdrawals.approve')
+                ->name('api.admin.withdrawals.approve')
                 ->where('id', '[0-9]+');
             Route::post('{id}/reject', 'AdminWithdrawalController@reject')
-                ->name('admin.withdrawals.reject')
+                ->name('api.admin.withdrawals.reject')
                 ->where('id', '[0-9]+');
         });
 

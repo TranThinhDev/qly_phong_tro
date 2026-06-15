@@ -96,6 +96,8 @@ Route::middleware('blockAccount')->group(function () {
             // ── Module 4: Quản lý Rút Tiền (Admin) ─────────────────────────────
             Route::prefix('withdrawals')->group(function () {
                 Route::get('/', 'WithdrawalWebController@index')->name('admin.withdrawals_web.index');
+                Route::post('{id}/approve', 'WithdrawalWebController@approve')->name('admin.withdrawals.approve');
+                Route::post('{id}/reject', 'WithdrawalWebController@reject')->name('admin.withdrawals.reject');
             });
 
             // ── Quản lý Hợp đồng & Hóa đơn (Admin) ─────────────────────────────
@@ -174,6 +176,7 @@ Route::middleware('blockAccount')->group(function () {
             Route::get('invoices/{id}', 'LandlordInvoiceWebController@show')->name('landlord.invoices.show');
             Route::post('invoices/{id}/update-status', 'LandlordInvoiceWebController@updateStatus')->name('landlord.invoices.update_status');
             Route::get('wallet', 'WalletWebController@index')->name('landlord.wallet.index');
+            Route::post('wallet/withdraw', 'WalletWebController@withdraw')->name('landlord.withdraw');
         });
 
         Route::get('contracts/{id}', 'ContractController@show')->name('contracts.show');
