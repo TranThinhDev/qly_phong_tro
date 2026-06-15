@@ -379,6 +379,15 @@ class BookingController extends Controller
                             'status'     => 3,        // 3 = đã có người cọc / đã bọn
                             'hold_until' => null,
                         ]);
+
+                        // Đưa tiền cọc vào ví tạm giữ (pending_balance) của Chủ trọ
+                        $walletService = app(\App\Services\WalletService::class);
+                        $walletService->addPendingFunds(
+                            $booking->room->chutro_id,
+                            (float) $amount,
+                            $booking,
+                            "Cọc tiền giữ phòng " . $booking->room->name . " (Mã: " . $booking->booking_code . ")"
+                        );
                     }
                 });
 

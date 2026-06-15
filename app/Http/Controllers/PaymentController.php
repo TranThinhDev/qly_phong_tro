@@ -16,7 +16,7 @@ class PaymentController extends Controller
      * IPN Webhook: VNPay gọi ngầm vào URL này để thông báo kết quả thanh toán
      * Route này KHÔNG được bọc middleware auth hay csrf
      */
-    public function vnpayIpn(Request $request, VnpayService $vnpayService)
+    public function vnpayIpn(Request $request, VnpayService $vnpayService, \App\Services\WalletService $walletService)
     {
         $inputData = $request->all();
         
@@ -36,7 +36,7 @@ class PaymentController extends Controller
 
             // 2. Tìm Transaction và Lock Row để chống Race Condition
             // Bắt buộc nằm trong DB::transaction để lock có hiệu lực
-            return DB::transaction(function () use ($inputData, $transactionCode, $vnpAmount, $vnpayService) {
+            return DB::transaction(function () use ($inputData, $transactionCode, $vnpAmount, $vnpayService, $walletService) {
                 
                 // Dùng lockForUpdate() để block các request đồng thời truy cập vào record này
                 $transaction = Transaction::where('transaction_code', $transactionCode)
@@ -88,22 +88,18 @@ class PaymentController extends Controller
                     // b. Cập nhật hợp đồng thành 'active'
                     $contract->transitionTo('active');
 
-                    // c. Cập nhật trạng thái phòng (ví dụ: status = 0 để ẩn khỏi danh sách tìm kiếm)
+                    // c. Cập nhật trạng thái phòng (ví dụ: status = 3 để ẩn khỏi danh sách tìm kiếm/đã cho thuê)
                     if ($contract->room) {
-                        $contract->room->update(['status' => 0]); // 0 = Ẩn/Đã cho thuê
+                        $contract->room->update(['status' => 3]);
                     }
 
-                    // d. Đưa tiền cọc vào bảng ví tạm (Pending Wallet) escrow
-                    // Kiểm tra xem đã có ví chưa để tránh lỗi duplicate entry (vì contract_id là unique)
-                    if (!$contract->pendingWallet) {
-                        $contract->pendingWallet()->create([
-                            'owner_id'              => $transaction->payer_id,
-                            'held_amount'           => $transaction->amount,
-                            'status'                => 'holding',
-                            'source_transaction_id' => $transaction->id,
-                            'note'                  => 'Tiền cọc giữ chỗ từ VNPAY',
-                        ]);
-                    }
+                    // d. Cộng tiền cọc thẳng vào ví khả dụng (available_balance) của Chủ trọ
+                    $walletService->topUp(
+                        $contract->landlord_id,
+                        (float) $transaction->amount,
+                        $contract,
+                        "Thanh toán cọc hợp đồng cho phòng " . ($contract->room ? $contract->room->name : '')
+                    );
 
                 } else {
                     // THẤT BẠI:

@@ -274,10 +274,9 @@ class ContractController extends Controller
     /**
      * Xử lý VNPay Return cho hợp đồng (Tiền cọc)
      */
-    public function vnpayReturn(Request $request)
+    public function vnpayReturn(Request $request, VnpayService $vnpay, \App\Services\WalletService $walletService)
     {
         $vnpData = $request->all();
-        $vnpay   = new VnpayService();
 
         if (! $vnpay->verifySignature($vnpData)) {
             \Illuminate\Support\Facades\Log::warning('[Contract VNPay Return] Chữ ký không hợp lệ', ['data' => $vnpData]);
@@ -296,7 +295,7 @@ class ContractController extends Controller
 
         if ($vnpay->isSuccess($vnpData)) {
             if ($transaction->status === 'pending') {
-                DB::transaction(function () use ($transaction, $contract, $vnpData) {
+                DB::transaction(function () use ($transaction, $contract, $vnpData, $walletService) {
                     $transaction->markAsCompleted($vnpData);
                     
                     if ($contract && $contract->status === 'pending_payment') {
@@ -306,6 +305,14 @@ class ContractController extends Controller
                         if ($contract->room) {
                             $contract->room->update(['status' => 3]);
                         }
+
+                        // Cộng tiền cọc thẳng vào ví khả dụng (available_balance) của Chủ trọ
+                        $walletService->topUp(
+                            $contract->landlord_id,
+                            (float) $transaction->amount,
+                            $contract,
+                            "Thanh toán cọc hợp đồng cho phòng " . ($contract->room ? $contract->room->name : '')
+                        );
 
                         // Gửi thông báo đến Chủ trọ
                         $this->MakeNotification(
