@@ -108,8 +108,15 @@
 
                         <a href="{{ route('contracts.download_pdf', $contract->id) }}" class="btn btn-info w-100 mb-3 text-white">Tải Xuất Hợp Đồng (PDF)</a>
 
-                        @if($user->role == 0 && $contract->status == 'draft')
-                            <a href="{{ route('contracts.sign', $contract->id) }}" class="btn btn-success w-100 mb-3">Ký Hợp Đồng</a>
+                        @if($user->role == 0)
+                            @if($contract->status == 'draft')
+                                <a href="{{ route('contracts.sign', $contract->id) }}" class="btn btn-success w-100 mb-3">Ký Hợp Đồng</a>
+                            @elseif($contract->status == 'pending_payment')
+                                <form action="{{ route('contracts.agree_pay', $contract->id) }}" method="POST" class="w-100 mb-3">
+                                    @csrf
+                                    <button type="submit" class="btn btn-warning w-100">Tiếp tục thanh toán cọc</button>
+                                </form>
+                            @endif
                         @endif
 
                         @if($user->role == 2)

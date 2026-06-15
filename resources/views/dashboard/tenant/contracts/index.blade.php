@@ -49,6 +49,8 @@
                                                 <span class="badge bg-success">Đang hiệu lực</span>
                                             @elseif($contract->status == 'draft')
                                                 <span class="badge bg-secondary">Bản nháp</span>
+                                            @elseif($contract->status == 'pending_payment')
+                                                <span class="badge bg-warning text-dark">Chờ thanh toán</span>
                                             @elseif($contract->status == 'expired')
                                                 <span class="badge bg-warning">Hết hạn</span>
                                             @elseif($contract->status == 'terminated')
@@ -60,6 +62,11 @@
                                         <td>
                                             @if($contract->status == 'draft')
                                                 <a href="{{ route('contracts.sign', $contract->id) }}" class="btn btn-sm btn-success">Ký HĐ</a>
+                                            @elseif($contract->status == 'pending_payment')
+                                                <form action="{{ route('contracts.agree_pay', $contract->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-warning">Thanh toán cọc</button>
+                                                </form>
                                             @endif
                                             <a href="{{ route('contracts.show', $contract->id) }}" class="btn btn-sm btn-primary">Chi tiết</a>
                                             <a href="{{ route('contracts.download_pdf', $contract->id) }}" class="btn btn-sm btn-info text-white">Tải PDF</a>

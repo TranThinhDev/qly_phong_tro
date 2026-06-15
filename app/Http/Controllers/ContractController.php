@@ -144,7 +144,7 @@ class ContractController extends Controller
                     'email'       => $validated['tenant_email'],
                     'PhoneNumber' => $validated['tenant_phone'],
                     'password'    => bcrypt($plainPassword),
-                    'role'        => 3 // Đảm bảo role là Người thuê
+                    'role'        => 0 // Đảm bảo role là Người thuê (0)
                 ]);
             }
 
@@ -186,8 +186,8 @@ class ContractController extends Controller
             $this->MakeNotification(
                 $tenant->id,
                 "Chủ trọ đã tạo hợp đồng mới cho phòng {$room->name}, vui lòng xem và ký.",
-                'tenant.contracts.show',
-                ['contract' => $contract->id]
+                'contracts.show',
+                ['id' => $contract->id]
             );
 
             return response()->json([
@@ -311,8 +311,8 @@ class ContractController extends Controller
                         $this->MakeNotification(
                             $contract->landlord_id,
                             "Người thuê đã thanh toán cọc và ký hợp đồng cho phòng " . ($contract->room ? $contract->room->name : ''),
-                            'landlord.contracts.show',
-                            ['contract' => $contract->id]
+                            'contracts.show',
+                            ['id' => $contract->id]
                         );
                     }
                 });
@@ -322,11 +322,10 @@ class ContractController extends Controller
                 ->with('success', 'Thanh toán tiền cọc hợp đồng thành công. Hợp đồng đã có hiệu lực.');
         } else {
             if ($transaction->status === 'pending') {
-                $transaction->markAsFailed();
+                $transaction->forceFill(['gateway_response' => $vnpData])->save();
+                $transaction->markAsFailed('Thanh toán thất bại hoặc hủy trên cổng VNPay');
                 
-                if ($contract && $contract->status === 'pending_payment') {
-                    $contract->transitionTo('draft');
-                }
+                // Bỏ đoạn revert về draft để giữ nguyên trạng thái pending_payment (chờ thanh toán lại)
             }
 
             return redirect()->route('tenant.contracts.index')
@@ -368,9 +367,9 @@ class ContractController extends Controller
             abort(403, 'Chỉ khách thuê mới có quyền ký hợp đồng này.');
         }
 
-        // 2. Kiểm tra trạng thái hợp đồng
-        if ($contract->status !== 'draft') {
-            return response()->json(['error' => 'Hợp đồng không ở trạng thái chờ ký.'], 400);
+        // 2. Kiểm tra trạng thái hợp đồng (cho phép Ký mới hoặc Thanh toán lại)
+        if (!in_array($contract->status, ['draft', 'pending_payment'])) {
+            return response()->json(['error' => 'Hợp đồng không ở trạng thái chờ ký hoặc chờ thanh toán.'], 400);
         }
 
         try {
@@ -378,10 +377,14 @@ class ContractController extends Controller
 
             // 3. Ghi nhận Clickwrap (chữ ký điện tử - Immutable)
             // Phương thức recordClickwrap sẽ ném exception nếu đã ký rồi.
-            $contract->recordClickwrap($request->ip(), $request->userAgent());
+            if (! $contract->isSigned()) {
+                $contract->recordClickwrap($request->ip(), $request->userAgent());
+            }
 
-            // 4. Chuyển trạng thái hợp đồng
-            $contract->transitionTo('pending_payment');
+            // 4. Chuyển trạng thái hợp đồng (nếu chưa chuyển)
+            if ($contract->status !== 'pending_payment') {
+                $contract->transitionTo('pending_payment');
+            }
 
             // 5. Tạo giao dịch (transaction) thanh toán cọc
             $transactionCode = 'TXN-' . time() . '-' . strtoupper(Str::random(6));

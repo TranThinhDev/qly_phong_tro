@@ -83,6 +83,13 @@
                         <span>Quản lý Hóa đơn</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('admin.withdrawals_web.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'admin.withdrawals_web.index') ? 'active' : '' }}">
+                        <i data-feather="credit-card"></i>
+                        <span>Quản lý Rút tiền</span>
+                    </a>
+                </li>
                 @elseif(Auth::user()->role == 2)
                 <li class="sidebar-item">
                     <a href="{{ route('landlord.contracts.index') }}"
@@ -103,6 +110,13 @@
                         class="sidebar-link only-link {{ ($currentRoute == 'billing.utility-readings') ? 'active' : '' }}">
                         <i data-feather="droplet"></i>
                         <span>Ghi Điện / Nước</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('landlord.wallet.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'landlord.wallet.index') ? 'active' : '' }}">
+                        <i data-feather="credit-card"></i>
+                        <span>Ví tiền</span>
                     </a>
                 </li>
                 @elseif(Auth::user()->role == 0)
