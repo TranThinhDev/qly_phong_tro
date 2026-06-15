@@ -97,6 +97,14 @@ Route::middleware('blockAccount')->group(function () {
             Route::prefix('withdrawals')->group(function () {
                 Route::get('/', 'WithdrawalWebController@index')->name('admin.withdrawals_web.index');
             });
+
+            // ── Quản lý Hợp đồng & Hóa đơn (Admin) ─────────────────────────────
+            Route::prefix('contracts')->group(function () {
+                Route::get('/', 'AdminContractController@index')->name('admin.contracts.index');
+            });
+            Route::prefix('invoices')->group(function () {
+                Route::get('/', 'AdminInvoiceController@index')->name('admin.invoices.index');
+            });
         });
     });
 
@@ -153,13 +161,24 @@ Route::middleware('blockAccount')->group(function () {
             return view('billing.utility-readings');
         })->name('billing.utility-readings');
 
-        // ── Khách thuê: Danh sách Hóa đơn & Thanh toán ────────────────────
-        Route::get('tenant/invoices', 'TenantInvoiceWebController@index')->name('tenant.invoices.index');
-        Route::get('tenant/invoices/{id}', 'TenantInvoiceWebController@show')->name('tenant.invoices.show');
+        // ── Khách thuê: Danh sách Hợp đồng, Hóa đơn & Thanh toán ────────────────────
+        Route::prefix('tenant')->group(function () {
+            Route::get('contracts', 'ContractController@index')->name('tenant.contracts.index');
+            Route::get('invoices', 'TenantInvoiceWebController@index')->name('tenant.invoices.index');
+            Route::get('invoices/{id}', 'TenantInvoiceWebController@show')->name('tenant.invoices.show');
+        });
 
-        // ── Chủ trọ: Quản lý Hóa đơn & Ví tiền ────────────────────────────
-        Route::get('landlord/invoices', 'LandlordInvoiceWebController@index')->name('landlord.invoices.index');
-        Route::get('landlord/wallet', 'WalletWebController@index')->name('landlord.wallet.index');
+        // ── Chủ trọ: Quản lý Hợp đồng, Hóa đơn & Ví tiền ────────────────────────────
+        Route::prefix('landlord')->group(function () {
+            Route::get('contracts', 'ContractController@index')->name('landlord.contracts.index');
+            Route::get('invoices', 'LandlordInvoiceWebController@index')->name('landlord.invoices.index');
+            Route::get('invoices/{id}', 'LandlordInvoiceWebController@show')->name('landlord.invoices.show');
+            Route::post('invoices/{id}/update-status', 'LandlordInvoiceWebController@updateStatus')->name('landlord.invoices.update_status');
+            Route::get('wallet', 'WalletWebController@index')->name('landlord.wallet.index');
+        });
+
+        Route::get('contracts/{id}', 'ContractController@show')->name('contracts.show');
+        Route::post('contracts/{id}/terminate', 'ContractController@terminate')->name('contracts.terminate');
 
         // Đổi mật khẩu tài khoản
         Route::get('doi-mat-khau', 'UserController@changePassword')->name('user.change_password');

@@ -291,11 +291,24 @@
                         <h6 class="color-2"><a href="{{ route('booking.index') }}">Danh sách đặt phòng</a></h6>
                     </div>
                 </div>
-                <div class="layouts-settings">
-                    <div class="customizer-title">
-                        <h6 class="color-2"><a href="{{ route('contracts.create') }}">Tạo Hợp Đồng Thuê Phòng</a></h6>
+                @if (Auth::user()->role == 2)
+                    <div class="layouts-settings">
+                        <div class="customizer-title">
+                            <h6 class="color-2"><a href="{{ route('landlord.contracts.index') }}">Quản lý Hợp đồng</a></h6>
+                        </div>
                     </div>
-                </div>
+                    <div class="layouts-settings">
+                        <div class="customizer-title">
+                            <h6 class="color-2"><a href="{{ route('landlord.invoices.index') }}">Quản lý Hóa đơn</a></h6>
+                        </div>
+                    </div>
+                @elseif (Auth::user()->role == 3)
+                    <div class="layouts-settings">
+                        <div class="customizer-title">
+                            <h6 class="color-2"><a href="{{ route('tenant.invoices.index') }}">Hóa đơn của tôi</a></h6>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     @endsection

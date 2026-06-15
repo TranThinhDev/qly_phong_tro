@@ -16,6 +16,70 @@ use App\Services\VnpayService;
 class ContractController extends Controller
 {
     /**
+     * Hiển thị danh sách hợp đồng cho Chủ trọ hoặc Người thuê
+     */
+    public function index()
+    {
+        $user = Auth::user();
+
+        if ($user->role == 2) {
+            // Chủ trọ: Lấy hợp đồng mà họ là landlord
+            $contracts = Contract::with(['room', 'tenant'])
+                ->where('landlord_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+            return view('contracts.index', compact('contracts', 'user'));
+        } elseif ($user->role == 3) {
+            // Người thuê: Lấy hợp đồng mà họ là tenant
+            $contracts = Contract::with(['room', 'landlord'])
+                ->where('tenant_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+            return view('contracts.index', compact('contracts', 'user'));
+        }
+
+        abort(403, 'Bạn không có quyền truy cập trang này.');
+    }
+
+    /**
+     * Chi tiết Hợp đồng
+     */
+    public function show($id)
+    {
+        $contract = Contract::with(['room', 'tenant', 'landlord'])->findOrFail($id);
+        $user = Auth::user();
+
+        // Kiểm tra quyền: chỉ Admin, Chủ trọ của hợp đồng này, hoặc Người thuê của hợp đồng này mới được xem
+        if ($user->role != 1 && $contract->landlord_id != $user->id && $contract->tenant_id != $user->id) {
+            abort(403, 'Bạn không có quyền xem hợp đồng này.');
+        }
+
+        return view('contracts.show', compact('contract', 'user'));
+    }
+
+    /**
+     * Chấm dứt Hợp đồng
+     */
+    public function terminate($id)
+    {
+        $contract = Contract::findOrFail($id);
+        $user = Auth::user();
+
+        // Chỉ Admin hoặc Chủ trọ của hợp đồng này mới được chấm dứt
+        if ($user->role != 1 && $contract->landlord_id != $user->id) {
+            abort(403, 'Bạn không có quyền chấm dứt hợp đồng này.');
+        }
+
+        if (in_array($contract->status, ['active', 'draft'])) {
+            $contract->status = 'terminated';
+            $contract->save();
+            return redirect()->back()->with('success', 'Hợp đồng đã được chấm dứt.');
+        }
+
+        return redirect()->back()->with('error', 'Trạng thái hợp đồng không hợp lệ để chấm dứt.');
+    }
+
+    /**
      * Hiển thị giao diện Tạo Hợp đồng cho Chủ trọ
      */
     public function create()

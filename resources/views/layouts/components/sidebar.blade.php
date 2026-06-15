@@ -69,6 +69,20 @@
                     </ul>
                 </li>
                 <li class="sidebar-item">
+                    <a href="{{ route('admin.contracts.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'admin.contracts.index') ? 'active' : '' }}">
+                        <i data-feather="file-text"></i>
+                        <span>Quản lý Hợp đồng</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('admin.invoices.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'admin.invoices.index') ? 'active' : '' }}">
+                        <i data-feather="dollar-sign"></i>
+                        <span>Quản lý Hóa đơn</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
                     <a href="{{ route('admin.disputes.index') }}"
                         class="sidebar-link only-link {{ ($currentRoute == 'admin.disputes.index') ? 'active' : '' }}">
                         <i data-feather="alert-triangle"></i>
