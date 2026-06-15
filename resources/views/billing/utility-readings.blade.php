@@ -73,7 +73,6 @@
         display: flex; align-items: center; gap: 6px;
     }
     .btn-load:hover { background: #1d4ed8; transform: translateY(-1px); }
-    .btn-load:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
 
     /* ── Room table ── */
     .rooms-grid { display: flex; flex-direction: column; gap: 16px; }
@@ -145,8 +144,6 @@
         transition: border-color .2s, background .2s;
     }
     .meter-input:focus { border-color: #2563eb; background: #fff; }
-    .meter-input.is-error { border-color: #ef4444; background: #fff8f8; }
-    .meter-input.is-saved { border-color: #10b981; background: #f0fdf4; }
 
     .ref-hint {
         font-size: .74rem; color: #64748b;
@@ -202,24 +199,7 @@
         cursor: pointer; transition: background .2s, transform .15s;
         display: flex; align-items: center; gap: 6px;
     }
-    .btn-save:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); }
-    .btn-save:disabled { background: #93c5fd; cursor: not-allowed; transform: none; }
-
-    .save-success-msg {
-        font-size: .82rem; color: #10b981; font-weight: 600;
-        display: flex; align-items: center; gap: 4px;
-        animation: fadeInUp .3s ease;
-    }
-
-    /* ── Spinner ── */
-    .spinner {
-        width: 18px; height: 18px;
-        border: 2.5px solid rgba(255,255,255,.4);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin .7s linear infinite;
-        display: inline-block;
-    }
+    .btn-save:hover { background: #1d4ed8; transform: translateY(-1px); }
 
     /* ── Empty state ── */
     .empty-state {
@@ -229,30 +209,6 @@
     }
     .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
     .empty-state p { color: #64748b; font-size: .95rem; margin: 0; }
-
-    /* ── Skeleton loader ── */
-    .skeleton-card {
-        background: #fff; border-radius: 14px;
-        padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,.06);
-        animation: pulse 1.4s ease infinite;
-    }
-    .skeleton-line {
-        height: 14px; background: #e2e8f0;
-        border-radius: 6px; margin-bottom: 10px;
-    }
-    .skeleton-line.w-60 { width: 60%; }
-    .skeleton-line.w-40 { width: 40%; }
-    .skeleton-line.h-32 { height: 32px; margin: 0; }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50%       { opacity: .55; }
-    }
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(5px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
 </style>
 @endsection
 
@@ -269,9 +225,159 @@
             </div>
         </div>
 
-        {{-- Vue 3 App Mount Point --}}
-        <div id="utility-reading-app">
-            {{-- Rendered by Vue --}}
+        @if(session('success'))
+            <div class="alert alert-success mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        {{-- Lọc tháng/năm --}}
+        <div class="month-picker-card">
+            <form action="{{ route('billing.utility-readings') }}" method="GET" class="d-flex align-items-center" style="gap: 16px; flex-wrap: wrap; margin: 0; width: 100%;">
+                <div class="d-flex align-items-center" style="gap: 10px;">
+                    <label for="month-select">Kỳ hóa đơn:</label>
+                    <select id="month-select" name="month">
+                        @for ($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>Tháng {{ $m }}</option>
+                        @endfor
+                    </select>
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 10px;">
+                    <label for="year-input">Năm:</label>
+                    <input type="number" id="year-input" name="year" value="{{ $year }}" min="2000" max="2100">
+                </div>
+
+                <button class="btn-load" type="submit">
+                    <i class="fas fa-search"></i> Xem danh sách
+                </button>
+            </form>
+        </div>
+
+        <div class="rooms-grid">
+            @if(count($rooms) === 0)
+                <div class="empty-state">
+                    <div class="empty-icon">🏠</div>
+                    <p>Không có phòng nào đang cho thuê (active) trong tháng này.</p>
+                </div>
+            @else
+                @foreach($rooms as $room)
+                    @php
+                        $reading = $room->reading;
+                        $prevReading = $room->previous_reading;
+                        
+                        $isFinalized = $reading && $reading->status === 'finalized';
+                    @endphp
+                    
+                    <div class="room-card">
+                        <form action="{{ route('billing.utility-readings.store') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="room_id" value="{{ $room->id }}">
+                            <input type="hidden" name="month" value="{{ $month }}">
+                            <input type="hidden" name="year" value="{{ $year }}">
+
+                            <div class="room-card-header">
+                                <div>
+                                    <div class="room-name">
+                                        <i class="fas fa-door-open"></i> {{ $room->name }}
+                                    </div>
+                                    <div class="room-tenant">
+                                        <i class="fas fa-user text-muted"></i> 
+                                        Khách: <strong>{{ $room->activeContract->tenant->name }}</strong>
+                                        - ĐT: {{ $room->activeContract->tenant->PhoneNumber }}
+                                    </div>
+                                </div>
+                                <div>
+                                    @if(!$reading)
+                                        <span class="badge-status badge-empty">Chưa nhập</span>
+                                    @elseif($reading->status === 'finalized')
+                                        <span class="badge-status badge-finalized">Đã chốt (Tạo hóa đơn)</span>
+                                    @else
+                                        <span class="badge-status badge-draft">Đã lưu nháp</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="room-card-body">
+                                {{-- Số Điện --}}
+                                <div class="input-group-billing">
+                                    <label>
+                                        <span class="meter-icon">⚡</span> Điện (kWh)
+                                    </label>
+                                    <div class="input-with-ref">
+                                        <input type="number" name="electricity_index" class="meter-input" 
+                                            value="{{ old('electricity_index', $reading->electricity_index ?? '') }}"
+                                            placeholder="Nhập chỉ số điện..."
+                                            min="{{ $prevReading ? $prevReading->electricity_index : 0 }}"
+                                            {{ $isFinalized ? 'disabled' : 'required' }}>
+                                    </div>
+                                    @if($prevReading)
+                                        <div class="ref-hint">
+                                            <i class="fas fa-history"></i> Tháng trước: <strong>{{ $prevReading->electricity_index }}</strong>
+                                        </div>
+                                    @else
+                                        <div class="ref-hint"><i class="fas fa-info-circle"></i> Chưa có chỉ số tháng trước</div>
+                                    @endif
+                                </div>
+
+                                {{-- Số Nước --}}
+                                <div class="input-group-billing">
+                                    <label>
+                                        <span class="meter-icon">💧</span> Nước (m³)
+                                    </label>
+                                    <div class="input-with-ref">
+                                        <input type="number" name="water_index" class="meter-input" 
+                                            value="{{ old('water_index', $reading->water_index ?? '') }}"
+                                            placeholder="Nhập chỉ số nước..."
+                                            min="{{ $prevReading ? $prevReading->water_index : 0 }}"
+                                            {{ $isFinalized ? 'disabled' : 'required' }}>
+                                    </div>
+                                    @if($prevReading)
+                                        <div class="ref-hint">
+                                            <i class="fas fa-history"></i> Tháng trước: <strong>{{ $prevReading->water_index }}</strong>
+                                        </div>
+                                    @else
+                                        <div class="ref-hint"><i class="fas fa-info-circle"></i> Chưa có chỉ số tháng trước</div>
+                                    @endif
+                                </div>
+
+                                {{-- Ảnh minh chứng --}}
+                                <div class="input-group-billing">
+                                    <label><i class="fas fa-camera meter-icon" style="color:#64748b"></i> Ảnh đồng hồ</label>
+                                    
+                                    @if($reading && $reading->evidence_image_url)
+                                        <img src="{{ Storage::url($reading->evidence_image_url) }}" class="preview-img" alt="Ảnh minh chứng">
+                                    @endif
+
+                                    @if(!$isFinalized)
+                                        <div class="upload-zone" onclick="document.getElementById('evidence_{{ $room->id }}').click()">
+                                            <input type="file" id="evidence_{{ $room->id }}" name="evidence_image" accept="image/*" 
+                                                onchange="previewImage(this, 'preview_{{ $room->id }}')" 
+                                                {{ (!$reading || !$reading->evidence_image_url) ? 'required' : '' }}>
+                                            <i class="fas fa-cloud-upload-alt" style="font-size: 20px; color: #94a3b8"></i>
+                                            <div class="upload-hint">Tải ảnh lên</div>
+                                        </div>
+                                        <img id="preview_{{ $room->id }}" class="preview-img mt-2" style="display:none" alt="Preview">
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if(!$isFinalized)
+                                <div class="btn-save-row">
+                                    <button type="submit" class="btn-save">
+                                        <i class="fas fa-save"></i> Lưu Số Liệu
+                                    </button>
+                                </div>
+                            @endif
+                        </form>
+                    </div>
+                @endforeach
+            @endif
         </div>
 
     </div>
@@ -279,35 +385,17 @@
 @endsection
 
 @push('scripts')
-{{-- Vue 3 CDN (ESM via importmap) --}}
-<script type="importmap">
-{
-    "imports": {
-        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js"
-    }
-}
-</script>
-
-<script type="module">
-import { createApp } from 'vue';
-import UtilityReadingApp from '/js/billing/UtilityReadingForm.js';
-
-createApp(UtilityReadingApp).mount('#utility-reading-app');
-</script>
-
-{{-- Pass server data to Vue via global window object --}}
 <script>
-    window.__BILLING_CONFIG__ = {
-        apiBase: '{{ url("/api") }}',
-        // Sanctum token không cần thiết với auth:api vì dùng session cookie
-        // nhưng nếu dùng Sanctum SPA mode ta sẽ thêm ở đây
-        csrfToken: '{{ csrf_token() }}',
-        currentUser: {
-            id: {{ auth()->id() }},
-            name: '{{ auth()->user()->name }}',
-        },
-        currentMonth: {{ now()->month }},
-        currentYear: {{ now()->year }},
-    };
+    function previewImage(input, previewId) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var preview = document.getElementById(previewId);
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
 </script>
 @endpush

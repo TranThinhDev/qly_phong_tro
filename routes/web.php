@@ -157,9 +157,8 @@ Route::middleware('blockAccount')->group(function () {
         Route::post('contracts/{contract}/agree-and-pay', 'ContractController@agreeAndPay')->name('contracts.agree_pay');
 
         // ── Module Auto-Billing: Nhập chỉ số điện/nước ───────────────────────
-        Route::get('utility-readings', function () {
-            return view('billing.utility-readings');
-        })->name('billing.utility-readings');
+        Route::get('utility-readings', [\App\Http\Controllers\UtilityReadingWebController::class, 'index'])->name('billing.utility-readings');
+        Route::post('utility-readings', [\App\Http\Controllers\UtilityReadingWebController::class, 'store'])->name('billing.utility-readings.store');
 
         // ── Khách thuê: Danh sách Hợp đồng, Hóa đơn & Thanh toán ────────────────────
         Route::prefix('tenant')->group(function () {
