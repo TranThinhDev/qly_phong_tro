@@ -98,6 +98,13 @@
                         <span>Quản lý Hóa đơn</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('billing.utility-readings') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'billing.utility-readings') ? 'active' : '' }}">
+                        <i data-feather="droplet"></i>
+                        <span>Ghi Điện / Nước</span>
+                    </a>
+                </li>
                 @elseif(Auth::user()->role == 0)
                 <li class="sidebar-item">
                     <a href="{{ route('tenant.contracts.index') }}"

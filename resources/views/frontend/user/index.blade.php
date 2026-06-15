@@ -302,6 +302,11 @@
                             <h6 class="color-2"><a href="{{ route('landlord.invoices.index') }}">Quản lý Hóa đơn</a></h6>
                         </div>
                     </div>
+                    <div class="layouts-settings">
+                        <div class="customizer-title">
+                            <h6 class="color-2"><a href="{{ route('billing.utility-readings') }}">Ghi Điện/Nước</a></h6>
+                        </div>
+                    </div>
                 @elseif (Auth::user()->role == 0)
                     <div class="layouts-settings">
                         <div class="customizer-title">
