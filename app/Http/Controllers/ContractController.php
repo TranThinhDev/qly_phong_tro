@@ -28,14 +28,14 @@ class ContractController extends Controller
                 ->where('landlord_id', $user->id)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
-            return view('contracts.index', compact('contracts', 'user'));
+            return view('dashboard.landlord.contracts.index', compact('contracts', 'user'));
         } elseif ($user->role == 3) {
             // Người thuê: Lấy hợp đồng mà họ là tenant
             $contracts = Contract::with(['room', 'landlord'])
                 ->where('tenant_id', $user->id)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
-            return view('contracts.index', compact('contracts', 'user'));
+            return view('dashboard.tenant.contracts.index', compact('contracts', 'user'));
         }
 
         abort(403, 'Bạn không có quyền truy cập trang này.');
@@ -144,7 +144,7 @@ class ContractController extends Controller
                     'email'    => $validated['tenant_email'],
                     'phone'    => $validated['tenant_phone'],
                     'password' => bcrypt($plainPassword),
-                    // 'role' => 'tenant' // Bổ sung role nếu hệ thống của bạn có phân quyền
+                    'role'     => 3 // Đảm bảo role là Người thuê
                 ]);
             }
 
@@ -165,6 +165,17 @@ class ContractController extends Controller
             ]);
 
             DB::commit();
+
+            // 3.5 Lưu chỉ số điện nước đầu kỳ (nếu có)
+            if ($request->filled('electric_index') || $request->filled('water_index')) {
+                \App\Models\UtilityReading::create([
+                    'room_id'           => $validated['room_id'],
+                    'month'             => date('n', strtotime($validated['start_date'])),
+                    'year'              => date('Y', strtotime($validated['start_date'])),
+                    'electricity_index' => $request->input('electric_index', 0),
+                    'water_index'       => $request->input('water_index', 0)
+                ]);
+            }
 
             // 4. Gửi Email thông báo (Đưa vào Queue)
             \Illuminate\Support\Facades\Mail::to($tenant->email)->send(
@@ -250,6 +261,61 @@ class ContractController extends Controller
         return Storage::download($filePath, $fileName, [
             'Content-Type' => 'application/pdf',
         ]);
+    }
+
+    /**
+     * Xử lý VNPay Return cho hợp đồng (Tiền cọc)
+     */
+    public function vnpayReturn(Request $request)
+    {
+        $vnpData = $request->all();
+        $vnpay   = new VnpayService();
+
+        if (! $vnpay->verifySignature($vnpData)) {
+            \Illuminate\Support\Facades\Log::warning('[Contract VNPay Return] Chữ ký không hợp lệ', ['data' => $vnpData]);
+            return redirect()->route('trang_chu')
+                ->with('error', 'Chữ ký thanh toán không hợp lệ.');
+        }
+
+        $transactionCode = $vnpData['vnp_TxnRef'] ?? '';
+        $transaction = \App\Models\Transaction::with('contract')->where('transaction_code', $transactionCode)->first();
+
+        if (!$transaction) {
+            return redirect()->route('trang_chu')->with('error', 'Không tìm thấy giao dịch.');
+        }
+
+        $contract = $transaction->contract;
+
+        if ($vnpay->isSuccess($vnpData)) {
+            if ($transaction->status === 'pending') {
+                DB::transaction(function () use ($transaction, $contract, $vnpData) {
+                    $transaction->markAsCompleted($vnpData);
+                    
+                    if ($contract && $contract->status === 'pending_payment') {
+                        $contract->transitionTo('active');
+
+                        // Cập nhật trạng thái phòng thành "Đã cho thuê" (status = 3)
+                        if ($contract->room) {
+                            $contract->room->update(['status' => 3]);
+                        }
+                    }
+                });
+            }
+
+            return redirect()->route('tenant.contracts.index')
+                ->with('success', 'Thanh toán tiền cọc hợp đồng thành công. Hợp đồng đã có hiệu lực.');
+        } else {
+            if ($transaction->status === 'pending') {
+                $transaction->markAsFailed();
+                
+                if ($contract && $contract->status === 'pending_payment') {
+                    $contract->transitionTo('draft');
+                }
+            }
+
+            return redirect()->route('tenant.contracts.index')
+                ->with('error', 'Thanh toán thất bại hoặc đã bị hủy.');
+        }
     }
 
     /**

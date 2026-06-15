@@ -342,6 +342,11 @@ class BookingController extends Controller
         $bankCode      = $vnpData['vnp_BankCode'] ?? '';
         $amount        = isset($vnpData['vnp_Amount']) ? (int)($vnpData['vnp_Amount'] / 100) : 0;
 
+        // Nếu mã tham chiếu bắt đầu bằng TXN- thì đây là thanh toán hợp đồng (Contract)
+        if (\Illuminate\Support\Str::startsWith($bookingCode, 'TXN-')) {
+            return app(\App\Http\Controllers\ContractController::class)->vnpayReturn($request);
+        }
+
         // ── 2. Tìm booking tương ứng ───────────────────────────────────────────
         $booking = BookingInformation::with('room')
             ->where('booking_code', $bookingCode)
@@ -349,7 +354,7 @@ class BookingController extends Controller
 
         if (! $booking) {
             Log::error('[VNPay Return] Không tìm thấy booking', ['booking_code' => $bookingCode]);
-            return redirect()->route('home')
+            return redirect()->route('trang_chu')
                 ->with('error', 'Không tìm thấy đơn đặt phòng tương ứng.');
         }
 

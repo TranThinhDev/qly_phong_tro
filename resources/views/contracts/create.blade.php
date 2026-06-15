@@ -281,7 +281,7 @@ $(document).ready(function() {
 
         // Gọi API Backend
         $.ajax({
-            url: "{{ url('/api/contracts/draft') }}", // Sửa lại đúng URL Endpoint API ContractController@store của bạn
+            url: "{{ route('contracts.draft') }}", // Sửa lại đúng URL Endpoint
             method: "POST",
             data: $form.serialize(),
             success: function(response) {
