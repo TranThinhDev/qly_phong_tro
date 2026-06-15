@@ -96,8 +96,8 @@ class GenerateInvoicePdfAndSendEmailJob implements ShouldQueue
         Log::info("[InvoicePdfJob] Bắt đầu xử lý invoice #{$invoice->invoice_code}");
 
         // ── 2. Tìm ảnh bằng chứng điện/nước (nếu có) ────────────────────
-        $evidenceImagePath = null;
-        $evidenceImageUrl  = null;
+        $electricityEvidenceImagePath = null;
+        $waterEvidenceImagePath       = null;
 
         if ($invoice->contract?->room) {
             $room = $invoice->contract->room;
@@ -107,27 +107,34 @@ class GenerateInvoicePdfAndSendEmailJob implements ShouldQueue
             $reading = UtilityReading::where('room_id', $room->id)
                 ->where('month', (int) $billMonth)
                 ->where('year',  (int) $billYear)
-                ->whereNotNull('evidence_image_url')
+                ->where(function($q) {
+                    $q->whereNotNull('electricity_evidence_image_url')
+                      ->orWhereNotNull('water_evidence_image_url');
+                })
                 ->first();
 
-            if ($reading?->evidence_image_url) {
-                // Path tuyệt đối để nhúng vào PDF (DomPDF không hỗ trợ URL)
-                $evidenceImagePath = Storage::disk('public')->path($reading->evidence_image_url);
-                // URL để hiển thị trong body email
-                $evidenceImageUrl  = Storage::url($reading->evidence_image_url);
-
-                // Chỉ dùng nếu file thực sự tồn tại
-                if (! file_exists($evidenceImagePath)) {
-                    $evidenceImagePath = null;
-                    $evidenceImageUrl  = null;
+            if ($reading) {
+                if ($reading->electricity_evidence_image_url) {
+                    $electricityEvidenceImagePath = Storage::disk('public')->path($reading->electricity_evidence_image_url);
+                    if (! file_exists($electricityEvidenceImagePath)) {
+                        $electricityEvidenceImagePath = null;
+                    }
+                }
+                
+                if ($reading->water_evidence_image_url) {
+                    $waterEvidenceImagePath = Storage::disk('public')->path($reading->water_evidence_image_url);
+                    if (! file_exists($waterEvidenceImagePath)) {
+                        $waterEvidenceImagePath = null;
+                    }
                 }
             }
         }
 
         // ── 3. Sinh PDF bằng DomPDF ───────────────────────────────────────
         $pdf = Pdf::loadView('pdf.invoice', [
-            'invoice'           => $invoice,
-            'evidenceImagePath' => $evidenceImagePath,
+            'invoice'                      => $invoice,
+            'electricityEvidenceImagePath' => $electricityEvidenceImagePath,
+            'waterEvidenceImagePath'       => $waterEvidenceImagePath,
         ])
         ->setPaper('a4', 'portrait')
         ->setOption('defaultFont', 'DejaVu Sans')

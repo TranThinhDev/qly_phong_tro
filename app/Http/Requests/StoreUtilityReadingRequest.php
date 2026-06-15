@@ -75,10 +75,16 @@ class StoreUtilityReadingRequest extends FormRequest
                 new IndexNotDecreased($roomId, 'water_index', $month, $year),
             ],
 
-            // ── Ảnh chứng minh ────────────────────────────────────────────
-            // mimes: jpeg, jpg, png, webp — không chấp nhận gif/svg
-            // max: 2048 KB = 2 MB
-            'evidence_image' => [
+            // ── Ảnh chứng minh Điện ────────────────────────────────────────────
+            'electricity_evidence_image' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,jpg,png,webp',
+                'max:2048',
+            ],
+
+            // ── Ảnh chứng minh Nước ────────────────────────────────────────────
+            'water_evidence_image' => [
                 'nullable',
                 'image',
                 'mimes:jpeg,jpg,png,webp',
@@ -102,9 +108,12 @@ class StoreUtilityReadingRequest extends FormRequest
             'water_index.required'       => 'Vui lòng nhập chỉ số nước.',
             'water_index.integer'        => 'Chỉ số nước phải là số nguyên.',
             'water_index.min'            => 'Chỉ số nước không được âm.',
-            'evidence_image.image'       => 'File phải là ảnh.',
-            'evidence_image.mimes'       => 'Chỉ chấp nhận ảnh JPG, PNG, WEBP.',
-            'evidence_image.max'         => 'Ảnh không được vượt quá 2MB.',
+            'electricity_evidence_image.image' => 'Ảnh đồng hồ điện phải là định dạng hình ảnh.',
+            'electricity_evidence_image.mimes' => 'Ảnh đồng hồ điện chỉ hỗ trợ: jpeg, jpg, png, webp.',
+            'electricity_evidence_image.max'   => 'Ảnh đồng hồ điện không được vượt quá 2MB.',
+            'water_evidence_image.image' => 'Ảnh đồng hồ nước phải là định dạng hình ảnh.',
+            'water_evidence_image.mimes' => 'Ảnh đồng hồ nước chỉ hỗ trợ: jpeg, jpg, png, webp.',
+            'water_evidence_image.max'   => 'Ảnh đồng hồ nước không được vượt quá 2MB.',
         ];
     }
 

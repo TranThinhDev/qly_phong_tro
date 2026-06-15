@@ -167,6 +167,7 @@ Route::middleware('blockAccount')->group(function () {
             Route::get('contracts', 'ContractController@index')->name('tenant.contracts.index');
             Route::get('invoices', 'TenantInvoiceWebController@index')->name('tenant.invoices.index');
             Route::get('invoices/{id}', 'TenantInvoiceWebController@show')->name('tenant.invoices.show');
+            Route::get('invoices/{id}/payment-url', '\App\Http\Controllers\Api\InvoicePaymentController@generatePaymentUrl')->name('tenant.invoices.payment-url');
         });
 
         // ── Chủ trọ: Quản lý Hợp đồng, Hóa đơn & Ví tiền ────────────────────────────

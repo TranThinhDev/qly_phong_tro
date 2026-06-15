@@ -388,11 +388,24 @@
     {{-- ══ TOTALS ══ --}}
     <div class="clearfix">
         {{-- Evidence image (nếu có) --}}
-        @if($evidenceImagePath)
-        <div class="evidence-section" style="float:left; width:50%;">
-            <div class="evidence-title">Ảnh chụp đồng hồ điện/nước</div>
-            <img src="{{ $evidenceImagePath }}" class="evidence-img" alt="Ảnh đồng hồ"/>
-        </div>
+        @if($electricityEvidenceImagePath || $waterEvidenceImagePath)
+            <div class="evidence-section">
+                <div class="evidence-title">ẢNH CHỤP ĐỒNG HỒ ĐIỆN / NƯỚC:</div>
+                <div style="margin-top: 10px;">
+                    @if($electricityEvidenceImagePath)
+                        <div style="display: inline-block; width: 48%; text-align: center;">
+                            <div style="font-size: 11px; margin-bottom: 5px; font-weight: bold;">Đồng hồ điện</div>
+                            <img src="{{ $electricityEvidenceImagePath }}" class="evidence-img" alt="Ảnh điện"/>
+                        </div>
+                    @endif
+                    @if($waterEvidenceImagePath)
+                        <div style="display: inline-block; width: 48%; text-align: center;">
+                            <div style="font-size: 11px; margin-bottom: 5px; font-weight: bold;">Đồng hồ nước</div>
+                            <img src="{{ $waterEvidenceImagePath }}" class="evidence-img" alt="Ảnh nước"/>
+                        </div>
+                    @endif
+                </div>
+            </div>
         @endif
 
         <div class="totals-wrapper">

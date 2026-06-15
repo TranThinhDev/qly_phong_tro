@@ -47,7 +47,8 @@ class UtilityReading extends Model
         'year',
         'electricity_index',
         'water_index',
-        'evidence_image_url',
+        'electricity_evidence_image_url',
+        'water_evidence_image_url',
     ];
 
     // ── Type Casting ──────────────────────────────────────────────────────

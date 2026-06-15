@@ -181,7 +181,7 @@
             btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang xử lý...');
 
             $.ajax({
-                url: "{{ route('invoices.payment-url', $invoice->id) }}",
+                url: "{{ route('tenant.invoices.payment-url', $invoice->id) }}",
                 type: 'GET',
                 success: function (response) {
                     if (response.data && response.data.payment_url) {

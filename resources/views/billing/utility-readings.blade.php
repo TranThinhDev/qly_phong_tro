@@ -346,23 +346,43 @@
                                     @endif
                                 </div>
 
-                                {{-- Ảnh minh chứng --}}
+                                {{-- Ảnh minh chứng Điện --}}
                                 <div class="input-group-billing">
-                                    <label><i class="fas fa-camera meter-icon" style="color:#64748b"></i> Ảnh đồng hồ</label>
+                                    <label><i class="fas fa-bolt meter-icon" style="color:#eab308"></i> Ảnh đồng hồ Điện</label>
                                     
-                                    @if($reading && $reading->evidence_image_url)
-                                        <img src="{{ Storage::url($reading->evidence_image_url) }}" class="preview-img" alt="Ảnh minh chứng">
+                                    @if($reading && $reading->electricity_evidence_image_url)
+                                        <img src="{{ Storage::url($reading->electricity_evidence_image_url) }}" class="preview-img" alt="Ảnh điện">
                                     @endif
 
                                     @if(!$isFinalized)
-                                        <div class="upload-zone" onclick="document.getElementById('evidence_{{ $room->id }}').click()">
-                                            <input type="file" id="evidence_{{ $room->id }}" name="evidence_image" accept="image/*" 
-                                                onchange="previewImage(this, 'preview_{{ $room->id }}')" 
-                                                {{ (!$reading || !$reading->evidence_image_url) ? 'required' : '' }}>
+                                        <div class="upload-zone" onclick="document.getElementById('elec_evidence_{{ $room->id }}').click()">
+                                            <input type="file" id="elec_evidence_{{ $room->id }}" name="electricity_evidence_image" accept="image/*" 
+                                                onchange="previewImage(this, 'elec_preview_{{ $room->id }}')" 
+                                                {{ (!$reading || !$reading->electricity_evidence_image_url) ? 'required' : '' }}>
                                             <i class="fas fa-cloud-upload-alt" style="font-size: 20px; color: #94a3b8"></i>
-                                            <div class="upload-hint">Tải ảnh lên</div>
+                                            <div class="upload-hint">Tải ảnh điện lên</div>
                                         </div>
-                                        <img id="preview_{{ $room->id }}" class="preview-img mt-2" style="display:none" alt="Preview">
+                                        <img id="elec_preview_{{ $room->id }}" class="preview-img mt-2" style="display:none" alt="Preview điện">
+                                    @endif
+                                </div>
+
+                                {{-- Ảnh minh chứng Nước --}}
+                                <div class="input-group-billing">
+                                    <label><i class="fas fa-tint meter-icon" style="color:#0ea5e9"></i> Ảnh đồng hồ Nước</label>
+                                    
+                                    @if($reading && $reading->water_evidence_image_url)
+                                        <img src="{{ Storage::url($reading->water_evidence_image_url) }}" class="preview-img" alt="Ảnh nước">
+                                    @endif
+
+                                    @if(!$isFinalized)
+                                        <div class="upload-zone" onclick="document.getElementById('water_evidence_{{ $room->id }}').click()">
+                                            <input type="file" id="water_evidence_{{ $room->id }}" name="water_evidence_image" accept="image/*" 
+                                                onchange="previewImage(this, 'water_preview_{{ $room->id }}')" 
+                                                {{ (!$reading || !$reading->water_evidence_image_url) ? 'required' : '' }}>
+                                            <i class="fas fa-cloud-upload-alt" style="font-size: 20px; color: #94a3b8"></i>
+                                            <div class="upload-hint">Tải ảnh nước lên</div>
+                                        </div>
+                                        <img id="water_preview_{{ $room->id }}" class="preview-img mt-2" style="display:none" alt="Preview nước">
                                     @endif
                                 </div>
                             </div>

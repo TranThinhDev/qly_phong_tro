@@ -307,7 +307,7 @@ class InvoiceService
         Notification::create([
             'user_id' => $contract->tenant_id,
             'title'   => "Bạn có hóa đơn mới tháng {$billingMonth} cho phòng " . ($room ? $room->name : '') . ". Vui lòng thanh toán.",
-            'link'    => route('tenant.invoices.show', ['invoice' => $invoice->id]),
+            'link'    => route('tenant.invoices.show', ['id' => $invoice->id]),
             'status'  => 0
         ]);
 

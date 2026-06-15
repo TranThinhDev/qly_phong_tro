@@ -137,18 +137,24 @@ class UtilityReadingController extends Controller
         try {
             DB::beginTransaction();
 
-            // ── Xử lý upload ảnh bằng chứng ──────────────────────────────
-            $imageUrl = $existingReading?->evidence_image_url; // Giữ ảnh cũ mặc định
+            // ── Xử lý upload ảnh bằng chứng Điện ──────────────────────────────
+            $electricityImageUrl = $existingReading?->electricity_evidence_image_url; // Giữ ảnh cũ mặc định
 
-            if ($request->hasFile('evidence_image')) {
-                // Xóa ảnh cũ nếu có (tiết kiệm storage)
-                if ($imageUrl && Storage::exists($imageUrl)) {
-                    Storage::delete($imageUrl);
+            if ($request->hasFile('electricity_evidence_image')) {
+                if ($electricityImageUrl && Storage::disk('public')->exists($electricityImageUrl)) {
+                    Storage::disk('public')->delete($electricityImageUrl);
                 }
+                $electricityImageUrl = $request->file('electricity_evidence_image')->store('utility_readings', 'public');
+            }
 
-                // Lưu ảnh mới vào: storage/app/public/utilities/{year}/{month}/
-                $path     = "utilities/{$validated['year']}/{$validated['month']}";
-                $imageUrl = $request->file('evidence_image')->store($path, 'public');
+            // ── Xử lý upload ảnh bằng chứng Nước ──────────────────────────────
+            $waterImageUrl = $existingReading?->water_evidence_image_url;
+
+            if ($request->hasFile('water_evidence_image')) {
+                if ($waterImageUrl && Storage::disk('public')->exists($waterImageUrl)) {
+                    Storage::disk('public')->delete($waterImageUrl);
+                }
+                $waterImageUrl = $request->file('water_evidence_image')->store('utility_readings', 'public');
             }
 
             // ── Upsert bản ghi chỉ số ─────────────────────────────────────
@@ -161,9 +167,10 @@ class UtilityReadingController extends Controller
                 ],
                 // Giá trị cần cập nhật/tạo mới
                 [
-                    'electricity_index'  => $validated['electricity_index'],
-                    'water_index'        => $validated['water_index'],
-                    'evidence_image_url' => $imageUrl,
+                    'electricity_index'              => $validated['electricity_index'],
+                    'water_index'                    => $validated['water_index'],
+                    'electricity_evidence_image_url' => $electricityImageUrl,
+                    'water_evidence_image_url'       => $waterImageUrl,
                     // status giữ nguyên 'draft' (không forceFill ở đây)
                 ]
             );
