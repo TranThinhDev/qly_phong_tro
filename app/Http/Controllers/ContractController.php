@@ -29,7 +29,7 @@ class ContractController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
             return view('dashboard.landlord.contracts.index', compact('contracts', 'user'));
-        } elseif ($user->role == 3) {
+        } elseif ($user->role == 0) {
             // Người thuê: Lấy hợp đồng mà họ là tenant
             $contracts = Contract::with(['room', 'landlord'])
                 ->where('tenant_id', $user->id)
@@ -144,7 +144,7 @@ class ContractController extends Controller
                     'email'    => $validated['tenant_email'],
                     'phone'    => $validated['tenant_phone'],
                     'password' => bcrypt($plainPassword),
-                    'role'     => 3 // Đảm bảo role là Người thuê
+                    'role'     => 0 // Đảm bảo role là Người thuê
                 ]);
             }
 

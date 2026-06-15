@@ -108,7 +108,7 @@
 
                         <a href="{{ route('contracts.download_pdf', $contract->id) }}" class="btn btn-info w-100 mb-3 text-white">Tải Xuất Hợp Đồng (PDF)</a>
 
-                        @if($user->role == 3 && $contract->status == 'draft')
+                        @if($user->role == 0 && $contract->status == 'draft')
                             <a href="{{ route('contracts.sign', $contract->id) }}" class="btn btn-success w-100 mb-3">Ký Hợp Đồng</a>
                         @endif
 

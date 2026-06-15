@@ -73,7 +73,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($contract->status == 'draft' && $user->role == 3)
+                                                @if($contract->status == 'draft' && $user->role == 0)
                                                     <a href="{{ route('contracts.sign', $contract->id) }}" class="btn btn-sm btn-success">Ký HĐ</a>
                                                 @endif
                                                 <a href="{{ route('contracts.download_pdf', $contract->id) }}" class="btn btn-sm btn-info text-white">Tải PDF</a>

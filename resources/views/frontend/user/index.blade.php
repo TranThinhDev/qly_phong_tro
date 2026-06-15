@@ -302,7 +302,7 @@
                             <h6 class="color-2"><a href="{{ route('landlord.invoices.index') }}">Quản lý Hóa đơn</a></h6>
                         </div>
                     </div>
-                @elseif (Auth::user()->role == 3)
+                @elseif (Auth::user()->role == 0)
                     <div class="layouts-settings">
                         <div class="customizer-title">
                             <h6 class="color-2"><a href="{{ route('tenant.invoices.index') }}">Hóa đơn của tôi</a></h6>

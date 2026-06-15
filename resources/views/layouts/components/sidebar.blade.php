@@ -98,7 +98,7 @@
                         <span>Quản lý Hóa đơn</span>
                     </a>
                 </li>
-                @elseif(Auth::user()->role == 3)
+                @elseif(Auth::user()->role == 0)
                 <li class="sidebar-item">
                     <a href="{{ route('tenant.contracts.index') }}"
                         class="sidebar-link only-link {{ ($currentRoute == 'tenant.contracts.index') ? 'active' : '' }}">
