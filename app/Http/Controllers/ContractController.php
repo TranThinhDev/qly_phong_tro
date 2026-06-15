@@ -132,7 +132,7 @@ class ContractController extends Controller
             $plainPassword = null;
             // Ưu tiên tìm theo Email hoặc SĐT
             $tenant = User::where('email', $validated['tenant_email'])
-                          ->orWhere('phone', $validated['tenant_phone'])
+                          ->orWhere('PhoneNumber', $validated['tenant_phone'])
                           ->first();
 
             if (!$tenant) {
@@ -140,11 +140,11 @@ class ContractController extends Controller
                 $plainPassword = Str::random(8); // Mật khẩu raw 8 ký tự ngẫu nhiên
                 
                 $tenant = User::create([
-                    'name'     => $validated['tenant_name'],
-                    'email'    => $validated['tenant_email'],
-                    'phone'    => $validated['tenant_phone'],
-                    'password' => bcrypt($plainPassword),
-                    'role'     => 0 // Đảm bảo role là Người thuê
+                    'name'        => $validated['tenant_name'],
+                    'email'       => $validated['tenant_email'],
+                    'PhoneNumber' => $validated['tenant_phone'],
+                    'password'    => bcrypt($plainPassword),
+                    'role'        => 3 // Đảm bảo role là Người thuê
                 ]);
             }
 

@@ -4,7 +4,7 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0 fw-bold text-primary">Tạo Hợp Đồng Thuê Phòng</h2>
-        <a href="{{ url('/contracts') }}" class="btn btn-outline-secondary">
+        <a href="{{ url('/landlord/contracts') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Trở về danh sách
         </a>
     </div>
