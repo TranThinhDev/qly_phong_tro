@@ -295,7 +295,7 @@ $(document).ready(function() {
                         confirmButtonText: 'Xem danh sách Hợp đồng',
                         confirmButtonColor: '#0d6efd'
                     }).then(() => {
-                        window.location.href = "{{ url('/contracts') }}"; 
+                        window.location.href = "{{ url('/landlord/contracts') }}"; 
                     });
                 } else {
                     // Fallback mặc định
