@@ -6,6 +6,7 @@ use App\Models\Contract;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\UtilityReading;
+use App\Models\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -300,6 +301,14 @@ class InvoiceService
             'total_amount'  => $totalAmount,
             'items'         => count($items),
             'utility_missing' => $utilityMissing,
+        ]);
+
+        // ── Gửi Notification cho Người thuê ─────────────────────────────
+        Notification::create([
+            'user_id' => $contract->tenant_id,
+            'title'   => "Bạn có hóa đơn mới tháng {$billingMonth} cho phòng " . ($room ? $room->name : '') . ". Vui lòng thanh toán.",
+            'link'    => route('tenant.invoices.show', ['invoice' => $invoice->id]),
+            'status'  => 0
         ]);
 
         return $invoice->load('items');

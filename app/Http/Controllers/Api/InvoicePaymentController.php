@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\GenerateInvoicePdfAndSendEmailJob;
 use App\Models\Invoice;
 use App\Models\PaymentTransaction;
+use App\Models\Notification;
 use App\Services\VnpayService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
@@ -284,6 +285,14 @@ class InvoicePaymentController extends Controller
                                 'landlord_id' => $landlordId,
                                 'amount'      => $invoice->total_amount,
                             ]);
+
+                            // ── Gửi Notification cho Chủ trọ ────────────────────────
+                            $this->MakeNotification(
+                                $landlordId,
+                                "Hóa đơn {$invoice->billing_month} của phòng " . ($contract->room ? $contract->room->name : '') . " đã được thanh toán (Đủ).",
+                                'landlord.invoices.show',
+                                ['invoice' => $invoice->id]
+                            );
                         }
 
                         Log::info('[InvoiceIPN] Invoice PAID in full', [

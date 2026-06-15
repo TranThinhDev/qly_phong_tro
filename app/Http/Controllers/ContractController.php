@@ -182,6 +182,14 @@ class ContractController extends Controller
                 new \App\Mail\SendContractAndAccountInfoMail($contract, $tenant, $plainPassword)
             );
 
+            // 5. Gửi Notification
+            $this->MakeNotification(
+                $tenant->id,
+                "Chủ trọ đã tạo hợp đồng mới cho phòng {$room->name}, vui lòng xem và ký.",
+                'tenant.contracts.show',
+                ['contract' => $contract->id]
+            );
+
             return response()->json([
                 'message' => 'Khởi tạo hợp đồng thành công.',
                 'data'    => $contract
@@ -298,6 +306,14 @@ class ContractController extends Controller
                         if ($contract->room) {
                             $contract->room->update(['status' => 3]);
                         }
+
+                        // Gửi thông báo đến Chủ trọ
+                        $this->MakeNotification(
+                            $contract->landlord_id,
+                            "Người thuê đã thanh toán cọc và ký hợp đồng cho phòng " . ($contract->room ? $contract->room->name : ''),
+                            'landlord.contracts.show',
+                            ['contract' => $contract->id]
+                        );
                     }
                 });
             }
