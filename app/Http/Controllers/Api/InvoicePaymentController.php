@@ -291,7 +291,7 @@ class InvoicePaymentController extends Controller
                                 $landlordId,
                                 "Hóa đơn {$invoice->billing_month} của phòng " . ($contract->room ? $contract->room->name : '') . " đã được thanh toán (Đủ).",
                                 'landlord.invoices.show',
-                                ['invoice' => $invoice->id]
+                                ['id' => $invoice->id]
                             );
                         }
 
@@ -354,6 +354,39 @@ class InvoicePaymentController extends Controller
                 'RspCode' => '99',
                 'Message' => 'Unknown error',
             ]);
+        }
+    }
+    // ══════════════════════════════════════════════════════════════════════
+    // 3. VNPAY RETURN WEBHOOK
+    // ══════════════════════════════════════════════════════════════════════
+
+    /**
+     * Xử lý VNPay Return URL (được gọi từ BookingController@vnpayReturn)
+     */
+    public function vnpayReturn(Request $request)
+    {
+        $vnpayService = app(VnpayService::class);
+        $walletService = app(WalletService::class);
+
+        // Gọi logic xử lý của IPN để xử lý an toàn với lockForUpdate
+        $this->vnpayIpn($request, $vnpayService, $walletService);
+
+        $vnpData = $request->all();
+        $txnRef   = $vnpData['vnp_TxnRef'] ?? '';
+        $parts = explode('-', $txnRef);
+        $invoiceId = $parts[1] ?? null;
+
+        if (! $invoiceId) {
+            return redirect()->route('tenant.invoices.index')
+                ->with('error', 'Không xác định được hóa đơn từ giao dịch.');
+        }
+
+        if ($vnpayService->isSuccess($vnpData)) {
+            return redirect()->route('tenant.invoices.show', $invoiceId)
+                ->with('success', 'Thanh toán hóa đơn thành công.');
+        } else {
+            return redirect()->route('tenant.invoices.show', $invoiceId)
+                ->with('error', 'Thanh toán hóa đơn thất bại hoặc đã bị hủy.');
         }
     }
 }

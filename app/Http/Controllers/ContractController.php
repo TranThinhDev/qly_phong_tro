@@ -168,13 +168,21 @@ class ContractController extends Controller
 
             // 3.5 Lưu chỉ số điện nước đầu kỳ (nếu có)
             if ($request->filled('electric_index') || $request->filled('water_index')) {
-                \App\Models\UtilityReading::create([
-                    'room_id'           => $validated['room_id'],
-                    'month'             => date('n', strtotime($validated['start_date'])),
-                    'year'              => date('Y', strtotime($validated['start_date'])),
-                    'electricity_index' => $request->input('electric_index', 0),
-                    'water_index'       => $request->input('water_index', 0)
-                ]);
+                $startDate = \Carbon\Carbon::parse($validated['start_date']);
+                $prevMonth = $startDate->copy()->subMonth();
+
+                \App\Models\UtilityReading::updateOrCreate(
+                    [
+                        'room_id' => $validated['room_id'],
+                        'month'   => $prevMonth->month,
+                        'year'    => $prevMonth->year,
+                    ],
+                    [
+                        'electricity_index' => $request->input('electric_index', 0),
+                        'water_index'       => $request->input('water_index', 0),
+                        'status'            => 'finalized'
+                    ]
+                );
             }
 
             // 4. Gửi Email thông báo (Đưa vào Queue)

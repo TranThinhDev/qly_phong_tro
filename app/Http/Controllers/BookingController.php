@@ -347,6 +347,11 @@ class BookingController extends Controller
             return app(\App\Http\Controllers\ContractController::class)->vnpayReturn($request);
         }
 
+        // Nếu mã tham chiếu bắt đầu bằng INV- thì đây là thanh toán Hóa đơn (Invoice)
+        if (\Illuminate\Support\Str::startsWith($bookingCode, 'INV-')) {
+            return app(\App\Http\Controllers\Api\InvoicePaymentController::class)->vnpayReturn($request);
+        }
+
         // ── 2. Tìm booking tương ứng ───────────────────────────────────────────
         $booking = BookingInformation::with('room')
             ->where('booking_code', $bookingCode)

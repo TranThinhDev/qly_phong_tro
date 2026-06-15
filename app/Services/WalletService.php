@@ -123,7 +123,7 @@ class WalletService
 
             // ── 1. Pessimistic lock ────────────────────────────────────────
             // Đây PHẢI là thao tác đầu tiên trong transaction để tránh race condition.
-            // firstOrFail() ném ModelNotFoundException nếu user chưa có ví.
+            $this->getOrCreateWallet($userId);
             $wallet = Wallet::where('user_id', $userId)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -195,6 +195,7 @@ class WalletService
         return DB::transaction(function () use ($userId, $amount, $reference, $description): WalletTransaction {
 
             // ── 1. Pessimistic lock ────────────────────────────────────────
+            $this->getOrCreateWallet($userId);
             $wallet = Wallet::where('user_id', $userId)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -289,6 +290,7 @@ class WalletService
         return DB::transaction(function () use ($userId, $amount, $type, $description, $reference): WalletTransaction {
 
             // ── 1. Pessimistic lock ────────────────────────────────────────
+            $this->getOrCreateWallet($userId);
             $wallet = Wallet::where('user_id', $userId)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -456,6 +458,7 @@ class WalletService
         return DB::transaction(function () use ($userId, $amount, $reference, $description): WalletTransaction {
 
             // ── 1. Pessimistic lock ────────────────────────────────────────
+            $this->getOrCreateWallet($userId);
             $wallet = Wallet::where('user_id', $userId)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -538,6 +541,7 @@ class WalletService
         return DB::transaction(function () use ($userId, $amount, $reference, $description): WalletTransaction {
 
             // ── 1. Pessimistic lock ────────────────────────────────────────
+            $this->getOrCreateWallet($userId);
             $wallet = Wallet::where('user_id', $userId)
                 ->lockForUpdate()
                 ->firstOrFail();

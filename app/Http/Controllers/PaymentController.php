@@ -19,8 +19,15 @@ class PaymentController extends Controller
     public function vnpayIpn(Request $request, VnpayService $vnpayService, \App\Services\WalletService $walletService)
     {
         $inputData = $request->all();
+        $transactionCode = $inputData['vnp_TxnRef'] ?? '';
         
-        Log::info('[VNPAY IPN] Received webhook', $inputData);
+        // Router: Phân luồng xử lý dựa trên tiền tố của mã giao dịch (vnp_TxnRef)
+        if (\Illuminate\Support\Str::startsWith($transactionCode, 'INV-')) {
+            Log::info('[VNPAY IPN Router] Forwarding to InvoicePaymentController', $inputData);
+            return app(\App\Http\Controllers\Api\InvoicePaymentController::class)->vnpayIpn($request, $vnpayService, $walletService);
+        }
+
+        Log::info('[VNPAY IPN] Received webhook for Contract/Booking', $inputData);
 
         try {
             // 1. Xác thực chữ ký dữ liệu từ VNPay để đảm bảo không bị giả mạo
@@ -31,8 +38,7 @@ class PaymentController extends Controller
                 ]);
             }
 
-            $transactionCode = $inputData['vnp_TxnRef'];
-            $vnpAmount       = $inputData['vnp_Amount'] / 100; // VNPay gửi sang là x100
+            $vnpAmount       = ($inputData['vnp_Amount'] ?? 0) / 100; // VNPay gửi sang là x100
 
             // 2. Tìm Transaction và Lock Row để chống Race Condition
             // Bắt buộc nằm trong DB::transaction để lock có hiệu lực

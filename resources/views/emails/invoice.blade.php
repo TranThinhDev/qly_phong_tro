@@ -34,10 +34,18 @@ Vui lòng thanh toán trước ngày **{{ $paymentDeadline }}** để tránh ph�
 </x-mail::panel>
 @endif
 
-@if($evidenceImageUrl)
+@if($electricityEvidenceImageUrl || $waterEvidenceImageUrl)
 **📷 Ảnh chụp đồng hồ điện/nước tháng {{ $invoice->billing_month }}:**
 
-![Ảnh đồng hồ]({{ $evidenceImageUrl }})
+@if($electricityEvidenceImageUrl)
+**Điện:**
+![Ảnh đồng hồ điện]({{ $electricityEvidenceImageUrl }})
+@endif
+
+@if($waterEvidenceImageUrl)
+**Nước:**
+![Ảnh đồng hồ nước]({{ $waterEvidenceImageUrl }})
+@endif
 @endif
 
 ---

@@ -98,6 +98,8 @@ class GenerateInvoicePdfAndSendEmailJob implements ShouldQueue
         // ── 2. Tìm ảnh bằng chứng điện/nước (nếu có) ────────────────────
         $electricityEvidenceImagePath = null;
         $waterEvidenceImagePath       = null;
+        $electricityEvidenceImageUrl  = null;
+        $waterEvidenceImageUrl        = null;
 
         if ($invoice->contract?->room) {
             $room = $invoice->contract->room;
@@ -116,15 +118,19 @@ class GenerateInvoicePdfAndSendEmailJob implements ShouldQueue
             if ($reading) {
                 if ($reading->electricity_evidence_image_url) {
                     $electricityEvidenceImagePath = Storage::disk('public')->path($reading->electricity_evidence_image_url);
+                    $electricityEvidenceImageUrl  = Storage::url($reading->electricity_evidence_image_url);
                     if (! file_exists($electricityEvidenceImagePath)) {
                         $electricityEvidenceImagePath = null;
+                        $electricityEvidenceImageUrl  = null;
                     }
                 }
                 
                 if ($reading->water_evidence_image_url) {
                     $waterEvidenceImagePath = Storage::disk('public')->path($reading->water_evidence_image_url);
+                    $waterEvidenceImageUrl  = Storage::url($reading->water_evidence_image_url);
                     if (! file_exists($waterEvidenceImagePath)) {
                         $waterEvidenceImagePath = null;
+                        $waterEvidenceImageUrl  = null;
                     }
                 }
             }
@@ -157,9 +163,10 @@ class GenerateInvoicePdfAndSendEmailJob implements ShouldQueue
         // SendInvoiceMail cũng implements ShouldQueue nên sẽ vào queue email
         Mail::to($invoice->tenant->email)
             ->send(new SendInvoiceMail(
-                invoice:          $invoice,
-                pdfPath:          $pdfAbsolutePath,
-                evidenceImageUrl: $evidenceImageUrl,
+                invoice:                     $invoice,
+                pdfPath:                     $pdfAbsolutePath,
+                electricityEvidenceImageUrl: $electricityEvidenceImageUrl,
+                waterEvidenceImageUrl:       $waterEvidenceImageUrl,
             ));
 
         Log::info("[InvoicePdfJob] Email đã gửi đến {$invoice->tenant->email}");

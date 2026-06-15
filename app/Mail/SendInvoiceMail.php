@@ -28,12 +28,14 @@ class SendInvoiceMail extends Mailable implements ShouldQueue
     /**
      * @param Invoice $invoice    Hóa đơn cần gửi (lazy-loaded khi serialize)
      * @param string  $pdfPath    Đường dẫn tuyệt đối đến file PDF trong storage
-     * @param string|null $evidenceImageUrl URL ảnh đồng hồ (để hiển thị trong body email)
+     * @param string|null $electricityEvidenceImageUrl URL ảnh đồng hồ điện
+     * @param string|null $waterEvidenceImageUrl URL ảnh đồng hồ nước
      */
     public function __construct(
         public readonly Invoice $invoice,
         public readonly string  $pdfPath,
-        public readonly ?string $evidenceImageUrl = null,
+        public readonly ?string $electricityEvidenceImageUrl = null,
+        public readonly ?string $waterEvidenceImageUrl = null,
     ) {}
 
     /**
@@ -58,9 +60,10 @@ class SendInvoiceMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'emails.invoice',
             with: [
-                'invoice'          => $this->invoice->load(['items', 'contract.room', 'tenant']),
-                'evidenceImageUrl' => $this->evidenceImageUrl,
-                'paymentDeadline'  => $this->invoice->due_date->format('d/m/Y'),
+                'invoice'                     => $this->invoice->load(['items', 'contract.room', 'tenant']),
+                'electricityEvidenceImageUrl' => $this->electricityEvidenceImageUrl,
+                'waterEvidenceImageUrl'       => $this->waterEvidenceImageUrl,
+                'paymentDeadline'             => $this->invoice->due_date->format('d/m/Y'),
             ],
         );
     }
