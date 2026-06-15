@@ -207,7 +207,7 @@
                                             </div>
 
                                             <div class="property-details {{ $item->status == 1 ? '' : 'hidden_room' }}">
-                                                <span class="font-roboto">{{ $item->getWard->getDistrict->name }}</span>
+                                                <span class="font-roboto">{{ $item->getWard?->getDistrict?->name ?? 'Đang cập nhật' }}</span>
                                                 <a href="{{ route('Room.show', $item->id) }}">
                                                     <h3>{{ $item->name }}</h3>
                                                 </a>

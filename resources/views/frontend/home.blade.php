@@ -207,7 +207,7 @@
                                 </div>
 
                                 <div class="property-details {{ $item->status == 1 ? '' : 'hidden_room' }}">
-                                    <span class="font-roboto">{{ $item->getWard->getDistrict->name }}</span>
+                                    <span class="font-roboto">{{ $item->getWard?->getDistrict?->name ?? 'Đang cập nhật' }}</span>
                                     <a href="{{ route('Room_show', $item->id) }}">
                                         <h3>{{ $item->name }}</h3>
                                     </a>
@@ -296,7 +296,7 @@
                                             <div
                                                 class="property-details {{ $item->status == 1 ? '' : 'hidden_room' }}">
                                                 <span
-                                                    class="font-roboto">{{ $item->getWard->getDistrict->name }}</span>
+                                                    class="font-roboto">{{ $item->getWard?->getDistrict?->name ?? 'Đang cập nhật' }}</span>
                                                 <a href="{{ route('Room_show', $item->id) }}">
                                                     <h3>{{ $item->name }}</h3>
                                                 </a>

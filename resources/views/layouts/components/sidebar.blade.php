@@ -68,6 +68,7 @@
 
                     </ul>
                 </li>
+                @if(Auth::user()->role == 1)
                 <li class="sidebar-item">
                     <a href="{{ route('admin.contracts.index') }}"
                         class="sidebar-link only-link {{ ($currentRoute == 'admin.contracts.index') ? 'active' : '' }}">
@@ -82,6 +83,37 @@
                         <span>Quản lý Hóa đơn</span>
                     </a>
                 </li>
+                @elseif(Auth::user()->role == 2)
+                <li class="sidebar-item">
+                    <a href="{{ route('landlord.contracts.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'landlord.contracts.index') ? 'active' : '' }}">
+                        <i data-feather="file-text"></i>
+                        <span>Quản lý Hợp đồng</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('landlord.invoices.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'landlord.invoices.index') ? 'active' : '' }}">
+                        <i data-feather="dollar-sign"></i>
+                        <span>Quản lý Hóa đơn</span>
+                    </a>
+                </li>
+                @elseif(Auth::user()->role == 3)
+                <li class="sidebar-item">
+                    <a href="{{ route('tenant.contracts.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'tenant.contracts.index') ? 'active' : '' }}">
+                        <i data-feather="file-text"></i>
+                        <span>Hợp đồng của tôi</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('tenant.invoices.index') }}"
+                        class="sidebar-link only-link {{ ($currentRoute == 'tenant.invoices.index') ? 'active' : '' }}">
+                        <i data-feather="dollar-sign"></i>
+                        <span>Hóa đơn của tôi</span>
+                    </a>
+                </li>
+                @endif
                 <li class="sidebar-item">
                     <a href="{{ route('admin.disputes.index') }}"
                         class="sidebar-link only-link {{ ($currentRoute == 'admin.disputes.index') ? 'active' : '' }}">
