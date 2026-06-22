@@ -322,6 +322,22 @@
     }
     #result-counter strong { color: #667eea; }
 
+    /* Custom jQuery UI slider in Map */
+    #slider-range-price .ui-slider-range, #slider-range-area .ui-slider-range {
+        background: linear-gradient(to right, #667eea, #764ba2);
+    }
+    #slider-range-price .ui-slider-handle, #slider-range-area .ui-slider-handle {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #667eea;
+        top: -6px;
+        cursor: pointer;
+        outline: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
     /* ═══════════════════════════════════════════════════════════
        BƯỚC 4 — Loading overlay & Popup styles
     ═══════════════════════════════════════════════════════════ */
@@ -667,7 +683,7 @@
                 type="range"
                 id="radius-slider"
                 min="1"
-                max="10"
+                max="50"
                 step="0.5"
                 value="3"
                 aria-label="Bán kính tìm kiếm tính bằng km"
@@ -676,10 +692,59 @@
             {{-- Tick marks phụ --}}
             <div class="radius-ticks">
                 <span>1km</span>
-                <span>3km</span>
                 <span>5km</span>
-                <span>8km</span>
                 <span>10km</span>
+                <span>20km</span>
+                <span>50km</span>
+            </div>
+
+            <hr class="section-divider">
+
+            {{-- ── Bộ lọc nâng cao (Bổ sung) ── --}}
+            <div class="advanced-filter-section" style="margin-bottom: 15px;">
+                <div style="font-weight:600; font-size:.85rem; margin-bottom:12px; color:#444;">⚙️ Bộ lọc nâng cao</div>
+                
+                {{-- Lọc Giá --}}
+                <div class="filter-group" style="margin-bottom: 18px;">
+                    <div class="radius-label" style="margin-bottom: 5px;">
+                        <span>Giá phòng</span>
+                        <input type="text" id="amount-price" readonly style="border:0; color:#667eea; font-weight:700; text-align:right; background:transparent; width:140px; font-size:.78rem;">
+                    </div>
+                    <div id="slider-range-price" style="height:6px; border:none; background:#dde1e8; border-radius:3px; margin-top:8px;"></div>
+                    <input type="hidden" id="price_from" value="500000">
+                    <input type="hidden" id="price_to" value="10000000">
+                </div>
+
+                {{-- Lọc Diện tích --}}
+                <div class="filter-group" style="margin-bottom: 15px;">
+                    <div class="radius-label" style="margin-bottom: 5px;">
+                        <span>Diện tích</span>
+                        <input type="text" id="amount-area" readonly style="border:0; color:#667eea; font-weight:700; text-align:right; background:transparent; width:100px; font-size:.78rem;">
+                    </div>
+                    <div id="slider-range-area" style="height:6px; border:none; background:#dde1e8; border-radius:3px; margin-top:8px;"></div>
+                    <input type="hidden" id="area_from" value="10">
+                    <input type="hidden" id="area_to" value="100">
+                </div>
+                {{-- Lọc Tiện ích --}}
+                <div class="filter-group" style="margin-bottom: 5px;">
+                    <div class="radius-label" style="margin-bottom: 8px;">
+                        <span>Tiện ích cơ bản</span>
+                    </div>
+                    <div class="d-flex flex-wrap" style="gap: 10px; font-size: .8rem;">
+                        <label style="display:flex; align-items:center; gap:4px; cursor:pointer; color:#555;">
+                            <input type="checkbox" name="add_ons[]" class="map-addon-checkbox" value="Nơi để xe"> Nơi để xe
+                        </label>
+                        <label style="display:flex; align-items:center; gap:4px; cursor:pointer; color:#555;">
+                            <input type="checkbox" name="add_ons[]" class="map-addon-checkbox" value="Camera an ninh"> Camera an ninh
+                        </label>
+                        <label style="display:flex; align-items:center; gap:4px; cursor:pointer; color:#555;">
+                            <input type="checkbox" name="add_ons[]" class="map-addon-checkbox" value="Wifi miễn phí"> Wifi
+                        </label>
+                        <label style="display:flex; align-items:center; gap:4px; cursor:pointer; color:#555;">
+                            <input type="checkbox" name="add_ons[]" class="map-addon-checkbox" value="Điều hòa"> Điều hòa
+                        </label>
+                    </div>
+                </div>
             </div>
 
             {{-- Nút tìm kiếm --}}
@@ -740,6 +805,41 @@
 /* ═══════════════════════════════════════════════════════════════
    BƯỚC 3 — Khởi tạo bản đồ & Geolocation
 ═══════════════════════════════════════════════════════════════ */
+
+// Khởi tạo thanh trượt jQuery UI cho Bộ lọc nâng cao
+$(function() {
+    // Giá phòng
+    $("#slider-range-price").slider({
+        range: true,
+        min: 100,
+        max: 30000, // 30 triệu
+        values: [ 500, 10000 ], // Mặc định 500k - 10tr
+        slide: function( event, ui ) {
+            let html = (ui.values[0] * 1000).toLocaleString('it-IT') + "đ - " + (ui.values[1] * 1000).toLocaleString('it-IT') + "đ";
+            $("#amount-price").val(html);
+            $("#price_from").val(ui.values[0] * 1000);
+            $("#price_to").val(ui.values[1] * 1000);
+        }
+    });
+    // Set initial value for UI
+    let initPrice = ($("#slider-range-price").slider("values", 0) * 1000).toLocaleString('it-IT') + "đ - " + ($("#slider-range-price").slider("values", 1) * 1000).toLocaleString('it-IT') + "đ";
+    $("#amount-price").val(initPrice);
+
+    // Diện tích
+    $("#slider-range-area").slider({
+        range: true,
+        min: 0,
+        max: 200,
+        values: [ 10, 100 ], // Mặc định 10m2 - 100m2
+        slide: function( event, ui ) {
+            $("#amount-area").val( ui.values[0] + "m² - " + ui.values[1] + "m²" );
+            $("#area_from").val(ui.values[0]);
+            $("#area_to").val(ui.values[1]);
+        }
+    });
+    // Set initial value for UI
+    $("#amount-area").val( $("#slider-range-area").slider("values", 0) + "m² - " + $("#slider-range-area").slider("values", 1) + "m²" );
+});
 
 /* ── [0] Tính chiều cao header thực tế, gán vào CSS variable ───
    Header dùng class fixed-header với logo max-height:100px.
@@ -1338,6 +1438,22 @@ async function fetchAndRenderMap() {
         all      : true,            // lấy toàn bộ (không phân trang) để hiện marker
     });
 
+    // Lấy giá trị bộ lọc nâng cao
+    if ($('#price_from').val() && $('#price_to').val()) {
+        params.append('price[0]', $('#price_from').val());
+        params.append('price[1]', $('#price_to').val());
+    }
+    if ($('#area_from').val() && $('#area_to').val()) {
+        params.append('area[0]', $('#area_from').val());
+        params.append('area[1]', $('#area_to').val());
+    }
+    
+    // Lấy tiện ích
+    const addons = [];
+    $('.map-addon-checkbox:checked').each(function() {
+        params.append('add_ons[]', $(this).val());
+    });
+
     try {
         /* ── Gọi API ── */
         const res = await fetch(`/api/map/rooms?${params.toString()}`, {
@@ -1378,12 +1494,12 @@ async function fetchAndRenderMap() {
                 confirmButtonText: 'Đồng ý',
                 confirmButtonColor: '#667eea',
                 showCancelButton : true,
-                cancelButtonText : `Mở rộng lên ${Math.min(currentRadiusKm + 2, 10)} km`,
+                cancelButtonText : `Mở rộng lên ${Math.min(currentRadiusKm + 5, 50)} km`,
                 cancelButtonColor: '#a0aec0',
             }).then(result => {
                 /* Nếu user click "Mở rộng" → tự động tăng slider & tìm lại */
                 if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
-                    const newRadius = Math.min(currentRadiusKm + 2, 10);
+                    const newRadius = Math.min(currentRadiusKm + 5, 50);
                     radiusSlider.value = newRadius;
                     currentRadiusKm    = newRadius;
                     document.getElementById('radius-badge').textContent = newRadius + ' km';

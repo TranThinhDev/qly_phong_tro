@@ -424,7 +424,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('assets/js/range-slider.js') }}"></script>
+<script src="{{ asset('assets/js/range-slider.js') }}?v={{ time() }}"></script>
 <!-- Lấy thông tin xã, tỉnh -->
 @include('js.getward')
 <script>
