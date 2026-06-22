@@ -8,8 +8,8 @@
       $( "#slider-range" ).slider({
         range: true,
         min: 100,
-        max: 5000,
-        values: [ {{ isset($oldData->price[0]) ? $oldData->price[0] / 1000 : 500 }}, {{ isset($oldData->price[1]) ? $oldData->price[1] / 1000 : 1500 }} ],
+        max: 30000,
+        values: [ {{ isset($oldData->price[0]) ? $oldData->price[0] / 1000 : 500 }}, {{ isset($oldData->price[1]) ? $oldData->price[1] / 1000 : 10000 }} ],
         slide: function( event, ui ) {
           let html = (ui.values[ 0 ]*1000).toLocaleString('it-IT', {style : 'currency', currency : 'VND'}) + " - " + (ui.values[ 1 ]*1000).toLocaleString('it-IT', {style : 'currency', currency : 'VND'});
           $( "#amount" ).html(html);
@@ -29,8 +29,8 @@
         $( "#slider-range1" ).slider({
           range: true,
           min: 0,
-          max: 100,
-          values: [ {{ isset($oldData->area[0]) ? $oldData->area[0] : 10 }}, {{ isset($oldData->area[1]) ? $oldData->area[1] : 30 }} ],
+          max: 200,
+          values: [ {{ isset($oldData->area[0]) ? $oldData->area[0] : 10 }}, {{ isset($oldData->area[1]) ? $oldData->area[1] : 100 }} ],
           slide: function( event, ui ) {
             $( "#amount1" ).val( ui.values[ 0 ] + "m2 - " + ui.values[ 1 ] + "m2"  );
             $( "#area_from" ).val(ui.values[ 0 ]);

@@ -6,8 +6,8 @@
       $( "#slider-range" ).slider({
         range: true,
         min: 100,
-        max: 5000,
-        values: [ 500, 3000 ],
+        max: 30000,
+        values: [ 500, 10000 ],
         slide: function( event, ui ) {
           let html = (ui.values[ 0 ]*1000).toLocaleString('it-IT', {style : 'currency', currency : 'VND'}) + " - " + (ui.values[ 1 ]*1000).toLocaleString('it-IT', {style : 'currency', currency : 'VND'});
           $( "#amount" ).html(html);
@@ -27,8 +27,8 @@
         $( "#slider-range1" ).slider({
           range: true,
           min: 0,
-          max: 100,
-          values: [ 10, 30 ],
+          max: 200,
+          values: [ 10, 100 ],
           slide: function( event, ui ) {
             $( "#amount1" ).val( ui.values[ 0 ] + "m2 - " + ui.values[ 1 ] + "m2"  );
             $( "#area_from" ).val(ui.values[ 0 ]);
