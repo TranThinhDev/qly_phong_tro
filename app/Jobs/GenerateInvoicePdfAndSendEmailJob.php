@@ -117,7 +117,7 @@ class GenerateInvoicePdfAndSendEmailJob implements ShouldQueue
 
             if ($reading) {
                 if ($reading->electricity_evidence_image_url) {
-                    $electricityEvidenceImagePath = Storage::disk('public')->path($reading->electricity_evidence_image_url);
+                    $electricityEvidenceImagePath = storage_path('app/public/' . ltrim($reading->electricity_evidence_image_url, '/'));
                     $electricityEvidenceImageUrl  = Storage::url($reading->electricity_evidence_image_url);
                     if (! file_exists($electricityEvidenceImagePath)) {
                         $electricityEvidenceImagePath = null;
@@ -126,7 +126,7 @@ class GenerateInvoicePdfAndSendEmailJob implements ShouldQueue
                 }
                 
                 if ($reading->water_evidence_image_url) {
-                    $waterEvidenceImagePath = Storage::disk('public')->path($reading->water_evidence_image_url);
+                    $waterEvidenceImagePath = storage_path('app/public/' . ltrim($reading->water_evidence_image_url, '/'));
                     $waterEvidenceImageUrl  = Storage::url($reading->water_evidence_image_url);
                     if (! file_exists($waterEvidenceImagePath)) {
                         $waterEvidenceImagePath = null;

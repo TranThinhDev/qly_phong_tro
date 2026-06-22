@@ -69,7 +69,7 @@
                                                         class="img-fluid img-80" alt="">
                                                     <div class="media-body">
                                                         <h6>{{ $item->name }}</h6>
-                                                        <span class="light-font">{{ $item->User->name }}</span>
+                                                        <span class="light-font">{{ $item->User?->name ?? 'Người dùng không tồn tại' }}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -83,7 +83,7 @@
                                             @else
                                                 <td><span class="label label-dark label-pill">Lỗi</span></td>
                                             @endif
-                                            <td>{{ $item->getWard->name . '/' . $item->getWard->getDistrict->name }}</td>
+                                            <td>{{ $item->getWard?->name }}{{ $item->getWard?->getDistrict?->name ? '/' . $item->getWard->getDistrict->name : '' }}</td>
                                             <td>
                                                 <div class="d-flex flex-column py-3">
                                                     @if ($item->status != 0)
