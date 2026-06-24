@@ -16,7 +16,6 @@ class UserController extends Controller
         $authUser = Auth::user();
         $data = User::where('id', $user->id)->first();
         $Room = Room::where('chutro_id', $user->id)->whereNotNull('status')->paginate(6);
-        $Room->withPath('/users/phongtro');
         if($data->profile_photo_path == null) {
             return view('frontend.user.update')->with('user', $data);
         }else {
